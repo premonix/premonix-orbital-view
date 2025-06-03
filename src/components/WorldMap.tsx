@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { ThreatService } from '@/services/threatService';
+import { RealThreatService } from '@/services/realThreatService';
 import { ThreatZone } from '@/types/threat';
 import SignalPulse from './SignalPulse';
 import MapControls from './MapControls';
@@ -34,8 +33,8 @@ const WorldMap = () => {
         y: 35, 
         level: 'high', 
         activity: 'Naval buildup and military exercises',
-        signals: ThreatService.getSignalsByZone('taiwan'),
-        readinessScore: ThreatService.getReadinessScore('taiwan')
+        signals: [],
+        readinessScore: 65
       },
       { 
         id: 'ukraine', 
@@ -44,8 +43,8 @@ const WorldMap = () => {
         y: 25, 
         level: 'high', 
         activity: 'Active conflict zone',
-        signals: ThreatService.getSignalsByZone('ukraine'),
-        readinessScore: ThreatService.getReadinessScore('ukraine')
+        signals: [],
+        readinessScore: 35
       },
       { 
         id: 'south-china', 
@@ -54,8 +53,8 @@ const WorldMap = () => {
         y: 45, 
         level: 'medium', 
         activity: 'Territorial disputes and patrols',
-        signals: ThreatService.getSignalsByZone('south-china'),
-        readinessScore: ThreatService.getReadinessScore('south-china')
+        signals: [],
+        readinessScore: 75
       },
       { 
         id: 'kashmir', 
@@ -64,8 +63,8 @@ const WorldMap = () => {
         y: 35, 
         level: 'medium', 
         activity: 'Border tensions and skirmishes',
-        signals: ThreatService.getSignalsByZone('kashmir'),
-        readinessScore: ThreatService.getReadinessScore('kashmir')
+        signals: [],
+        readinessScore: 70
       },
       { 
         id: 'korea', 
@@ -74,41 +73,82 @@ const WorldMap = () => {
         y: 30, 
         level: 'low', 
         activity: 'Diplomatic engagement',
-        signals: ThreatService.getSignalsByZone('korea'),
-        readinessScore: ThreatService.getReadinessScore('korea')
+        signals: [],
+        readinessScore: 85
       },
     ];
 
-    // Update threat levels based on timeline
-    const updatedZones = zones.map(zone => ({
-      ...zone,
-      level: ThreatService.calculateThreatLevel(zone.signals),
-      signals: zone.signals,
-      readinessScore: zone.readinessScore
-    }));
+    // Load threat data and update zones
+    const loadThreatData = async () => {
+      const updatedZones = await Promise.all(
+        zones.map(async (zone) => {
+          const signals = await RealThreatService.getSignalsByZone(zone.id);
+          const readinessScore = await RealThreatService.getReadinessScore(zone.id);
+          
+          return {
+            ...zone,
+            signals,
+            level: RealThreatService.calculateThreatLevel(signals),
+            readinessScore
+          };
+        })
+      );
+      
+      setThreatZones(updatedZones);
+    };
 
-    setThreatZones(updatedZones);
+    loadThreatData();
 
-    // Simulate new threat signals appearing
-    const signalInterval = setInterval(() => {
-      const newSignal = ThreatService.getLatestSignals(1)[0];
-      if (newSignal) {
+    // Set up real-time subscription
+    const unsubscribe = RealThreatService.subscribeToSignals((newSignals) => {
+      console.log('Received real-time signal update, refreshing zones...');
+      loadThreatData();
+      
+      // Add new signal pulse animation
+      if (newSignals.length > 0) {
+        const latestSignal = newSignals[0];
         const zone = zones[Math.floor(Math.random() * zones.length)];
         const pulseId = Math.random().toString(36).substr(2, 9);
+        
         setActivePulses(prev => [...prev, {
           id: pulseId,
           x: zone.x + (Math.random() - 0.5) * 8,
           y: zone.y + (Math.random() - 0.5) * 8,
-          signal: newSignal
+          signal: latestSignal
         }]);
 
         setTimeout(() => {
           setActivePulses(prev => prev.filter(p => p.id !== pulseId));
         }, 5000);
       }
-    }, 15000);
+    });
 
-    return () => clearInterval(signalInterval);
+    // Simulate new threat signals appearing periodically
+    const signalInterval = setInterval(() => {
+      RealThreatService.getLatestSignals(1).then(signals => {
+        if (signals.length > 0) {
+          const signal = signals[0];
+          const zone = zones[Math.floor(Math.random() * zones.length)];
+          const pulseId = Math.random().toString(36).substr(2, 9);
+          
+          setActivePulses(prev => [...prev, {
+            id: pulseId,
+            x: zone.x + (Math.random() - 0.5) * 8,
+            y: zone.y + (Math.random() - 0.5) * 8,
+            signal: signal
+          }]);
+
+          setTimeout(() => {
+            setActivePulses(prev => prev.filter(p => p.id !== pulseId));
+          }, 5000);
+        }
+      });
+    }, 20000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(signalInterval);
+    };
   }, [selectedYear]);
 
   const getZoneClass = (level: string) => {
@@ -266,12 +306,12 @@ const WorldMap = () => {
         </div>
       )}
 
-      {/* Status Bar - Layer 8 */}
+      {/* Enhanced Status Bar - Layer 8 */}
       <div className="absolute bottom-4 lg:bottom-6 left-4 lg:left-auto lg:right-6 z-40 glass-panel rounded-lg px-3 lg:px-4 py-2">
         <div className="flex items-center space-x-2 lg:space-x-4 text-xs lg:text-sm">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-starlink-grey-light">Live Data</span>
+            <span className="text-starlink-grey-light">GDELT + NewsAPI</span>
           </div>
           <div className="text-starlink-grey">|</div>
           <span className="text-starlink-white">{viewMode.toUpperCase()} View</span>

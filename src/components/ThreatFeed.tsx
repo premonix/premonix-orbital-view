@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
-import { ThreatService } from '@/services/threatService';
+import { ChevronUp, ChevronDown, MapPin, RefreshCw } from 'lucide-react';
+import { RealThreatService } from '@/services/realThreatService';
 import { ThreatSignal } from '@/types/threat';
 import PermissionGate from '@/components/auth/PermissionGate';
 
@@ -53,29 +54,48 @@ const ThreatFeed = () => {
   const [signals, setSignals] = useState<ThreatSignal[]>([]);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     // Fetch initial signals
-    const initialSignals = ThreatService.getLatestSignals(20);
-    setSignals(initialSignals);
+    loadSignals();
 
-    // Simulate new signals appearing every 30 seconds
-    const signalInterval = setInterval(() => {
-      const newSignal = ThreatService.getLatestSignals(1)[0];
-      if (newSignal) {
-        setSignals(prev => [newSignal, ...prev]);
-      }
-    }, 30000);
+    // Set up real-time subscription
+    const unsubscribe = RealThreatService.subscribeToSignals((newSignals) => {
+      console.log('ThreatFeed: Received real-time update');
+      setSignals(newSignals);
+    });
 
-    return () => clearInterval(signalInterval);
+    return () => unsubscribe();
   }, []);
 
-  const toggleCategory = (category: string) => {
-    setActiveCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
+  const loadSignals = async () => {
+    try {
+      const latestSignals = await RealThreatService.getLatestSignals(20);
+      setSignals(latestSignals);
+      console.log(`ThreatFeed: Loaded ${latestSignals.length} signals`);
+    } catch (error) {
+      console.error('Error loading signals:', error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await RealThreatService.refreshThreatData();
+      console.log('Refresh result:', result);
+      
+      if (result.success) {
+        // Wait a moment for the data to be processed, then reload
+        setTimeout(() => {
+          loadSignals();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const filteredSignals = activeCategories.length === 0
@@ -93,14 +113,26 @@ const ThreatFeed = () => {
                 <div className="w-2 h-2 bg-starlink-blue rounded-full animate-pulse" />
                 <h3 className="text-sm lg:text-base font-semibold text-starlink-white">Live Threat Feed</h3>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="h-6 w-6 p-0 hover:bg-starlink-slate-light"
-              >
-                {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </Button>
+              <div className="flex items-center space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="h-6 w-6 p-0 hover:bg-starlink-slate-light"
+                  title="Refresh threat data"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  className="h-6 w-6 p-0 hover:bg-starlink-slate-light"
+                >
+                  {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              </div>
             </div>
             
             {!isCollapsed && (
@@ -129,7 +161,7 @@ const ThreatFeed = () => {
             <div className="max-h-64 lg:max-h-96 overflow-y-auto">
               {filteredSignals.length === 0 ? (
                 <div className="p-4 text-center text-starlink-grey-light text-sm">
-                  No signals for selected categories
+                  {signals.length === 0 ? 'Loading threat signals...' : 'No signals for selected categories'}
                 </div>
               ) : (
                 <div className="space-y-2 p-3 lg:p-4">
@@ -157,9 +189,14 @@ const ThreatFeed = () => {
                         {signal.title}
                       </h4>
                       
-                      <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
-                        <MapPin className="w-3 h-3" />
-                        <span>{signal.location.country}, {signal.location.region}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
+                          <MapPin className="w-3 h-3" />
+                          <span>{signal.location.country}, {signal.location.region}</span>
+                        </div>
+                        <div className="text-xs text-starlink-grey-light">
+                          {signal.source}
+                        </div>
                       </div>
                     </div>
                   ))}
