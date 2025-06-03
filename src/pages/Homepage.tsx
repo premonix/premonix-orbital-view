@@ -12,25 +12,25 @@ const Homepage = () => {
       icon: Globe,
       title: "Global Threat Intelligence",
       description: "Real-time monitoring of 10,000+ data sources across military, cyber, economic, and political domains.",
-      image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?w=400&h=250&fit=crop"
+      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=250&fit=crop"
     },
     {
       icon: Brain,
       title: "AI-Powered Predictions",
       description: "Advanced machine learning algorithms predict conflict hotspots and emerging threats before they escalate.",
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=250&fit=crop"
+      image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=250&fit=crop"
     },
     {
       icon: Bell,
       title: "Custom Alert System",
       description: "Personalized notifications based on your location, sector, and threat preferences delivered in real-time.",
-      image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=250&fit=crop"
+      image: "https://images.unsplash.com/photo-1586210579191-33b45e38fa8c?w=400&h=250&fit=crop"
     },
     {
       icon: Shield,
       title: "Resilience Toolkit",
       description: "Tailored preparedness guides and crisis management resources for individuals, families, and businesses.",
-      image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=400&h=250&fit=crop"
+      image: "https://images.unsplash.com/photo-1633265486064-086b219458ec?w=400&h=250&fit=crop"
     }
   ];
 
@@ -112,8 +112,8 @@ const Homepage = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=1920&h=1080&fit=crop" 
-            alt="Global network visualization" 
+            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&h=1080&fit=crop" 
+            alt="Isometric technology visualization" 
             className="w-full h-full object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark/80 via-starlink-dark/60 to-starlink-dark"></div>
@@ -168,8 +168,8 @@ const Homepage = () => {
             <div className="relative">
               <div className="glass-panel rounded-xl p-4 lg:p-6">
                 <img 
-                  src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=400&fit=crop" 
-                  alt="Threat intelligence dashboard interface" 
+                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop" 
+                  alt="Isometric dashboard interface visualization" 
                   className="w-full h-80 lg:h-96 object-cover rounded-lg"
                 />
                 <div className="absolute inset-4 lg:inset-6 bg-gradient-to-t from-starlink-dark/60 to-transparent rounded-lg flex items-end">
