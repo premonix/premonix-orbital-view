@@ -17,7 +17,8 @@ const Navigation = () => {
     { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
-    { label: 'Reports', href: '/reports' }
+    { label: 'Reports', href: '/reports' },
+    { label: 'About', href: '/about' }
   ];
 
   const handleSwitchToRegister = () => {

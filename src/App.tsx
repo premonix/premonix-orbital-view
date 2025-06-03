@@ -11,6 +11,7 @@ import RiskBySector from "./pages/RiskBySector";
 import ResilienceToolkit from "./pages/ResilienceToolkit";
 import SoWhat from "./pages/SoWhat";
 import Reports from "./pages/Reports";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/resilience-toolkit" element={<ResilienceToolkit />} />
             <Route path="/so-what" element={<SoWhat />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
