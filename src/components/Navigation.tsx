@@ -24,8 +24,8 @@ const Navigation = () => {
     { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
-    { label: 'DisruptionOS', href: '/disruption-os' },
-    { label: 'Reports', href: '/reports' }
+    { label: 'Reports', href: '/reports' },
+    { label: 'DisruptionOS', href: '/disruption-os' }
   ];
 
   const aboutItems = [
