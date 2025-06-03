@@ -55,7 +55,7 @@ const Homepage = () => {
   const pricingPlans = [
     {
       name: "Personal",
-      price: "£29",
+      price: "£290",
       period: "per year",
       description: "Perfect for individuals and families seeking personal preparedness",
       features: [
@@ -69,7 +69,7 @@ const Homepage = () => {
     },
     {
       name: "Business",
-      price: "£199",
+      price: "£2,995",
       period: "per year",
       description: "Ideal for SMEs and growing businesses with up to 50 employees",
       features: [
@@ -84,9 +84,9 @@ const Homepage = () => {
     },
     {
       name: "Enterprise",
-      price: "£999",
+      price: "£9,750",
       period: "per year",
-      description: "Comprehensive solution for large organizations and government",
+      description: "Comprehensive solution for large organizations (£5M+ revenue)",
       features: [
         "Everything in Business",
         "Advanced analytics dashboard",
