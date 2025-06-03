@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 import LoginModal from '@/components/auth/LoginModal';
 import RegisterModal from '@/components/auth/RegisterModal';
 import UserMenu from '@/components/auth/UserMenu';
@@ -11,12 +12,13 @@ const Navigation = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   const navItems = [
-    { label: 'Threat Map', href: '#map' },
-    { label: 'Risk by Sector', href: '#sectors' },
-    { label: 'Resilience Toolkit', href: '#toolkit' },
-    { label: 'Reports', href: '#reports' }
+    { label: 'Threat Map', href: '/' },
+    { label: 'Risk by Sector', href: '/risk-by-sector' },
+    { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
+    { label: 'Reports', href: '/reports' }
   ];
 
   const handleSwitchToRegister = () => {
@@ -29,33 +31,44 @@ const Navigation = () => {
     setShowLoginModal(true);
   };
 
+  const isActiveRoute = (href: string) => {
+    if (href === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-starlink-grey/20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-starlink-blue rounded-sm flex items-center justify-center">
               <span className="text-starlink-dark font-bold text-lg">P</span>
             </div>
             <span className="text-xl font-semibold tracking-tight">PREMONIX</span>
-          </div>
+          </Link>
 
           {/* Navigation Items */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
-                className="relative text-starlink-grey-light hover:text-starlink-white transition-colors duration-200"
+                to={item.href}
+                className={`relative transition-colors duration-200 ${
+                  isActiveRoute(item.href) 
+                    ? 'text-starlink-white' 
+                    : 'text-starlink-grey-light hover:text-starlink-white'
+                }`}
                 onMouseEnter={() => setHoveredItem(item.label)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
                 {item.label}
-                {hoveredItem === item.label && (
+                {(hoveredItem === item.label || isActiveRoute(item.href)) && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
                 )}
-              </a>
+              </Link>
             ))}
           </div>
 
