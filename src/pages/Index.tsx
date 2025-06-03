@@ -1,9 +1,9 @@
-
 import Navigation from "@/components/Navigation";
 import WorldMap from "@/components/WorldMap";
 import HeroPanel from "@/components/HeroPanel";
 import ThreatIndicator from "@/components/ThreatIndicator";
 import Footer from "@/components/Footer";
+import ThreatFeed from "@/components/ThreatFeed";
 
 const Index = () => {
   return (
@@ -21,6 +21,9 @@ const Index = () => {
         
         {/* Live Threat Indicator */}
         <ThreatIndicator />
+        
+        {/* NEW: Live Threat Feed */}
+        <ThreatFeed />
       </div>
       
       {/* Footer */}
