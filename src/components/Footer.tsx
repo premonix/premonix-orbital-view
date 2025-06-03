@@ -30,9 +30,9 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-2 lg:space-y-0">
             <div className="flex items-center space-x-2">
               <div className="w-5 h-5 lg:w-6 lg:h-6 bg-starlink-blue rounded-sm flex items-center justify-center">
-                <span className="text-starlink-dark font-bold text-xs lg:text-sm">O</span>
+                <span className="text-starlink-dark font-bold text-xs lg:text-sm">P</span>
               </div>
-              <span className="text-starlink-grey-light text-xs lg:text-sm">© 2024 OptiQsOn</span>
+              <span className="text-starlink-grey-light text-xs lg:text-sm">© 2024 PREMONIX</span>
             </div>
             
             <div className="hidden md:flex items-center space-x-4 lg:space-x-8">

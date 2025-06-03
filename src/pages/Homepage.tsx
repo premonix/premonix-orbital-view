@@ -137,7 +137,7 @@ const Homepage = () => {
               </h1>
               
               <p className="text-xl lg:text-2xl text-starlink-grey-light leading-relaxed">
-                OptiQsOn scans 10,000+ military, economic, cyber, and political signals to predict emerging conflict hotspots. 
+                PREMONIX scans 10,000+ military, economic, cyber, and political signals to predict emerging conflict hotspots. 
                 Built for resilience—at home and in business.
               </p>
               
@@ -242,7 +242,7 @@ const Homepage = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Built for Everyone</h2>
             <p className="text-xl text-starlink-grey-light max-w-3xl mx-auto">
-              Whether you're protecting your family or running a global enterprise, OptiQsOn adapts to your needs
+              Whether you're protecting your family or running a global enterprise, PREMONIX adapts to your needs
             </p>
           </div>
           
@@ -352,7 +352,7 @@ const Homepage = () => {
             Don't Wait for the Storm
           </h2>
           <p className="text-xl text-starlink-grey-light mb-8">
-            Join thousands of individuals and organizations who trust OptiQsOn for their threat intelligence and resilience planning.
+            Join thousands of individuals and organizations who trust PREMONIX for their threat intelligence and resilience planning.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
