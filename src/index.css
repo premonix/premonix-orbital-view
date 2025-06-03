@@ -80,4 +80,25 @@
   .threat-zone-low {
     @apply bg-starlink-blue/20 border-starlink-blue/50;
   }
+
+  .custom-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00b4d8;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+  }
+  
+  .custom-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00b4d8;
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+  }
 }

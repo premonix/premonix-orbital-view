@@ -98,7 +98,7 @@ const WorldMap = () => {
             max={2027}
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="w-48 h-1 bg-starlink-slate-light rounded-full appearance-none cursor-pointer slider"
+            className="w-48 h-1 bg-starlink-slate-light rounded-full appearance-none cursor-pointer custom-slider"
           />
           <span className="text-sm text-starlink-grey-light">2027 Projections</span>
         </div>
@@ -106,29 +106,6 @@ const WorldMap = () => {
           <span className="text-starlink-blue font-medium">{selectedYear}</span>
         </div>
       </div>
-
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #00b4d8;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
-        }
-        
-        .slider::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #00b4d8;
-          cursor: pointer;
-          border: 2px solid #ffffff;
-          box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
-        }
-      `}</style>
     </div>
   );
 };
