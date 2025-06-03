@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import ThreatMap from "./pages/ThreatMap";
 import RiskBySector from "./pages/RiskBySector";
 import ResilienceToolkit from "./pages/ResilienceToolkit";
+import DisruptionOS from "./pages/DisruptionOS";
 import DataSources from "./pages/DataSources";
 import Reports from "./pages/Reports";
 import About from "./pages/About";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/threat-map" element={<ThreatMap />} />
             <Route path="/risk-by-sector" element={<RiskBySector />} />
             <Route path="/resilience-toolkit" element={<ResilienceToolkit />} />
+            <Route path="/disruption-os" element={<DisruptionOS />} />
             <Route path="/data-sources" element={<DataSources />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/about" element={<About />} />
