@@ -1,11 +1,13 @@
-
 import { useState, useEffect } from 'react';
-import { ThreatService } from '@/services/threatService';
-import { ThreatZone } from '@/types/threat';
+import { RealThreatService } from '@/services/realThreatService';
+import { ThreatZone, ThreatSignal } from '@/types/threat';
 import SignalPulse from './SignalPulse';
 import MapControls from './MapControls';
 import HeatZoneOverlay from './HeatZoneOverlay';
 import ThreatPopup from './ThreatPopup';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const WorldMap = () => {
   const [selectedZone, setSelectedZone] = useState<{zone: ThreatZone, x: number, y: number} | null>(null);
@@ -13,7 +15,10 @@ const WorldMap = () => {
   const [viewMode, setViewMode] = useState<'2d' | 'globe'>('2d');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [threatZones, setThreatZones] = useState<ThreatZone[]>([]);
-  const [activePulses, setActivePulses] = useState<Array<{id: string, x: number, y: number, signal: any}>>([]);
+  const [activePulses, setActivePulses] = useState<Array<{id: string, x: number, y: number, signal: ThreatSignal}>>([]);
+  const [allSignals, setAllSignals] = useState<ThreatSignal[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   // Heat zones for weathermap-style visualization
   const [heatZones] = useState([
@@ -24,92 +29,148 @@ const WorldMap = () => {
     { id: 'diplomatic-heat', x: 30, y: 35, radius: 7, intensity: 0.5, type: 'diplomatic' },
   ]);
 
+  // Country to coordinate mapping for visualization
+  const countryCoordinates: Record<string, {x: number, y: number}> = {
+    'Taiwan': { x: 75, y: 35 },
+    'Ukraine': { x: 50, y: 25 },
+    'China': { x: 72, y: 30 },
+    'Russia': { x: 60, y: 20 },
+    'US': { x: 20, y: 35 },
+    'Iran': { x: 55, y: 32 },
+    'Israel': { x: 52, y: 30 },
+    'Syria': { x: 53, y: 28 },
+    'Afghanistan': { x: 62, y: 30 },
+    'Iraq': { x: 54, y: 30 },
+    'Yemen': { x: 54, y: 40 },
+    'Turkey': { x: 51, y: 26 },
+    'Libya': { x: 48, y: 32 },
+    'Sudan': { x: 50, y: 40 },
+    'Nigeria': { x: 45, y: 42 },
+    'Brazil': { x: 25, y: 50 },
+    'Venezuela': { x: 22, y: 42 },
+    'Mexico': { x: 15, y: 38 },
+    'South Korea': { x: 78, y: 30 },
+    'North Korea': { x: 77, y: 28 },
+    'Japan': { x: 80, y: 30 },
+    'India': { x: 65, y: 35 },
+    'Pakistan': { x: 62, y: 32 }
+  };
+
+  const loadThreatData = async () => {
+    setIsLoading(true);
+    try {
+      const signals = await RealThreatService.fetchThreatSignals(100);
+      setAllSignals(signals);
+
+      // Group signals by country to create threat zones
+      const zoneMap = new Map<string, ThreatSignal[]>();
+      
+      signals.forEach(signal => {
+        const country = signal.location.country;
+        if (!zoneMap.has(country)) {
+          zoneMap.set(country, []);
+        }
+        zoneMap.get(country)!.push(signal);
+      });
+
+      // Create threat zones from grouped signals
+      const zones: ThreatZone[] = Array.from(zoneMap.entries()).map(([country, countrySignals]) => {
+        const coords = countryCoordinates[country] || { x: 50, y: 50 };
+        const threatLevel = RealThreatService.calculateThreatLevel(countrySignals);
+        const readinessScore = RealThreatService.getReadinessScore(countrySignals);
+        
+        // Get most recent activity
+        const recentSignal = countrySignals[0];
+        const activity = recentSignal ? recentSignal.title.substring(0, 60) + '...' : 'No recent activity';
+
+        return {
+          id: country.toLowerCase().replace(/\s+/g, '-'),
+          name: country,
+          x: coords.x,
+          y: coords.y,
+          level: threatLevel,
+          activity,
+          signals: countrySignals.slice(0, 10), // Limit to recent signals
+          readinessScore
+        };
+      });
+
+      setThreatZones(zones);
+      
+      toast({
+        title: "Data Updated",
+        description: `Loaded ${signals.length} threat signals from ${zones.length} regions`,
+      });
+    } catch (error) {
+      console.error('Error loading threat data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load threat data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const triggerDataRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await RealThreatService.triggerDataIngestion();
+      
+      toast({
+        title: "Data Ingestion Started",
+        description: "Fetching latest threat intelligence...",
+      });
+
+      // Wait a moment then reload data
+      setTimeout(() => {
+        loadThreatData();
+      }, 3000);
+    } catch (error) {
+      console.error('Error triggering data refresh:', error);
+      toast({
+        title: "Error",
+        description: "Failed to trigger data refresh",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Initialize threat zones with enhanced data
-    const zones: ThreatZone[] = [
-      { 
-        id: 'taiwan', 
-        name: 'Taiwan Strait', 
-        x: 75, 
-        y: 35, 
-        level: 'high', 
-        activity: 'Naval buildup and military exercises',
-        signals: ThreatService.getSignalsByZone('taiwan'),
-        readinessScore: ThreatService.getReadinessScore('taiwan')
-      },
-      { 
-        id: 'ukraine', 
-        name: 'Eastern Ukraine', 
-        x: 50, 
-        y: 25, 
-        level: 'high', 
-        activity: 'Active conflict zone',
-        signals: ThreatService.getSignalsByZone('ukraine'),
-        readinessScore: ThreatService.getReadinessScore('ukraine')
-      },
-      { 
-        id: 'south-china', 
-        name: 'South China Sea', 
-        x: 72, 
-        y: 45, 
-        level: 'medium', 
-        activity: 'Territorial disputes and patrols',
-        signals: ThreatService.getSignalsByZone('south-china'),
-        readinessScore: ThreatService.getReadinessScore('south-china')
-      },
-      { 
-        id: 'kashmir', 
-        name: 'Kashmir Region', 
-        x: 65, 
-        y: 35, 
-        level: 'medium', 
-        activity: 'Border tensions and skirmishes',
-        signals: ThreatService.getSignalsByZone('kashmir'),
-        readinessScore: ThreatService.getReadinessScore('kashmir')
-      },
-      { 
-        id: 'korea', 
-        name: 'Korean Peninsula', 
-        x: 78, 
-        y: 30, 
-        level: 'low', 
-        activity: 'Diplomatic engagement',
-        signals: ThreatService.getSignalsByZone('korea'),
-        readinessScore: ThreatService.getReadinessScore('korea')
-      },
-    ];
+    // Initial data load
+    loadThreatData();
 
-    // Update threat levels based on timeline
-    const updatedZones = zones.map(zone => ({
-      ...zone,
-      level: ThreatService.calculateThreatLevel(zone.signals),
-      signals: zone.signals,
-      readinessScore: zone.readinessScore
-    }));
+    // Set up real-time subscription
+    const unsubscribe = RealThreatService.subscribeToRealTimeUpdates((newSignal) => {
+      console.log('New threat signal received:', newSignal);
+      
+      // Add pulse for new signal
+      const country = newSignal.location.country;
+      const coords = countryCoordinates[country] || { x: 50, y: 50 };
+      const pulseId = Math.random().toString(36).substr(2, 9);
+      
+      setActivePulses(prev => [...prev, {
+        id: pulseId,
+        x: coords.x + (Math.random() - 0.5) * 8,
+        y: coords.y + (Math.random() - 0.5) * 8,
+        signal: newSignal
+      }]);
 
-    setThreatZones(updatedZones);
+      // Remove pulse after 5 seconds
+      setTimeout(() => {
+        setActivePulses(prev => prev.filter(p => p.id !== pulseId));
+      }, 5000);
 
-    // Simulate new threat signals appearing
-    const signalInterval = setInterval(() => {
-      const newSignal = ThreatService.getLatestSignals(1)[0];
-      if (newSignal) {
-        const zone = zones[Math.floor(Math.random() * zones.length)];
-        const pulseId = Math.random().toString(36).substr(2, 9);
-        setActivePulses(prev => [...prev, {
-          id: pulseId,
-          x: zone.x + (Math.random() - 0.5) * 8,
-          y: zone.y + (Math.random() - 0.5) * 8,
-          signal: newSignal
-        }]);
+      // Reload data to update zones
+      loadThreatData();
+    });
 
-        setTimeout(() => {
-          setActivePulses(prev => prev.filter(p => p.id !== pulseId));
-        }, 5000);
-      }
-    }, 15000);
-
-    return () => clearInterval(signalInterval);
-  }, [selectedYear]);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const getZoneClass = (level: string) => {
     const baseClass = 'transition-all duration-300 hover:scale-110 cursor-pointer relative';
@@ -134,7 +195,6 @@ const WorldMap = () => {
     setSelectedZone(null);
   };
 
-  // Click outside to close popup
   useEffect(() => {
     const handleClickOutside = () => {
       if (selectedZone) {
@@ -158,6 +218,18 @@ const WorldMap = () => {
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
         />
+      </div>
+
+      {/* Data Refresh Button */}
+      <div className="absolute top-4 lg:top-6 right-4 lg:right-6 z-50">
+        <Button
+          onClick={triggerDataRefresh}
+          disabled={isLoading}
+          className="bg-starlink-blue hover:bg-starlink-blue/80 text-starlink-dark"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Loading...' : 'Refresh Data'}
+        </Button>
       </div>
 
       {/* Enhanced World Map Background - Layer 2 (lowest z-index) */}
@@ -274,9 +346,9 @@ const WorldMap = () => {
             <span className="text-starlink-grey-light">Live Data</span>
           </div>
           <div className="text-starlink-grey">|</div>
-          <span className="text-starlink-white">{viewMode.toUpperCase()} View</span>
+          <span className="text-starlink-white">{allSignals.length} Signals</span>
           <div className="text-starlink-grey">|</div>
-          <span className="text-starlink-blue">{selectedYear}</span>
+          <span className="text-starlink-blue">{threatZones.length} Zones</span>
         </div>
       </div>
     </div>

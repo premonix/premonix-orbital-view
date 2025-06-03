@@ -1,23 +1,22 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
-import { ThreatService } from '@/services/threatService';
+import { RealThreatService } from '@/services/realThreatService';
 import { ThreatSignal } from '@/types/threat';
 import PermissionGate from '@/components/auth/PermissionGate';
 
-interface ThreatFeedProps {
-  // No props needed for now
-}
-
-const categories = ['Military', 'Cyber', 'Economic', 'Political'];
+const categories = ['Military', 'Cyber', 'Economic', 'Diplomatic', 'Supply Chain', 'Unrest'];
 
 const getCategoryColor = (category: string) => {
   switch (category) {
     case 'Military': return 'text-red-400';
     case 'Cyber': return 'text-purple-400';
     case 'Economic': return 'text-green-400';
-    case 'Political': return 'text-blue-400';
+    case 'Diplomatic': return 'text-blue-400';
+    case 'Supply Chain': return 'text-orange-400';
+    case 'Unrest': return 'text-yellow-400';
     default: return 'text-gray-400';
   }
 };
@@ -32,42 +31,48 @@ const getSeverityColor = (severity: string) => {
   }
 };
 
-const formatTimeAgo = (timestamp: string) => {
-  const date = new Date(timestamp);
+const formatTimeAgo = (timestamp: Date) => {
   const now = new Date();
-  const diff = now.getTime() - date.getTime();
+  const diff = now.getTime() - timestamp.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (minutes < 60) {
-    return `${minutes} minutes ago`;
-  } else if (hours < 24) {
-    return `${hours} hours ago`;
-  } else {
-    return `${days} days ago`;
-  }
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
 };
 
 const ThreatFeed = () => {
   const [signals, setSignals] = useState<ThreatSignal[]>([]);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch initial signals
-    const initialSignals = ThreatService.getLatestSignals(20);
-    setSignals(initialSignals);
-
-    // Simulate new signals appearing every 30 seconds
-    const signalInterval = setInterval(() => {
-      const newSignal = ThreatService.getLatestSignals(1)[0];
-      if (newSignal) {
-        setSignals(prev => [newSignal, ...prev]);
+    const loadSignals = async () => {
+      setIsLoading(true);
+      try {
+        const threatSignals = await RealThreatService.fetchThreatSignals(50);
+        setSignals(threatSignals);
+      } catch (error) {
+        console.error('Error loading threat signals:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }, 30000);
+    };
 
-    return () => clearInterval(signalInterval);
+    loadSignals();
+
+    // Set up real-time subscription
+    const unsubscribe = RealThreatService.subscribeToRealTimeUpdates((newSignal) => {
+      setSignals(prev => [newSignal, ...prev].slice(0, 50)); // Keep latest 50
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const toggleCategory = (category: string) => {
@@ -127,13 +132,17 @@ const ThreatFeed = () => {
           {/* Feed Content */}
           {!isCollapsed && (
             <div className="max-h-64 lg:max-h-96 overflow-y-auto">
-              {filteredSignals.length === 0 ? (
+              {isLoading ? (
+                <div className="p-4 text-center text-starlink-grey-light text-sm">
+                  Loading real threat data...
+                </div>
+              ) : filteredSignals.length === 0 ? (
                 <div className="p-4 text-center text-starlink-grey-light text-sm">
                   No signals for selected categories
                 </div>
               ) : (
                 <div className="space-y-2 p-3 lg:p-4">
-                  {filteredSignals.slice(0, 10).map(signal => (
+                  {filteredSignals.slice(0, 15).map(signal => (
                     <div 
                       key={signal.id} 
                       className="p-3 rounded-lg bg-starlink-slate/20 border border-starlink-grey/10 hover:bg-starlink-slate/30 transition-colors"
@@ -148,7 +157,7 @@ const ThreatFeed = () => {
                         <div className="flex items-center space-x-2">
                           <span className={`w-2 h-2 rounded-full ${getSeverityColor(signal.severity)}`} />
                           <span className="text-xs text-starlink-grey-light">
-                            {formatTimeAgo(signal.timestamp.toString())}
+                            {formatTimeAgo(signal.timestamp)}
                           </span>
                         </div>
                       </div>
@@ -157,9 +166,14 @@ const ThreatFeed = () => {
                         {signal.title}
                       </h4>
                       
-                      <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
-                        <MapPin className="w-3 h-3" />
-                        <span>{signal.location.country}, {signal.location.region}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
+                          <MapPin className="w-3 h-3" />
+                          <span>{signal.location.country}</span>
+                        </div>
+                        <div className="text-xs text-starlink-grey-light">
+                          {signal.confidence}% confidence
+                        </div>
                       </div>
                     </div>
                   ))}
