@@ -1,12 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import Navigation from "@/components/Navigation";
+import WorldMap from "@/components/WorldMap";
+import HeroPanel from "@/components/HeroPanel";
+import ThreatIndicator from "@/components/ThreatIndicator";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-starlink-dark text-starlink-white overflow-hidden">
+      {/* Navigation */}
+      <Navigation />
+      
+      {/* Main Content */}
+      <div className="relative">
+        {/* World Map Background */}
+        <WorldMap />
+        
+        {/* Hero Content Panel */}
+        <HeroPanel />
+        
+        {/* Live Threat Indicator */}
+        <ThreatIndicator />
       </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

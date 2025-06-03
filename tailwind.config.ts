@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Starlink theme colors
+				starlink: {
+					dark: '#0a0a0a',
+					slate: '#1a1a1a',
+					'slate-light': '#2a2a2a',
+					blue: '#00b4d8',
+					'blue-bright': '#0077b6',
+					'blue-dark': '#023e8a',
+					red: '#dc2626',
+					'red-bright': '#ef4444',
+					orange: '#f97316',
+					'orange-bright': '#fb923c',
+					grey: '#64748b',
+					'grey-light': '#94a3b8',
+					white: '#ffffff'
 				}
 			},
 			borderRadius: {
@@ -84,11 +101,45 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				pulse: {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.5'
+					}
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 10px rgba(0, 180, 216, 0.5)',
+						opacity: '1'
+					},
+					'50%': {
+						boxShadow: '0 0 20px rgba(0, 180, 216, 0.8)',
+						opacity: '0.8'
+					}
+				},
+				'grid-fade': {
+					'0%': {
+						opacity: '0.1'
+					},
+					'50%': {
+						opacity: '0.3'
+					},
+					'100%': {
+						opacity: '0.1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'grid-fade': 'grid-fade 4s ease-in-out infinite'
+			},
+			fontFamily: {
+				'space': ['Space Grotesk', 'Inter', 'Helvetica Neue', 'sans-serif']
 			}
 		}
 	},
