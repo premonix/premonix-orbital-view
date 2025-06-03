@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import RiskBySector from "./pages/RiskBySector";
 import ResilienceToolkit from "./pages/ResilienceToolkit";
+import SoWhat from "./pages/SoWhat";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/risk-by-sector" element={<RiskBySector />} />
             <Route path="/resilience-toolkit" element={<ResilienceToolkit />} />
+            <Route path="/so-what" element={<SoWhat />} />
             <Route path="/reports" element={<Reports />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

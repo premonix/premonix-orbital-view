@@ -18,6 +18,7 @@ const Navigation = () => {
     { label: 'Threat Map', href: '/' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
+    { label: 'So What?', href: '/so-what' },
     { label: 'Reports', href: '/reports' }
   ];
 
