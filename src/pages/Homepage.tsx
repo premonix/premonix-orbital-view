@@ -1,9 +1,10 @@
+
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Shield, Bell, Brain, Users, Building, Home, Briefcase, CheckCircle } from "lucide-react";
+import { Globe, Shield, Bell, Brain, Users, Building, Home, Briefcase, CheckCircle, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import GlobalThreatIntelligence from "@/components/isometric/GlobalThreatIntelligence";
 import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
@@ -57,6 +58,12 @@ const Homepage = () => {
       title: "Enterprise & Government",
       description: "Comprehensive threat intelligence and risk management for large organizations.",
       benefits: ["Advanced analytics dashboard", "Multi-team coordination", "API integrations", "Custom threat modeling"]
+    },
+    {
+      icon: Zap,
+      title: "DisruptionOS Integration",
+      description: "Transform awareness into preparedness with strategic disruption management.",
+      benefits: ["Disruption Sensitivity Score", "Scenario simulation engine", "Initiative portfolio mapping", "Automated governance briefings"]
     }
   ];
 
@@ -76,7 +83,7 @@ const Homepage = () => {
       popular: false
     },
     {
-      name: "Business",
+      name: "Business Pro",
       price: "£2,995",
       period: "per year",
       description: "Ideal for SMEs and growing businesses with up to 50 employees",
@@ -86,7 +93,8 @@ const Homepage = () => {
         "Team collaboration tools",
         "Sector-specific intelligence",
         "Priority support",
-        "Custom alert filters"
+        "Custom alert filters",
+        "Basic DisruptionOS features"
       ],
       popular: true
     },
@@ -96,13 +104,14 @@ const Homepage = () => {
       period: "per year",
       description: "Comprehensive solution for large organizations (£5M+ revenue)",
       features: [
-        "Everything in Business",
+        "Everything in Business Pro",
         "Advanced analytics dashboard",
         "API access & integrations",
         "Custom threat modeling",
         "Dedicated account manager",
         "White-label options",
-        "24/7 phone support"
+        "24/7 phone support",
+        "Full DisruptionOS suite"
       ],
       popular: false
     }
@@ -127,7 +136,7 @@ const Homepage = () => {
             {/* Left side - Text content */}
             <div className="space-y-8">
               <Badge className="bg-starlink-blue/20 text-starlink-blue border-starlink-blue/30 px-4 py-2 text-sm font-medium">
-                🚀 Now Live: Real-time Global Threat Intelligence
+                🚀 Now Live: Real-time Global Threat Intelligence + DisruptionOS
               </Badge>
               
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
@@ -138,7 +147,7 @@ const Homepage = () => {
               
               <p className="text-xl lg:text-2xl text-starlink-grey-light leading-relaxed">
                 PREMONIX scans 10,000+ military, economic, cyber, and political signals to predict emerging conflict hotspots. 
-                Built for resilience—at home and in business.
+                Enhanced with DisruptionOS for strategic preparedness—at home and in business.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
@@ -159,9 +168,9 @@ const Homepage = () => {
                   className="glass-panel border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light px-8 py-4 text-lg"
                   asChild
                 >
-                  <Link to="/so-what">
-                    <Shield className="w-5 h-5 mr-2" />
-                    Build Your Resilience Kit
+                  <Link to="/disruption-os">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Discover DisruptionOS
                   </Link>
                 </Button>
               </div>
@@ -233,6 +242,30 @@ const Homepage = () => {
               </Card>
             ))}
           </div>
+
+          {/* DisruptionOS CTA */}
+          <div className="mt-16 text-center">
+            <Card className="glass-panel border-starlink-blue/50 max-w-4xl mx-auto">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center mb-4">
+                  <Zap className="w-8 h-8 text-starlink-blue mr-3" />
+                  <h3 className="text-2xl font-bold text-starlink-white">Enhanced with DisruptionOS</h3>
+                </div>
+                <p className="text-starlink-grey-light mb-6 text-lg">
+                  Transform from reactive threat monitoring to proactive disruption preparedness with strategic scenario simulation, 
+                  sensitivity scoring, and automated governance briefings.
+                </p>
+                <Button 
+                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold"
+                  asChild
+                >
+                  <Link to="/disruption-os">
+                    Explore DisruptionOS Features
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -246,14 +279,14 @@ const Homepage = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
             {personas.map((persona, index) => (
               <Card key={index} className="glass-panel border-starlink-grey/30">
                 <CardHeader>
                   <div className="w-12 h-12 bg-starlink-blue/20 rounded-lg flex items-center justify-center mb-4">
                     <persona.icon className="w-6 h-6 text-starlink-blue" />
                   </div>
-                  <CardTitle className="text-starlink-white text-2xl">{persona.title}</CardTitle>
+                  <CardTitle className="text-starlink-white text-xl">{persona.title}</CardTitle>
                   <CardDescription className="text-starlink-grey-light text-base">
                     {persona.description}
                   </CardDescription>
@@ -263,7 +296,7 @@ const Homepage = () => {
                     {persona.benefits.map((benefit, idx) => (
                       <li key={idx} className="flex items-center space-x-3">
                         <CheckCircle className="w-5 h-5 text-starlink-blue flex-shrink-0" />
-                        <span className="text-starlink-grey-light">{benefit}</span>
+                        <span className="text-starlink-grey-light text-sm">{benefit}</span>
                       </li>
                     ))}
                   </ul>
@@ -280,7 +313,7 @@ const Homepage = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Simple, Transparent Pricing</h2>
             <p className="text-xl text-starlink-grey-light max-w-3xl mx-auto">
-              Choose the plan that fits your security needs and budget
+              Choose the plan that fits your security needs and budget. DisruptionOS features included in Pro and Enterprise tiers.
             </p>
           </div>
           
