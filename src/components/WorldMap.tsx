@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { RealThreatService } from '@/services/realThreatService';
 import { ThreatZone } from '@/types/threat';
@@ -204,17 +205,45 @@ const WorldMap = () => {
       <div className={`absolute inset-0 z-0 transition-transform duration-500 ${
         viewMode === 'globe' ? 'perspective-1000 transform-style-3d rotate-x-12' : ''
       }`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark via-starlink-slate/30 to-starlink-dark">
-          {/* Grid overlay for weathermap effect */}
-          <div className="absolute inset-0 opacity-20 z-0">
+        {/* Multi-layered Background with Enhanced Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-br from-starlink-dark via-starlink-slate/40 to-starlink-blue-dark/20">
+          {/* Atmospheric overlay */}
+          <div className="absolute inset-0 bg-gradient-radial from-transparent via-starlink-blue/5 to-starlink-dark/80" />
+          
+          {/* Enhanced Grid overlay with multiple patterns */}
+          <div className="absolute inset-0 opacity-15 z-0">
             <svg viewBox="0 0 100 50" className="w-full h-full">
               <defs>
-                <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
-                  <path d="M 5 0 L 0 0 0 5" fill="none" stroke="rgba(100, 116, 139, 0.3)" strokeWidth="0.5"/>
+                {/* Main grid pattern */}
+                <pattern id="mainGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+                  <path d="M 4 0 L 0 0 0 4" fill="none" stroke="rgba(0, 180, 216, 0.4)" strokeWidth="0.3"/>
+                </pattern>
+                {/* Secondary fine grid */}
+                <pattern id="fineGrid" width="1" height="1" patternUnits="userSpaceOnUse">
+                  <path d="M 1 0 L 0 0 0 1" fill="none" stroke="rgba(100, 116, 139, 0.2)" strokeWidth="0.1"/>
+                </pattern>
+                {/* Radar sweep pattern */}
+                <pattern id="radarGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <circle cx="10" cy="10" r="9" fill="none" stroke="rgba(0, 180, 216, 0.1)" strokeWidth="0.5"/>
+                  <circle cx="10" cy="10" r="5" fill="none" stroke="rgba(0, 180, 216, 0.15)" strokeWidth="0.3"/>
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
+              <rect width="100%" height="100%" fill="url(#fineGrid)" />
+              <rect width="100%" height="100%" fill="url(#mainGrid)" />
+              <rect width="100%" height="100%" fill="url(#radarGrid)" className="animate-grid-fade" />
             </svg>
+          </div>
+
+          {/* Animated scanning lines */}
+          <div className="absolute inset-0 opacity-20 z-5">
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-starlink-blue to-transparent animate-pulse" 
+                 style={{top: '25%', animationDelay: '0s', animationDuration: '4s'}} />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-starlink-blue/60 to-transparent animate-pulse" 
+                 style={{top: '75%', animationDelay: '2s', animationDuration: '6s'}} />
+            <div className="absolute h-full w-0.5 bg-gradient-to-b from-transparent via-starlink-blue/40 to-transparent animate-pulse" 
+                 style={{left: '30%', animationDelay: '1s', animationDuration: '5s'}} />
+            <div className="absolute h-full w-0.5 bg-gradient-to-b from-transparent via-starlink-blue/60 to-transparent animate-pulse" 
+                 style={{left: '70%', animationDelay: '3s', animationDuration: '7s'}} />
           </div>
 
           {/* Heat Zone Overlay - Layer 3 */}
@@ -226,30 +255,91 @@ const WorldMap = () => {
             />
           </div>
 
-          {/* World Map Outlines - Layer 4 */}
-          <div className="absolute inset-0 z-20 opacity-60">
+          {/* Enhanced World Map Outlines - Layer 4 */}
+          <div className="absolute inset-0 z-20 opacity-70">
             <svg viewBox="0 0 100 50" className="w-full h-full">
-              {/* Continents with enhanced styling */}
+              <defs>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="0.5" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* North America */}
               <path
                 d="M12 15 Q14 14 16 14.5 L18 15.5 Q20 16 22 15 L24 15.5 Q26 16.5 28 16 L30 17 Q32 17.5 34 16.5 L36 17 Q38 18 40 17.5"
-                stroke="rgba(100, 116, 139, 0.8)"
-                strokeWidth="1.5"
-                fill="rgba(100, 116, 139, 0.2)"
-                className="transition-opacity duration-300 hover:opacity-80"
+                stroke="rgba(0, 180, 216, 0.8)"
+                strokeWidth="1.2"
+                fill="rgba(0, 180, 216, 0.1)"
+                filter="url(#glow)"
+                className="transition-opacity duration-300 hover:opacity-100"
               />
+              
+              {/* Europe */}
               <path
                 d="M40 17.5 Q42 16.5 44 17 L46 17.5 Q48 18 50 17.5 L52 18.5"
-                stroke="rgba(100, 116, 139, 0.8)"
-                strokeWidth="1.5"
-                fill="rgba(100, 116, 139, 0.2)"
+                stroke="rgba(0, 180, 216, 0.8)"
+                strokeWidth="1.2"
+                fill="rgba(0, 180, 216, 0.1)"
+                filter="url(#glow)"
               />
+              
+              {/* Asia */}
               <path
                 d="M52 18.5 Q54 17.5 56 18 L58 18.5 Q60 19 62 18.5 L64 19.5 Q66 20 68 19.5 L70 20.5 Q72 21 74 20.5 L76 21.5 Q78 22 80 21.5"
-                stroke="rgba(100, 116, 139, 0.8)"
-                strokeWidth="1.5"
-                fill="rgba(100, 116, 139, 0.2)"
+                stroke="rgba(0, 180, 216, 0.8)"
+                strokeWidth="1.2"
+                fill="rgba(0, 180, 216, 0.1)"
+                filter="url(#glow)"
+              />
+              
+              {/* Additional continent outlines */}
+              <path
+                d="M15 25 Q20 24 25 25 L30 26 Q35 27 40 26"
+                stroke="rgba(0, 180, 216, 0.6)"
+                strokeWidth="1"
+                fill="rgba(0, 180, 216, 0.08)"
+                filter="url(#glow)"
+              />
+              
+              {/* Ocean currents visualization */}
+              <path
+                d="M10 30 Q30 28 50 30 Q70 32 90 30"
+                stroke="rgba(0, 180, 216, 0.3)"
+                strokeWidth="0.8"
+                fill="none"
+                strokeDasharray="2,2"
+                className="animate-pulse"
+              />
+              <path
+                d="M15 35 Q35 33 55 35 Q75 37 85 35"
+                stroke="rgba(0, 180, 216, 0.2)"
+                strokeWidth="0.6"
+                fill="none"
+                strokeDasharray="3,3"
+                className="animate-pulse"
+                style={{animationDelay: '1s'}}
               />
             </svg>
+          </div>
+
+          {/* Atmospheric particles effect */}
+          <div className="absolute inset-0 z-15 pointer-events-none opacity-30">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-starlink-blue rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -101,4 +101,13 @@
     border: 2px solid #ffffff;
     box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
   }
+
+  /* Enhanced gradient utilities */
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+  
+  .bg-gradient-conic {
+    background-image: conic-gradient(var(--tw-gradient-stops));
+  }
 }
