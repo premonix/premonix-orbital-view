@@ -1,133 +1,177 @@
-
 import { useState, useEffect } from 'react';
-import { ThreatSignal } from '@/types/threat';
-import { ThreatService } from '@/services/threatService';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAuth } from '@/contexts/AuthContext';
-import PermissionGate from '@/components/auth/PermissionGate';
+import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
+import { ThreatService } from '@/services/threatService';
+import { Signal } from '@/types/threat';
+import { PermissionGate } from '@/components/PermissionGate';
+
+interface ThreatFeedProps {
+  // No props needed for now
+}
+
+const categories = ['Military', 'Cyber', 'Economic', 'Political'];
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'Military': return 'text-red-400';
+    case 'Cyber': return 'text-purple-400';
+    case 'Economic': return 'text-green-400';
+    case 'Political': return 'text-blue-400';
+    default: return 'text-gray-400';
+  }
+};
+
+const getSeverityColor = (severity: string) => {
+  switch (severity) {
+    case 'critical': return 'bg-red-500';
+    case 'high': return 'bg-orange-500';
+    case 'medium': return 'bg-yellow-500';
+    case 'low': return 'bg-blue-500';
+    default: return 'bg-gray-500';
+  }
+};
+
+const formatTimeAgo = (timestamp: string) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (minutes < 60) {
+    return `${minutes} minutes ago`;
+  } else if (hours < 24) {
+    return `${hours} hours ago`;
+  } else {
+    return `${days} days ago`;
+  }
+};
 
 const ThreatFeed = () => {
-  const [signals, setSignals] = useState<ThreatSignal[]>([]);
-  const [filter, setFilter] = useState<string>('all');
-  const { hasPermission, user } = useAuth();
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    const updateSignals = () => {
-      // Limit signals based on user role
-      const maxSignals = hasPermission('view_full_feed') ? 20 : 3;
-      const latestSignals = ThreatService.getLatestSignals(maxSignals);
-      setSignals(latestSignals);
-    };
+    // Fetch initial signals
+    const initialSignals = ThreatService.getLatestSignals(20);
+    setSignals(initialSignals);
 
-    updateSignals();
-    const interval = setInterval(updateSignals, 30000);
-    return () => clearInterval(interval);
-  }, [hasPermission]);
+    // Simulate new signals appearing every 30 seconds
+    const signalInterval = setInterval(() => {
+      const newSignal = ThreatService.getLatestSignals(1)[0];
+      if (newSignal) {
+        setSignals(prev => [newSignal, ...prev]);
+      }
+    }, 30000);
 
-  const filteredSignals = signals.filter(signal => 
-    filter === 'all' || signal.category === filter
-  );
+    return () => clearInterval(signalInterval);
+  }, []);
 
-  const categories = ['all', 'Military', 'Cyber', 'Diplomatic', 'Economic', 'Supply Chain', 'Unrest'];
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-500';
-      case 'high': return 'bg-orange-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-blue-500';
-      default: return 'bg-gray-500';
-    }
+  const toggleCategory = (category: string) => {
+    setActiveCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
   };
 
+  const filteredSignals = activeCategories.length === 0
+    ? signals
+    : signals.filter(signal => activeCategories.includes(signal.category));
+
   return (
-    <PermissionGate 
-      permission="view_basic_feed"
-      fallback={
-        <div className="fixed right-6 top-1/2 transform -translate-y-1/2 w-80 z-40">
-          <div className="glass-panel rounded-lg p-4">
-            <p className="text-starlink-grey-light text-center">
-              Threat feed available to registered users
-            </p>
+    <div className="fixed bottom-16 lg:bottom-6 right-4 lg:right-6 z-40 w-72 lg:w-80">
+      <PermissionGate requiredRole="registered">
+        <div className="glass-panel rounded-lg border border-starlink-grey/30">
+          {/* Header */}
+          <div className="p-3 lg:p-4 border-b border-starlink-grey/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-starlink-blue rounded-full animate-pulse" />
+                <h3 className="text-sm lg:text-base font-semibold text-starlink-white">Live Threat Feed</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="h-6 w-6 p-0 hover:bg-starlink-slate-light"
+              >
+                {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+            </div>
+            
+            {!isCollapsed && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {categories.map(category => (
+                  <Button
+                    key={category}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleCategory(category)}
+                    className={`h-6 px-2 text-xs ${
+                      activeCategories.includes(category)
+                        ? 'bg-starlink-blue text-starlink-dark'
+                        : 'text-starlink-grey-light hover:text-starlink-white'
+                    }`}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      }
-    >
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 w-80 z-40">
-        <div className="glass-panel rounded-lg p-4 max-h-[70vh]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-starlink-white">Live Threat Feed</h3>
-            <div className="flex items-center space-x-2">
-              {!hasPermission('view_full_feed') && (
-                <Badge variant="outline" className="text-xs">
-                  Limited
-                </Badge>
-              )}
-              <div className="w-2 h-2 bg-starlink-red rounded-full animate-pulse" />
-            </div>
-          </div>
 
-          {/* Category Filter - only for full access users */}
-          {hasPermission('view_full_feed') && (
-            <div className="flex flex-wrap gap-1 mb-4">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setFilter(category)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
-                    filter === category 
-                      ? 'bg-starlink-blue text-starlink-dark' 
-                      : 'bg-starlink-slate text-starlink-grey-light hover:bg-starlink-slate-light'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Usage indicator for guest users */}
-          {!hasPermission('view_full_feed') && (
-            <div className="mb-4 p-2 bg-starlink-slate/30 rounded text-xs text-starlink-grey-light">
-              Showing {signals.length}/3 daily signals. 
-              <span className="text-starlink-blue cursor-pointer hover:underline ml-1">
-                Upgrade for unlimited access
-              </span>
-            </div>
-          )}
-
-          {/* Signals List */}
-          <ScrollArea className="h-96">
-            <div className="space-y-3">
-              {filteredSignals.map(signal => (
-                <div key={signal.id} className="p-3 rounded bg-starlink-slate/50 border border-starlink-grey/20">
-                  <div className="flex items-start justify-between mb-2">
-                    <Badge variant="outline" className="text-xs">
-                      {signal.category}
-                    </Badge>
-                    <div className={`w-2 h-2 rounded-full ${getSeverityColor(signal.severity)}`} />
-                  </div>
-                  
-                  <h4 className="font-medium text-sm text-starlink-white mb-1">
-                    {signal.title}
-                  </h4>
-                  
-                  <p className="text-xs text-starlink-grey-light mb-2">
-                    {signal.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between text-xs text-starlink-grey">
-                    <span>{signal.location.country}</span>
-                    <span>Conf: {signal.confidence}%</span>
-                  </div>
+          {/* Feed Content */}
+          {!isCollapsed && (
+            <div className="max-h-64 lg:max-h-96 overflow-y-auto">
+              {filteredSignals.length === 0 ? (
+                <div className="p-4 text-center text-starlink-grey-light text-sm">
+                  No signals for selected categories
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-2 p-3 lg:p-4">
+                  {filteredSignals.slice(0, 10).map(signal => (
+                    <div 
+                      key={signal.id} 
+                      className="p-3 rounded-lg bg-starlink-slate/20 border border-starlink-grey/10 hover:bg-starlink-slate/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${getCategoryColor(signal.category)}`}
+                        >
+                          {signal.category}
+                        </Badge>
+                        <div className="flex items-center space-x-2">
+                          <span className={`w-2 h-2 rounded-full ${getSeverityColor(signal.severity)}`} />
+                          <span className="text-xs text-starlink-grey-light">
+                            {formatTimeAgo(signal.timestamp)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <h4 className="text-sm font-medium text-starlink-white mb-1 line-clamp-2">
+                        {signal.title}
+                      </h4>
+                      
+                      {signal.location && (
+                        <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
+                          <MapPin className="w-3 h-3" />
+                          <span>{signal.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </ScrollArea>
+          )}
         </div>
-      </div>
-    </PermissionGate>
+      </PermissionGate>
+    </div>
   );
 };
 

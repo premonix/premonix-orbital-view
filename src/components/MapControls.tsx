@@ -41,7 +41,7 @@ const MapControls = ({
   };
 
   return (
-    <div className="absolute top-6 left-6 z-50 space-y-4">
+    <div className="absolute top-4 lg:top-6 left-4 lg:left-6 right-4 lg:right-auto z-50 space-y-3 lg:space-y-4 max-w-xs lg:max-w-none">
       {/* View Mode Toggle */}
       <div className="glass-panel rounded-lg p-2">
         <ToggleGroup
@@ -52,16 +52,16 @@ const MapControls = ({
         >
           <ToggleGroupItem 
             value="2d" 
-            className="data-[state=on]:bg-starlink-blue data-[state=on]:text-starlink-dark"
+            className="data-[state=on]:bg-starlink-blue data-[state=on]:text-starlink-dark text-xs lg:text-sm"
           >
-            <Map className="w-4 h-4 mr-1" />
+            <Map className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
             2D
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="globe" 
-            className="data-[state=on]:bg-starlink-blue data-[state=on]:text-starlink-dark"
+            className="data-[state=on]:bg-starlink-blue data-[state=on]:text-starlink-dark text-xs lg:text-sm"
           >
-            <Globe className="w-4 h-4 mr-1" />
+            <Globe className="w-3 h-3 lg:w-4 lg:h-4 mr-1" />
             Globe
           </ToggleGroupItem>
         </ToggleGroup>
@@ -70,12 +70,12 @@ const MapControls = ({
       {/* Threat Type Filters */}
       <div className="glass-panel rounded-lg p-3">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-starlink-white">Threat Types</h4>
+          <h4 className="text-xs lg:text-sm font-medium text-starlink-white">Threat Types</h4>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="h-6 w-6 p-0"
+            className="h-5 w-5 lg:h-6 lg:w-6 p-0"
           >
             <Filter className="w-3 h-3" />
           </Button>
@@ -86,14 +86,14 @@ const MapControls = ({
             {threatTypes.map(type => (
               <div key={type.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full ${type.color}`} />
+                  <div className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full ${type.color}`} />
                   <span className="text-xs text-starlink-white">{type.label}</span>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => toggleFilter(type.id)}
-                  className={`h-6 px-2 text-xs ${
+                  className={`h-5 lg:h-6 px-2 text-xs ${
                     activeFilters.includes(type.id) 
                       ? 'bg-starlink-blue text-starlink-dark' 
                       : 'text-starlink-grey-light'
@@ -125,7 +125,7 @@ const MapControls = ({
 
       {/* Timeline Control */}
       <div className="glass-panel rounded-lg p-3">
-        <h4 className="text-sm font-medium text-starlink-white mb-2">Timeline</h4>
+        <h4 className="text-xs lg:text-sm font-medium text-starlink-white mb-2">Timeline</h4>
         <div className="space-y-2">
           <input
             type="range"

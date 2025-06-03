@@ -224,7 +224,7 @@ const WorldMap = () => {
       {threatZones.map((zone) => (
         <div
           key={zone.id}
-          className={`absolute w-16 h-16 rounded-full border-2 ${getZoneClass(zone.level)}`}
+          className={`absolute w-12 h-12 lg:w-16 lg:h-16 rounded-full border-2 ${getZoneClass(zone.level)}`}
           style={{
             left: `${zone.x}%`,
             top: `${zone.y}%`,
@@ -236,7 +236,7 @@ const WorldMap = () => {
           
           {/* Zone indicator */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`w-3 h-3 rounded-full ${
+            <div className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full ${
               zone.level === 'high' ? 'bg-red-400' :
               zone.level === 'medium' ? 'bg-orange-400' : 'bg-blue-400'
             } animate-pulse`} />
@@ -255,8 +255,8 @@ const WorldMap = () => {
       )}
 
       {/* Status Bar */}
-      <div className="absolute bottom-6 right-6 glass-panel rounded-lg px-4 py-2">
-        <div className="flex items-center space-x-4 text-sm">
+      <div className="absolute bottom-6 left-4 lg:left-auto lg:right-6 glass-panel rounded-lg px-3 lg:px-4 py-2">
+        <div className="flex items-center space-x-2 lg:space-x-4 text-xs lg:text-sm">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span className="text-starlink-grey-light">Live Data</span>
