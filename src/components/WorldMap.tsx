@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { RealThreatService } from '@/services/realThreatService';
 import { ThreatZone } from '@/types/threat';
 import SignalPulse from './SignalPulse';
 import MapControls from './MapControls';
+import HeatZoneOverlay from './HeatZoneOverlay';
 import ThreatPopup from './ThreatPopup';
 
 const WorldMap = () => {
@@ -14,8 +14,17 @@ const WorldMap = () => {
   const [threatZones, setThreatZones] = useState<ThreatZone[]>([]);
   const [activePulses, setActivePulses] = useState<Array<{id: string, x: number, y: number, signal: any}>>([]);
 
+  // Heat zones for weathermap-style visualization
+  const [heatZones] = useState([
+    { id: 'taiwan-heat', x: 75, y: 35, radius: 8, intensity: 0.8, type: 'military' },
+    { id: 'ukraine-heat', x: 50, y: 25, radius: 12, intensity: 0.9, type: 'military' },
+    { id: 'cyber-heat-1', x: 40, y: 45, radius: 6, intensity: 0.6, type: 'cyber' },
+    { id: 'supply-heat', x: 65, y: 50, radius: 10, intensity: 0.7, type: 'supply-chain' },
+    { id: 'diplomatic-heat', x: 30, y: 35, radius: 7, intensity: 0.5, type: 'diplomatic' },
+  ]);
+
   useEffect(() => {
-    // Initialize threat zones
+    // Initialize threat zones with enhanced data
     const zones: ThreatZone[] = [
       { 
         id: 'taiwan', 
@@ -114,8 +123,31 @@ const WorldMap = () => {
       }
     });
 
+    // Simulate new threat signals appearing periodically
+    const signalInterval = setInterval(() => {
+      RealThreatService.getLatestSignals(1).then(signals => {
+        if (signals.length > 0) {
+          const signal = signals[0];
+          const zone = zones[Math.floor(Math.random() * zones.length)];
+          const pulseId = Math.random().toString(36).substr(2, 9);
+          
+          setActivePulses(prev => [...prev, {
+            id: pulseId,
+            x: zone.x + (Math.random() - 0.5) * 8,
+            y: zone.y + (Math.random() - 0.5) * 8,
+            signal: signal
+          }]);
+
+          setTimeout(() => {
+            setActivePulses(prev => prev.filter(p => p.id !== pulseId));
+          }, 5000);
+        }
+      });
+    }, 20000);
+
     return () => {
       unsubscribe();
+      clearInterval(signalInterval);
     };
   }, [selectedYear]);
 
@@ -123,7 +155,7 @@ const WorldMap = () => {
     const baseClass = 'transition-all duration-300 hover:scale-110 cursor-pointer relative';
     switch (level) {
       case 'high': 
-        return `${baseClass} border-red-400 bg-red-500/30 shadow-lg shadow-red-500/50`;
+        return `${baseClass} border-red-400 bg-red-500/30 shadow-lg shadow-red-500/50 animate-pulse`;
       case 'medium': 
         return `${baseClass} border-orange-400 bg-orange-500/30 shadow-lg shadow-orange-500/50`;
       case 'low': 
@@ -156,7 +188,7 @@ const WorldMap = () => {
 
   return (
     <div className="relative w-full h-screen bg-starlink-dark overflow-hidden">
-      {/* Map Controls */}
+      {/* Map Controls - Layer 1 (highest z-index) */}
       <MapControls
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -166,63 +198,117 @@ const WorldMap = () => {
         onYearChange={setSelectedYear}
       />
 
-      {/* Clean World Map Background */}
-      <div className="absolute inset-0 z-0">
-        {/* Simple gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-starlink-dark via-starlink-slate/10 to-starlink-dark">
-          
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0 opacity-20">
+      {/* Enhanced World Map Background - Layer 2 (lowest z-index) */}
+      <div className={`absolute inset-0 z-0 transition-transform duration-500 ${
+        viewMode === 'globe' ? 'perspective-1000 transform-style-3d rotate-x-12' : ''
+      }`}>
+        {/* Clean Background with Subtle Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-br from-starlink-dark via-starlink-slate/20 to-starlink-dark">
+          {/* Grid overlay with reduced opacity */}
+          <div className="absolute inset-0 opacity-8 z-0">
             <svg viewBox="0 0 100 50" className="w-full h-full">
               <defs>
-                <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
-                  <path d="M 5 0 L 0 0 0 5" fill="none" stroke="rgba(100, 116, 139, 0.3)" strokeWidth="0.5"/>
+                {/* Main grid pattern */}
+                <pattern id="mainGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+                  <path d="M 4 0 L 0 0 0 4" fill="none" stroke="rgba(100, 116, 139, 0.2)" strokeWidth="0.2"/>
+                </pattern>
+                {/* Fine grid pattern */}
+                <pattern id="fineGrid" width="1" height="1" patternUnits="userSpaceOnUse">
+                  <path d="M 1 0 L 0 0 0 1" fill="none" stroke="rgba(100, 116, 139, 0.1)" strokeWidth="0.1"/>
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
+              <rect width="100%" height="100%" fill="url(#fineGrid)" />
+              <rect width="100%" height="100%" fill="url(#mainGrid)" />
             </svg>
           </div>
 
-          {/* Simple world map outlines */}
-          <div className="absolute inset-0 z-10 opacity-30">
+          {/* Subtle scanning lines with reduced opacity */}
+          <div className="absolute inset-0 opacity-10 z-5">
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-starlink-blue/60 to-transparent animate-pulse" 
+                 style={{top: '25%', animationDelay: '0s', animationDuration: '6s'}} />
+            <div className="absolute w-full h-0.5 bg-gradient-to-r from-transparent via-starlink-blue/40 to-transparent animate-pulse" 
+                 style={{top: '75%', animationDelay: '3s', animationDuration: '8s'}} />
+          </div>
+
+          {/* Heat Zone Overlay - Layer 3 */}
+          <div className="absolute inset-0 z-10">
+            <HeatZoneOverlay 
+              zones={heatZones} 
+              activeFilters={activeFilters}
+              viewMode={viewMode}
+            />
+          </div>
+
+          {/* World Map Outlines - Layer 4 */}
+          <div className="absolute inset-0 z-20 opacity-40">
             <svg viewBox="0 0 100 50" className="w-full h-full">
+              <defs>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="0.3" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
               {/* North America */}
               <path
-                d="M12 15 Q16 14 20 15 L24 15.5 Q28 16 32 16.5 L36 17"
-                stroke="rgba(156, 163, 175, 0.8)"
-                strokeWidth="1.5"
-                fill="none"
+                d="M12 15 Q14 14 16 14.5 L18 15.5 Q20 16 22 15 L24 15.5 Q26 16.5 28 16 L30 17 Q32 17.5 34 16.5 L36 17 Q38 18 40 17.5"
+                stroke="rgba(156, 163, 175, 0.6)"
+                strokeWidth="1"
+                fill="rgba(156, 163, 175, 0.05)"
+                filter="url(#glow)"
               />
               
               {/* Europe */}
               <path
-                d="M40 17.5 Q44 17 48 17.5 L52 18"
-                stroke="rgba(156, 163, 175, 0.8)"
-                strokeWidth="1.5"
-                fill="none"
+                d="M40 17.5 Q42 16.5 44 17 L46 17.5 Q48 18 50 17.5 L52 18.5"
+                stroke="rgba(156, 163, 175, 0.6)"
+                strokeWidth="1"
+                fill="rgba(156, 163, 175, 0.05)"
+                filter="url(#glow)"
               />
               
               {/* Asia */}
               <path
-                d="M52 18 Q58 17.5 64 18.5 L70 19.5 Q76 20 80 20.5"
-                stroke="rgba(156, 163, 175, 0.8)"
-                strokeWidth="1.5"
-                fill="none"
+                d="M52 18.5 Q54 17.5 56 18 L58 18.5 Q60 19 62 18.5 L64 19.5 Q66 20 68 19.5 L70 20.5 Q72 21 74 20.5 L76 21.5 Q78 22 80 21.5"
+                stroke="rgba(156, 163, 175, 0.6)"
+                strokeWidth="1"
+                fill="rgba(156, 163, 175, 0.05)"
+                filter="url(#glow)"
               />
               
-              {/* Africa */}
+              {/* Additional continent outlines */}
               <path
-                d="M45 25 Q50 24 55 25 L60 26 Q65 27 70 26.5"
-                stroke="rgba(156, 163, 175, 0.8)"
-                strokeWidth="1.5"
-                fill="none"
+                d="M15 25 Q20 24 25 25 L30 26 Q35 27 40 26"
+                stroke="rgba(156, 163, 175, 0.5)"
+                strokeWidth="0.8"
+                fill="rgba(156, 163, 175, 0.03)"
+                filter="url(#glow)"
               />
             </svg>
+          </div>
+
+          {/* Subtle atmospheric particles */}
+          <div className="absolute inset-0 z-15 pointer-events-none opacity-15">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-0.5 h-0.5 bg-starlink-blue rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 4}s`,
+                  animationDuration: `${3 + Math.random() * 2}s`
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Signal Pulses */}
+      {/* Signal Pulses - Layer 5 */}
       <div className="absolute inset-0 z-30 pointer-events-none">
         {activePulses.map(pulse => (
           <SignalPulse
@@ -234,7 +320,7 @@ const WorldMap = () => {
         ))}
       </div>
 
-      {/* Threat Zones */}
+      {/* Threat Zones - Layer 6 */}
       <div className="absolute inset-0 z-40">
         {threatZones.map((zone) => (
           <div
@@ -260,7 +346,7 @@ const WorldMap = () => {
         ))}
       </div>
 
-      {/* Threat Popup */}
+      {/* Threat Popup - Layer 7 (highest interactive z-index) */}
       {selectedZone && (
         <div className="absolute inset-0 z-50 pointer-events-none">
           <div className="pointer-events-auto">
@@ -274,7 +360,7 @@ const WorldMap = () => {
         </div>
       )}
 
-      {/* Status Bar */}
+      {/* Enhanced Status Bar - Layer 8 */}
       <div className="absolute bottom-4 lg:bottom-6 left-4 lg:left-auto lg:right-6 z-40 glass-panel rounded-lg px-3 lg:px-4 py-2">
         <div className="flex items-center space-x-2 lg:space-x-4 text-xs lg:text-sm">
           <div className="flex items-center space-x-2">
