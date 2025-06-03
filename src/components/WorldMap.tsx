@@ -112,7 +112,7 @@ const WorldMap = () => {
   }, [selectedYear]);
 
   const getZoneClass = (level: string) => {
-    const baseClass = 'transition-all duration-300 hover:scale-110 cursor-pointer';
+    const baseClass = 'transition-all duration-300 hover:scale-110 cursor-pointer relative';
     switch (level) {
       case 'high': 
         return `${baseClass} border-red-400 bg-red-500/30 shadow-lg shadow-red-500/50 animate-pulse`;
@@ -148,23 +148,25 @@ const WorldMap = () => {
 
   return (
     <div className="relative w-full h-screen bg-starlink-dark overflow-hidden">
-      {/* Map Controls */}
-      <MapControls
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        activeFilters={activeFilters}
-        onFiltersChange={setActiveFilters}
-        selectedYear={selectedYear}
-        onYearChange={setSelectedYear}
-      />
+      {/* Map Controls - Layer 1 (highest z-index) */}
+      <div className="absolute top-4 lg:top-6 left-4 lg:left-6 right-4 lg:right-auto z-50 max-w-xs lg:max-w-none">
+        <MapControls
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          activeFilters={activeFilters}
+          onFiltersChange={setActiveFilters}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+        />
+      </div>
 
-      {/* Enhanced World Map Background */}
-      <div className={`absolute inset-0 transition-transform duration-500 ${
+      {/* Enhanced World Map Background - Layer 2 (lowest z-index) */}
+      <div className={`absolute inset-0 z-0 transition-transform duration-500 ${
         viewMode === 'globe' ? 'perspective-1000 transform-style-3d rotate-x-12' : ''
       }`}>
         <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark via-starlink-slate/30 to-starlink-dark">
           {/* Grid overlay for weathermap effect */}
-          <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 opacity-20 z-0">
             <svg viewBox="0 0 100 50" className="w-full h-full">
               <defs>
                 <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
@@ -175,15 +177,17 @@ const WorldMap = () => {
             </svg>
           </div>
 
-          {/* Heat Zone Overlay */}
-          <HeatZoneOverlay 
-            zones={heatZones} 
-            activeFilters={activeFilters}
-            viewMode={viewMode}
-          />
+          {/* Heat Zone Overlay - Layer 3 */}
+          <div className="absolute inset-0 z-10">
+            <HeatZoneOverlay 
+              zones={heatZones} 
+              activeFilters={activeFilters}
+              viewMode={viewMode}
+            />
+          </div>
 
-          {/* World Map Outlines */}
-          <div className="absolute inset-0 opacity-60">
+          {/* World Map Outlines - Layer 4 */}
+          <div className="absolute inset-0 z-20 opacity-60">
             <svg viewBox="0 0 100 50" className="w-full h-full">
               {/* Continents with enhanced styling */}
               <path
@@ -210,52 +214,60 @@ const WorldMap = () => {
         </div>
       </div>
 
-      {/* Signal Pulses */}
-      {activePulses.map(pulse => (
-        <SignalPulse
-          key={pulse.id}
-          signal={pulse.signal}
-          x={pulse.x}
-          y={pulse.y}
-        />
-      ))}
+      {/* Signal Pulses - Layer 5 */}
+      <div className="absolute inset-0 z-30 pointer-events-none">
+        {activePulses.map(pulse => (
+          <SignalPulse
+            key={pulse.id}
+            signal={pulse.signal}
+            x={pulse.x}
+            y={pulse.y}
+          />
+        ))}
+      </div>
 
-      {/* Threat Zones */}
-      {threatZones.map((zone) => (
-        <div
-          key={zone.id}
-          className={`absolute w-12 h-12 lg:w-16 lg:h-16 rounded-full border-2 ${getZoneClass(zone.level)}`}
-          style={{
-            left: `${zone.x}%`,
-            top: `${zone.y}%`,
-            transform: 'translate(-50%, -50%)',
-          }}
-          onClick={(e) => handleZoneClick(zone, e)}
-        >
-          <div className="w-full h-full rounded-full bg-current opacity-20" />
-          
-          {/* Zone indicator */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`w-2 h-2 lg:w-3 lg:h-3 rounded-full ${
-              zone.level === 'high' ? 'bg-red-400' :
-              zone.level === 'medium' ? 'bg-orange-400' : 'bg-blue-400'
-            } animate-pulse`} />
+      {/* Threat Zones - Layer 6 */}
+      <div className="absolute inset-0 z-40">
+        {threatZones.map((zone) => (
+          <div
+            key={zone.id}
+            className={`absolute w-8 h-8 lg:w-12 lg:h-12 rounded-full border-2 ${getZoneClass(zone.level)}`}
+            style={{
+              left: `${zone.x}%`,
+              top: `${zone.y}%`,
+              transform: 'translate(-50%, -50%)',
+            }}
+            onClick={(e) => handleZoneClick(zone, e)}
+          >
+            <div className="w-full h-full rounded-full bg-current opacity-20" />
+            
+            {/* Zone indicator */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full ${
+                zone.level === 'high' ? 'bg-red-400' :
+                zone.level === 'medium' ? 'bg-orange-400' : 'bg-blue-400'
+              } animate-pulse`} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Threat Popup - Layer 7 (highest interactive z-index) */}
+      {selectedZone && (
+        <div className="absolute inset-0 z-50 pointer-events-none">
+          <div className="pointer-events-auto">
+            <ThreatPopup
+              zone={selectedZone.zone}
+              x={selectedZone.x}
+              y={selectedZone.y}
+              onClose={closePopup}
+            />
           </div>
         </div>
-      ))}
-
-      {/* Threat Popup */}
-      {selectedZone && (
-        <ThreatPopup
-          zone={selectedZone.zone}
-          x={selectedZone.x}
-          y={selectedZone.y}
-          onClose={closePopup}
-        />
       )}
 
-      {/* Status Bar */}
-      <div className="absolute bottom-6 left-4 lg:left-auto lg:right-6 glass-panel rounded-lg px-3 lg:px-4 py-2">
+      {/* Status Bar - Layer 8 */}
+      <div className="absolute bottom-4 lg:bottom-6 left-4 lg:left-auto lg:right-6 z-40 glass-panel rounded-lg px-3 lg:px-4 py-2">
         <div className="flex items-center space-x-2 lg:space-x-4 text-xs lg:text-sm">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
