@@ -131,9 +131,9 @@ const Homepage = () => {
               </Badge>
               
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
-                See the Storm
+                Real-Time Risk.
                 <br />
-                <span className="text-starlink-blue">Before It Hits</span>
+                <span className="text-starlink-blue">Real-World Readiness.</span>
               </h1>
               
               <p className="text-xl lg:text-2xl text-starlink-grey-light leading-relaxed">
