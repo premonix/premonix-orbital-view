@@ -5,6 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Globe, Shield, Bell, Brain, Users, Building, Home, Briefcase, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import GlobalThreatIntelligence from "@/components/isometric/GlobalThreatIntelligence";
+import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
+import CustomAlertSystem from "@/components/isometric/CustomAlertSystem";
+import ResilienceToolkit from "@/components/isometric/ResilienceToolkit";
+import HeroThreatMap from "@/components/isometric/HeroThreatMap";
 
 const Homepage = () => {
   const features = [
@@ -12,25 +17,25 @@ const Homepage = () => {
       icon: Globe,
       title: "Global Threat Intelligence",
       description: "Real-time monitoring of 10,000+ data sources across military, cyber, economic, and political domains.",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=250&fit=crop"
+      component: GlobalThreatIntelligence
     },
     {
       icon: Brain,
       title: "AI-Powered Predictions",
       description: "Advanced machine learning algorithms predict conflict hotspots and emerging threats before they escalate.",
-      image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=250&fit=crop"
+      component: AIPoweredPredictions
     },
     {
       icon: Bell,
       title: "Custom Alert System",
       description: "Personalized notifications based on your location, sector, and threat preferences delivered in real-time.",
-      image: "https://images.unsplash.com/photo-1586210579191-33b45e38fa8c?w=400&h=250&fit=crop"
+      component: CustomAlertSystem
     },
     {
       icon: Shield,
       title: "Resilience Toolkit",
       description: "Tailored preparedness guides and crisis management resources for individuals, families, and businesses.",
-      image: "https://images.unsplash.com/photo-1633265486064-086b219458ec?w=400&h=250&fit=crop"
+      component: ResilienceToolkit
     }
   ];
 
@@ -111,11 +116,9 @@ const Homepage = () => {
       <section className="relative pt-24 pb-20 px-6 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&h=1080&fit=crop" 
-            alt="Isometric technology visualization" 
-            className="w-full h-full object-cover opacity-20"
-          />
+          <div className="w-full h-full bg-gradient-to-br from-starlink-dark via-starlink-slate/20 to-starlink-dark opacity-60">
+            <HeroThreatMap />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark/80 via-starlink-dark/60 to-starlink-dark"></div>
         </div>
         
@@ -167,11 +170,9 @@ const Homepage = () => {
             {/* Right side - Threat Map Preview */}
             <div className="relative">
               <div className="glass-panel rounded-xl p-4 lg:p-6">
-                <img 
-                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop" 
-                  alt="Isometric dashboard interface visualization" 
-                  className="w-full h-80 lg:h-96 object-cover rounded-lg"
-                />
+                <div className="w-full h-80 lg:h-96 rounded-lg overflow-hidden">
+                  <HeroThreatMap />
+                </div>
                 <div className="absolute inset-4 lg:inset-6 bg-gradient-to-t from-starlink-dark/60 to-transparent rounded-lg flex items-end">
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-starlink-white mb-2">Live Threat Intelligence</h3>
@@ -213,13 +214,8 @@ const Homepage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="glass-panel border-starlink-grey/30 overflow-hidden">
-                <div className="relative h-48">
-                  <img 
-                    src={feature.image} 
-                    alt={feature.title} 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-starlink-dark/80 to-transparent"></div>
+                <div className="relative h-48 bg-gradient-to-br from-starlink-slate/30 to-starlink-dark/90">
+                  <feature.component />
                   <div className="absolute bottom-4 left-4">
                     <div className="w-12 h-12 bg-starlink-blue/80 rounded-lg flex items-center justify-center backdrop-blur-sm">
                       <feature.icon className="w-6 h-6 text-starlink-white" />
