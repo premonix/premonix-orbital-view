@@ -79,6 +79,14 @@ const ThreatFeed = () => {
     }
   };
 
+  const toggleCategory = (category: string) => {
+    setActiveCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
