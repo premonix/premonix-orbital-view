@@ -35,20 +35,62 @@ const WorldMap = () => {
     <div className="relative w-full h-screen bg-starlink-dark grid-overlay">
       {/* World Map Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark via-starlink-slate/50 to-starlink-dark">
-        <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 opacity-30">
           <svg viewBox="0 0 1000 500" className="w-full h-full">
-            {/* Simplified world map outlines */}
+            {/* North America */}
             <path
-              d="M150 200 L200 180 L280 190 L350 170 L400 180 L450 200 L500 190"
-              stroke="rgba(100, 116, 139, 0.3)"
+              d="M50 150 Q80 120 120 130 Q180 125 200 140 Q220 160 240 180 Q250 200 230 220 Q200 240 170 250 Q120 260 80 240 Q50 220 40 180 Q45 160 50 150 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
               strokeWidth="1"
-              fill="none"
             />
+            
+            {/* South America */}
             <path
-              d="M600 220 L700 200 L800 210 L850 230 L900 220"
-              stroke="rgba(100, 116, 139, 0.3)"
+              d="M170 280 Q180 270 190 280 Q200 300 210 340 Q215 380 200 400 Q185 420 175 400 Q165 380 160 340 Q155 300 170 280 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
               strokeWidth="1"
-              fill="none"
+            />
+            
+            {/* Europe */}
+            <path
+              d="M450 120 Q480 110 510 120 Q530 140 520 160 Q500 180 480 170 Q460 150 450 120 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
+              strokeWidth="1"
+            />
+            
+            {/* Africa */}
+            <path
+              d="M480 200 Q520 190 540 210 Q550 250 545 300 Q540 350 520 380 Q500 400 480 390 Q460 360 465 320 Q470 280 480 200 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
+              strokeWidth="1"
+            />
+            
+            {/* Asia */}
+            <path
+              d="M550 100 Q650 90 750 110 Q800 130 820 160 Q830 190 810 220 Q780 240 740 250 Q680 260 620 250 Q580 240 560 220 Q540 190 550 100 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
+              strokeWidth="1"
+            />
+            
+            {/* Australia */}
+            <path
+              d="M720 350 Q780 340 820 360 Q830 380 810 390 Q770 400 720 390 Q700 380 720 350 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
+              strokeWidth="1"
+            />
+            
+            {/* Greenland */}
+            <path
+              d="M380 50 Q420 40 440 60 Q450 80 430 90 Q400 100 380 80 Q370 60 380 50 Z"
+              fill="rgba(100, 116, 139, 0.4)"
+              stroke="rgba(100, 116, 139, 0.6)"
+              strokeWidth="1"
             />
           </svg>
         </div>
