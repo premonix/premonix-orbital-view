@@ -11,7 +11,7 @@ import {
   Shield, 
   CreditCard, 
   FileText, 
-  Flask, 
+  Beaker, 
   BarChart,
   Lock
 } from "lucide-react";
@@ -35,7 +35,7 @@ const AdminConsole = () => {
     { id: 'roles', label: 'Roles', icon: <Shield className="w-4 h-4" />, component: AdminRolesPanel },
     { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" />, component: AdminBillingPanel },
     { id: 'audit', label: 'Audit Trail', icon: <FileText className="w-4 h-4" />, component: AdminAuditPanel },
-    { id: 'beta', label: 'Beta Access', icon: <Flask className="w-4 h-4" />, component: AdminBetaPanel },
+    { id: 'beta', label: 'Beta Access', icon: <Beaker className="w-4 h-4" />, component: AdminBetaPanel },
     { id: 'analytics', label: 'Analytics', icon: <BarChart className="w-4 h-4" />, component: AdminAnalyticsPanel }
   ];
 

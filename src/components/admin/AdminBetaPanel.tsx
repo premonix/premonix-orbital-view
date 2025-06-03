@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { 
-  Flask, 
+  Beaker, 
   Plus, 
   Users, 
   Building,
@@ -134,7 +133,7 @@ const AdminBetaPanel = () => {
       <Card className="glass-panel border-starlink-grey/30">
         <CardHeader>
           <CardTitle className="text-starlink-white flex items-center">
-            <Flask className="w-6 h-6 mr-2 text-starlink-blue" />
+            <Beaker className="w-6 h-6 mr-2 text-starlink-blue" />
             Beta Program & Feature Flags
           </CardTitle>
           <CardDescription className="text-starlink-grey-light">
