@@ -21,8 +21,8 @@ export class RealThreatService {
         id: signal.id,
         timestamp: new Date(signal.timestamp),
         location: {
-          lat: signal.latitude,
-          lng: signal.longitude,
+          lat: parseFloat(signal.latitude),
+          lng: parseFloat(signal.longitude),
           country: signal.country,
           region: signal.region || 'Global'
         },
@@ -73,13 +73,13 @@ export class RealThreatService {
             id: signal.id,
             timestamp: new Date(signal.timestamp),
             location: {
-              lat: signal.latitude,
-              lng: signal.longitude,
+              lat: parseFloat(signal.latitude),
+              lng: parseFloat(signal.longitude),
               country: signal.country,
               region: signal.region || 'Global'
             },
-            category: signal.category as 'Military' | 'Cyber' | 'Diplomatic' | 'Economic' | 'Supply Chain' | 'Unrest',
-            severity: signal.severity as 'low' | 'medium' | 'high' | 'critical',
+            category: signal.category,
+            severity: signal.severity,
             confidence: signal.confidence,
             source: signal.source_name,
             title: signal.title,
@@ -114,13 +114,13 @@ export class RealThreatService {
         id: signal.id,
         timestamp: new Date(signal.timestamp),
         location: {
-          lat: signal.latitude,
-          lng: signal.longitude,
+          lat: parseFloat(signal.latitude),
+          lng: parseFloat(signal.longitude),
           country: signal.country,
           region: signal.region || 'Global'
         },
-        category: signal.category as 'Military' | 'Cyber' | 'Diplomatic' | 'Economic' | 'Supply Chain' | 'Unrest',
-        severity: signal.severity as 'low' | 'medium' | 'high' | 'critical',
+        category: signal.category,
+        severity: signal.severity,
         confidence: signal.confidence,
         source: signal.source_name,
         title: signal.title,
