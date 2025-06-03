@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState, UserRole, rolePermissions } from '@/types/user';
 
@@ -57,16 +56,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Check if this is the admin email
+    const isAdminEmail = email === 'leonedwardhardwick22@gmail.com';
+    const userRole: UserRole = isAdminEmail ? 'enterprise' : 'registered';
+    
     // Mock login - in real app this would call an API
     const user: User = {
       id: `user_${Date.now()}`,
       email,
       name: email.split('@')[0],
-      role: 'registered',
-      permissions: rolePermissions.registered,
+      role: userRole,
+      permissions: rolePermissions[userRole],
       subscription: {
-        plan: 'registered',
-        features: ['dashboard', 'alerts', 'full_feed']
+        plan: userRole,
+        features: rolePermissions[userRole]
       }
     };
 
@@ -79,16 +82,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const register = async (email: string, password: string, name: string) => {
+    // Check if this is the admin email
+    const isAdminEmail = email === 'leonedwardhardwick22@gmail.com';
+    const userRole: UserRole = isAdminEmail ? 'enterprise' : 'registered';
+    
     // Mock registration
     const user: User = {
       id: `user_${Date.now()}`,
       email,
       name,
-      role: 'registered',
-      permissions: rolePermissions.registered,
+      role: userRole,
+      permissions: rolePermissions[userRole],
       subscription: {
-        plan: 'registered',
-        features: ['dashboard', 'alerts', 'full_feed']
+        plan: userRole,
+        features: rolePermissions[userRole]
       }
     };
 
