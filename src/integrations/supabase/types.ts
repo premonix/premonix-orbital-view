@@ -9,72 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      threat_signals: {
-        Row: {
-          category: string
-          confidence: number
-          country: string
-          created_at: string
-          escalation_potential: number | null
-          id: string
-          latitude: number
-          longitude: number
-          processed_at: string | null
-          region: string | null
-          severity: string
-          source_name: string
-          source_url: string | null
-          summary: string | null
-          tags: string[] | null
-          threat_score: number
-          timestamp: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          confidence: number
-          country: string
-          created_at?: string
-          escalation_potential?: number | null
-          id?: string
-          latitude: number
-          longitude: number
-          processed_at?: string | null
-          region?: string | null
-          severity: string
-          source_name: string
-          source_url?: string | null
-          summary?: string | null
-          tags?: string[] | null
-          threat_score: number
-          timestamp?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          confidence?: number
-          country?: string
-          created_at?: string
-          escalation_potential?: number | null
-          id?: string
-          latitude?: number
-          longitude?: number
-          processed_at?: string | null
-          region?: string | null
-          severity?: string
-          source_name?: string
-          source_url?: string | null
-          summary?: string | null
-          tags?: string[] | null
-          threat_score?: number
-          timestamp?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
