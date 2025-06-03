@@ -78,8 +78,8 @@ export class RealThreatService {
               country: signal.country,
               region: signal.region || 'Global'
             },
-            category: signal.category,
-            severity: signal.severity,
+            category: signal.category as 'Military' | 'Cyber' | 'Diplomatic' | 'Economic' | 'Supply Chain' | 'Unrest',
+            severity: signal.severity as 'low' | 'medium' | 'high' | 'critical',
             confidence: signal.confidence,
             source: signal.source_name,
             title: signal.title,
@@ -119,8 +119,8 @@ export class RealThreatService {
           country: signal.country,
           region: signal.region || 'Global'
         },
-        category: signal.category,
-        severity: signal.severity,
+        category: signal.category as 'Military' | 'Cyber' | 'Diplomatic' | 'Economic' | 'Supply Chain' | 'Unrest',
+        severity: signal.severity as 'low' | 'medium' | 'high' | 'critical',
         confidence: signal.confidence,
         source: signal.source_name,
         title: signal.title,
