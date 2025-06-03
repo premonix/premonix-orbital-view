@@ -1,12 +1,14 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { User, AuthState, UserRole, rolePermissions, tierMapping } from '@/types/user';
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  register: (email: string, password: string, name: string, companyName?: string) => Promise<void>;
-  upgradeRole: (newRole: UserRole) => void;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, name: string, companyName?: string) => Promise<{ error?: string }>;
+  upgradeRole: (newRole: UserRole) => Promise<void>;
   hasPermission: (permission: string) => boolean;
 }
 
@@ -31,130 +33,212 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoading: true
   });
 
-  useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('premonix_user');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false
-      });
-    } else {
-      // Set as guest user
-      const guestUser: User = {
-        id: 'guest',
-        role: 'guest',
-        permissions: rolePermissions.guest,
+  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+    try {
+      // Fetch user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return null;
+      }
+
+      // Fetch user role
+      const { data: roleData } = await supabase
+        .rpc('get_user_role', { user_id: supabaseUser.id });
+
+      const role: UserRole = roleData || 'registered';
+      const permissions = rolePermissions[role];
+
+      return {
+        id: supabaseUser.id,
+        email: profile.email,
+        name: profile.name,
+        companyName: role === 'enterprise' && supabaseUser.email === 'leonedwardhardwick22@gmail.com' ? 'Premonix' : undefined,
+        role,
+        permissions,
         subscription: {
-          plan: 'guest',
-          tier: 'personal',
-          features: rolePermissions.guest
+          plan: role,
+          tier: tierMapping[role],
+          features: permissions
         }
       };
-      setAuthState({
-        user: guestUser,
-        isAuthenticated: false,
-        isLoading: false
-      });
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
     }
+  };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (session?.user) {
+          // User is authenticated, fetch their profile
+          const userProfile = await fetchUserProfile(session.user);
+          if (userProfile) {
+            setAuthState({
+              user: userProfile,
+              isAuthenticated: true,
+              isLoading: false
+            });
+          } else {
+            // Profile fetch failed, set as guest
+            setAuthState({
+              user: {
+                id: 'guest',
+                role: 'guest',
+                permissions: rolePermissions.guest,
+                subscription: {
+                  plan: 'guest',
+                  tier: 'personal',
+                  features: rolePermissions.guest
+                }
+              },
+              isAuthenticated: false,
+              isLoading: false
+            });
+          }
+        } else {
+          // No user, set as guest
+          setAuthState({
+            user: {
+              id: 'guest',
+              role: 'guest',
+              permissions: rolePermissions.guest,
+              subscription: {
+                plan: 'guest',
+                tier: 'personal',
+                features: rolePermissions.guest
+              }
+            },
+            isAuthenticated: false,
+            isLoading: false
+          });
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user).then(userProfile => {
+          if (userProfile) {
+            setAuthState({
+              user: userProfile,
+              isAuthenticated: true,
+              isLoading: false
+            });
+          }
+        });
+      } else {
+        setAuthState({
+          user: {
+            id: 'guest',
+            role: 'guest',
+            permissions: rolePermissions.guest,
+            subscription: {
+              plan: 'guest',
+              tier: 'personal',
+              features: rolePermissions.guest
+            }
+          },
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Check if this is the Premonix admin email
-    const isPremonixAdmin = email === 'leonedwardhardwick22@gmail.com';
-    const userRole: UserRole = isPremonixAdmin ? 'enterprise' : 'registered';
-    
-    // Mock login - in real app this would call an API
-    const user: User = {
-      id: `user_${Date.now()}`,
-      email,
-      name: email.split('@')[0],
-      companyName: isPremonixAdmin ? 'Premonix' : undefined,
-      role: userRole,
-      permissions: rolePermissions[userRole],
-      subscription: {
-        plan: userRole,
-        tier: tierMapping[userRole],
-        features: rolePermissions[userRole]
-      }
-    };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    localStorage.setItem('premonix_user', JSON.stringify(user));
-    setAuthState({
-      user,
-      isAuthenticated: true,
-      isLoading: false
-    });
+      if (error) {
+        return { error: error.message };
+      }
+
+      return {};
+    } catch (error) {
+      return { error: 'An unexpected error occurred' };
+    }
   };
 
   const register = async (email: string, password: string, name: string, companyName?: string) => {
-    // Check if this is the Premonix admin email
-    const isPremonixAdmin = email === 'leonedwardhardwick22@gmail.com';
-    const userRole: UserRole = isPremonixAdmin ? 'enterprise' : 'registered';
-    
-    // Mock registration
-    const user: User = {
-      id: `user_${Date.now()}`,
-      email,
-      name,
-      companyName: isPremonixAdmin ? 'Premonix' : companyName,
-      role: userRole,
-      permissions: rolePermissions[userRole],
-      subscription: {
-        plan: userRole,
-        tier: tierMapping[userRole],
-        features: rolePermissions[userRole]
-      }
-    };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            company_name: companyName
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
 
-    localStorage.setItem('premonix_user', JSON.stringify(user));
-    setAuthState({
-      user,
-      isAuthenticated: true,
-      isLoading: false
-    });
+      if (error) {
+        return { error: error.message };
+      }
+
+      return {};
+    } catch (error) {
+      return { error: 'An unexpected error occurred' };
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('premonix_user');
-    const guestUser: User = {
-      id: 'guest',
-      role: 'guest',
-      permissions: rolePermissions.guest,
-      subscription: {
-        plan: 'guest',
-        tier: 'personal',
-        features: rolePermissions.guest
-      }
-    };
-    setAuthState({
-      user: guestUser,
-      isAuthenticated: false,
-      isLoading: false
-    });
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
-  const upgradeRole = (newRole: UserRole) => {
-    if (!authState.user) return;
+  const upgradeRole = async (newRole: UserRole) => {
+    if (!authState.user || !authState.isAuthenticated) return;
 
-    const updatedUser: User = {
-      ...authState.user,
-      role: newRole,
-      permissions: rolePermissions[newRole],
-      subscription: {
-        plan: newRole,
-        tier: tierMapping[newRole],
-        features: rolePermissions[newRole]
+    try {
+      // Update role in database
+      const { error } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: authState.user.id,
+          role: newRole
+        });
+
+      if (error) {
+        console.error('Error upgrading role:', error);
+        return;
       }
-    };
 
-    localStorage.setItem('premonix_user', JSON.stringify(updatedUser));
-    setAuthState({
-      ...authState,
-      user: updatedUser
-    });
+      // Update local state
+      const updatedUser: User = {
+        ...authState.user,
+        role: newRole,
+        permissions: rolePermissions[newRole],
+        subscription: {
+          plan: newRole,
+          tier: tierMapping[newRole],
+          features: rolePermissions[newRole]
+        }
+      };
+
+      setAuthState({
+        ...authState,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error in upgradeRole:', error);
+    }
   };
 
   const hasPermission = (permission: string): boolean => {

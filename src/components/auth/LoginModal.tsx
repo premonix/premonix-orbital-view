@@ -24,18 +24,27 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      toast({
-        title: "Login successful",
-        description: "Welcome back to PREMONIX",
-      });
-      onOpenChange(false);
-      setEmail('');
-      setPassword('');
+      const { error } = await login(email, password);
+      
+      if (error) {
+        toast({
+          title: "Login failed",
+          description: error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to PREMONIX",
+        });
+        onOpenChange(false);
+        setEmail('');
+        setPassword('');
+      }
     } catch (error) {
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {

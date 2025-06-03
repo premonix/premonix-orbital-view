@@ -18,6 +18,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
 
@@ -36,20 +37,30 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
     setIsLoading(true);
 
     try {
-      await register(email, password, name);
-      toast({
-        title: "Registration successful",
-        description: "Welcome to PREMONIX! You now have full access to registered features.",
-      });
-      onOpenChange(false);
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+      const { error } = await register(email, password, name, companyName || undefined);
+      
+      if (error) {
+        toast({
+          title: "Registration failed",
+          description: error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Registration successful",
+          description: "Please check your email to verify your account.",
+        });
+        onOpenChange(false);
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setCompanyName('');
+      }
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: "Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
@@ -84,6 +95,16 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
               onChange={(e) => setEmail(e.target.value)}
               className="bg-starlink-slate border-starlink-grey/20 text-starlink-white"
               required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="companyName" className="text-starlink-grey-light">Company Name (Optional)</Label>
+            <Input
+              id="companyName"
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              className="bg-starlink-slate border-starlink-grey/20 text-starlink-white"
             />
           </div>
           <div className="space-y-2">

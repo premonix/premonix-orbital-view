@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,67 +22,71 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface User {
+interface UserProfile {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
-  country: string;
-  plan: 'guest' | 'registered' | 'business' | 'enterprise';
-  lastLogin: string;
-  dssScore: number;
-  status: 'active' | 'suspended';
+  created_at: string;
   role: string;
-  companyName: string;
-  tier: string;
+  company_name?: string;
 }
 
 const AdminUsersPanel = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlan, setFilterPlan] = useState('all');
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { hasPermission } = useAuth();
 
-  // Mock data - in real app this would come from API
-  const mockUsers: User[] = [
-    {
-      id: '1',
-      name: 'Leon Hardwick',
-      email: 'leonedwardhardwick22@gmail.com',
-      country: 'United States',
-      plan: 'enterprise',
-      lastLogin: '2024-01-15',
-      dssScore: 95,
-      status: 'active',
-      role: 'Admin',
-      companyName: 'Premonix',
-      tier: 'enterprise'
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@techstart.io',
-      country: 'Canada',
-      plan: 'business',
-      lastLogin: '2024-01-14',
-      dssScore: 72,
-      status: 'active',
-      role: 'Analyst',
-      companyName: 'TechStart Inc',
-      tier: 'business-pro'
-    },
-    {
-      id: '3',
-      name: 'Michael Chen',
-      email: 'mchen@globalfirm.com',
-      country: 'Singapore',
-      plan: 'registered',
-      lastLogin: '2024-01-10',
-      dssScore: 45,
-      status: 'suspended',
-      role: 'Viewer',
-      companyName: 'Global Manufacturing',
-      tier: 'personal'
+  useEffect(() => {
+    if (hasPermission('admin_console_access')) {
+      fetchUsers();
     }
-  ];
+  }, [hasPermission]);
+
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch profiles with roles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          name,
+          email,
+          created_at
+        `);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return;
+      }
+
+      // Fetch roles for each user
+      const usersWithRoles = await Promise.all(
+        profiles.map(async (profile) => {
+          const { data: roleData } = await supabase
+            .rpc('get_user_role', { user_id: profile.id });
+          
+          return {
+            ...profile,
+            role: roleData || 'registered',
+            company_name: profile.email === 'leonedwardhardwick22@gmail.com' ? 'Premonix' : undefined
+          };
+        })
+      );
+
+      setUsers(usersWithRoles);
+    } catch (error) {
+      console.error('Error in fetchUsers:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getPlanBadgeColor = (plan: string) => {
     switch (plan) {
@@ -92,25 +97,29 @@ const AdminUsersPanel = () => {
     }
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    return status === 'active' ? 'bg-green-500 text-white' : 'bg-red-500 text-white';
-  };
-
-  const getTierBadgeColor = (tier: string) => {
-    switch (tier) {
+  const getTierBadgeColor = (role: string) => {
+    switch (role) {
       case 'enterprise': return 'bg-purple-600 text-white';
-      case 'business-pro': return 'bg-green-600 text-white';
-      case 'personal': return 'bg-blue-600 text-white';
+      case 'business': return 'bg-green-600 text-white';
+      case 'registered': return 'bg-blue-600 text-white';
       default: return 'bg-gray-600 text-white';
     }
   };
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPlan = filterPlan === 'all' || user.plan === filterPlan;
+    const matchesPlan = filterPlan === 'all' || user.role === filterPlan;
     return matchesSearch && matchesPlan;
   });
+
+  if (!hasPermission('admin_console_access')) {
+    return (
+      <div className="text-center text-starlink-grey-light">
+        You don't have permission to access the user management panel.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -158,98 +167,90 @@ const AdminUsersPanel = () => {
               <TableHeader>
                 <TableRow className="border-starlink-grey/30">
                   <TableHead className="text-starlink-grey-light">User</TableHead>
-                  <TableHead className="text-starlink-grey-light">Company & Country</TableHead>
-                  <TableHead className="text-starlink-grey-light">Plan & Tier</TableHead>
-                  <TableHead className="text-starlink-grey-light">Last Login</TableHead>
-                  <TableHead className="text-starlink-grey-light">DSS Score</TableHead>
+                  <TableHead className="text-starlink-grey-light">Company</TableHead>
+                  <TableHead className="text-starlink-grey-light">Role & Tier</TableHead>
+                  <TableHead className="text-starlink-grey-light">Joined</TableHead>
                   <TableHead className="text-starlink-grey-light">Status</TableHead>
                   <TableHead className="text-starlink-grey-light">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="border-starlink-grey/30">
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-starlink-white flex items-center">
-                          {user.name}
-                          {user.role === 'Admin' && (
-                            <Crown className="w-4 h-4 ml-2 text-yellow-500" />
-                          )}
-                        </div>
-                        <div className="text-sm text-starlink-grey-light">{user.email}</div>
-                        <Badge className="text-xs mt-1">{user.role}</Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="text-starlink-white">{user.companyName || 'Individual'}</div>
-                        <div className="text-sm text-starlink-grey-light">{user.country}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <Badge className={getPlanBadgeColor(user.plan)}>
-                          {user.plan}
-                        </Badge>
-                        <Badge className={getTierBadgeColor(user.tier)}>
-                          {user.tier}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-starlink-grey-light">{user.lastLogin}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 bg-starlink-slate/20 rounded-full h-2">
-                          <div 
-                            className="bg-starlink-blue h-2 rounded-full"
-                            style={{ width: `${user.dssScore}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-starlink-white">{user.dssScore}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusBadgeColor(user.status)}>
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="glass-panel border-starlink-grey/30">
-                          <DropdownMenuItem className="text-starlink-white cursor-pointer">
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-starlink-white cursor-pointer">
-                            <Shield className="w-4 h-4 mr-2" />
-                            Impersonate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-starlink-white cursor-pointer">
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Reset Password
-                          </DropdownMenuItem>
-                          {user.status === 'active' ? (
-                            <DropdownMenuItem className="text-red-400 cursor-pointer">
-                              <UserX className="w-4 h-4 mr-2" />
-                              Suspend User
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem className="text-green-400 cursor-pointer">
-                              <UserCheck className="w-4 h-4 mr-2" />
-                              Reactivate User
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-starlink-grey-light">
+                      Loading users...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-starlink-grey-light">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id} className="border-starlink-grey/30">
+                      <TableCell>
+                        <div>
+                          <div className="font-medium text-starlink-white flex items-center">
+                            {user.name || 'Unknown'}
+                            {user.email === 'leonedwardhardwick22@gmail.com' && (
+                              <Crown className="w-4 h-4 ml-2 text-yellow-500" />
+                            )}
+                          </div>
+                          <div className="text-sm text-starlink-grey-light">{user.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-starlink-white">
+                          {user.company_name || 'Individual'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <Badge className={getPlanBadgeColor(user.role)}>
+                            {user.role}
+                          </Badge>
+                          <Badge className={getTierBadgeColor(user.role)}>
+                            {user.role === 'enterprise' ? 'enterprise' : 
+                             user.role === 'business' ? 'business-pro' : 'personal'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-starlink-grey-light">
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-green-500 text-white">
+                          Active
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="glass-panel border-starlink-grey/30">
+                            <DropdownMenuItem className="text-starlink-white cursor-pointer">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-starlink-white cursor-pointer">
+                              <Shield className="w-4 h-4 mr-2" />
+                              Manage Roles
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-starlink-white cursor-pointer">
+                              <RotateCcw className="w-4 h-4 mr-2" />
+                              Reset Password
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -257,20 +258,22 @@ const AdminUsersPanel = () => {
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-starlink-slate/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-starlink-white">1,247</div>
+              <div className="text-2xl font-bold text-starlink-white">{users.length}</div>
               <div className="text-sm text-starlink-grey-light">Total Users</div>
             </div>
             <div className="bg-starlink-slate/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-green-400">1,198</div>
+              <div className="text-2xl font-bold text-green-400">{users.length}</div>
               <div className="text-sm text-starlink-grey-light">Active Users</div>
             </div>
             <div className="bg-starlink-slate/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-red-400">49</div>
+              <div className="text-2xl font-bold text-red-400">0</div>
               <div className="text-sm text-starlink-grey-light">Suspended</div>
             </div>
             <div className="bg-starlink-slate/20 rounded-lg p-4">
-              <div className="text-2xl font-bold text-starlink-blue">89</div>
-              <div className="text-sm text-starlink-grey-light">Avg DSS Score</div>
+              <div className="text-2xl font-bold text-starlink-blue">
+                {users.filter(u => u.role === 'enterprise').length}
+              </div>
+              <div className="text-sm text-starlink-grey-light">Enterprise Users</div>
             </div>
           </div>
         </CardContent>
