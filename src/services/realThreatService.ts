@@ -21,8 +21,8 @@ export class RealThreatService {
         id: signal.id,
         timestamp: new Date(signal.timestamp),
         location: {
-          lat: parseFloat(signal.latitude),
-          lng: parseFloat(signal.longitude),
+          lat: signal.latitude,
+          lng: signal.longitude,
           country: signal.country,
           region: signal.region || 'Global'
         },
@@ -73,8 +73,8 @@ export class RealThreatService {
             id: signal.id,
             timestamp: new Date(signal.timestamp),
             location: {
-              lat: parseFloat(signal.latitude),
-              lng: parseFloat(signal.longitude),
+              lat: signal.latitude,
+              lng: signal.longitude,
               country: signal.country,
               region: signal.region || 'Global'
             },
@@ -114,8 +114,8 @@ export class RealThreatService {
         id: signal.id,
         timestamp: new Date(signal.timestamp),
         location: {
-          lat: parseFloat(signal.latitude),
-          lng: parseFloat(signal.longitude),
+          lat: signal.latitude,
+          lng: signal.longitude,
           country: signal.country,
           region: signal.region || 'Global'
         },
