@@ -1,9 +1,16 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { useAuth } from '@/contexts/AuthContext';
+import LoginModal from '@/components/auth/LoginModal';
+import RegisterModal from '@/components/auth/RegisterModal';
+import UserMenu from '@/components/auth/UserMenu';
 
 const Navigation = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     { label: 'Threat Map', href: '#map' },
@@ -12,46 +19,83 @@ const Navigation = () => {
     { label: 'Reports', href: '#reports' }
   ];
 
+  const handleSwitchToRegister = () => {
+    setShowLoginModal(false);
+    setShowRegisterModal(true);
+  };
+
+  const handleSwitchToLogin = () => {
+    setShowRegisterModal(false);
+    setShowLoginModal(true);
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-starlink-grey/20">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-starlink-blue rounded-sm flex items-center justify-center">
-            <span className="text-starlink-dark font-bold text-lg">P</span>
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-starlink-grey/20">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-starlink-blue rounded-sm flex items-center justify-center">
+              <span className="text-starlink-dark font-bold text-lg">P</span>
+            </div>
+            <span className="text-xl font-semibold tracking-tight">PREMONIX</span>
           </div>
-          <span className="text-xl font-semibold tracking-tight">PREMONIX</span>
-        </div>
 
-        {/* Navigation Items */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="relative text-starlink-grey-light hover:text-starlink-white transition-colors duration-200"
-              onMouseEnter={() => setHoveredItem(item.label)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {item.label}
-              {hoveredItem === item.label && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
-              )}
-            </a>
-          ))}
-        </div>
+          {/* Navigation Items */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="relative text-starlink-grey-light hover:text-starlink-white transition-colors duration-200"
+                onMouseEnter={() => setHoveredItem(item.label)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                {item.label}
+                {hoveredItem === item.label && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
+                )}
+              </a>
+            ))}
+          </div>
 
-        {/* Auth Buttons */}
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" className="text-starlink-grey-light hover:text-starlink-white">
-            Log In
-          </Button>
-          <Button className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium">
-            Create Account
-          </Button>
+          {/* Auth Section */}
+          <div className="flex items-center space-x-4">
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="text-starlink-grey-light hover:text-starlink-white"
+                  onClick={() => setShowLoginModal(true)}
+                >
+                  Log In
+                </Button>
+                <Button 
+                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
+                  onClick={() => setShowRegisterModal(true)}
+                >
+                  Create Account
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Auth Modals */}
+      <LoginModal
+        open={showLoginModal}
+        onOpenChange={setShowLoginModal}
+        onSwitchToRegister={handleSwitchToRegister}
+      />
+      <RegisterModal
+        open={showRegisterModal}
+        onOpenChange={setShowRegisterModal}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
+    </>
   );
 };
 
