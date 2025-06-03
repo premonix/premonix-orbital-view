@@ -35,6 +35,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
+      console.log('Fetching profile for user:', supabaseUser.id);
+      
       // Fetch user profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -47,9 +49,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return null;
       }
 
+      console.log('Profile fetched:', profile);
+
       // Fetch user role
       const { data: roleData } = await supabase
         .rpc('get_user_role', { user_id: supabaseUser.id });
+
+      console.log('Role fetched:', roleData);
 
       const role: UserRole = roleData || 'registered';
       const permissions = rolePermissions[role];
@@ -74,6 +80,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    console.log('Setting up auth listener');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -127,12 +135,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       if (session?.user) {
         fetchUserProfile(session.user).then(userProfile => {
           if (userProfile) {
             setAuthState({
               user: userProfile,
               isAuthenticated: true,
+              isLoading: false
+            });
+          } else {
+            setAuthState({
+              user: {
+                id: 'guest',
+                role: 'guest',
+                permissions: rolePermissions.guest,
+                subscription: {
+                  plan: 'guest',
+                  tier: 'personal',
+                  features: rolePermissions.guest
+                }
+              },
+              isAuthenticated: false,
               isLoading: false
             });
           }
@@ -160,24 +184,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Login error:', error);
         return { error: error.message };
       }
 
+      console.log('Login successful');
       return {};
     } catch (error) {
+      console.error('Login exception:', error);
       return { error: 'An unexpected error occurred' };
     }
   };
 
   const register = async (email: string, password: string, name: string, companyName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log('Attempting registration for:', email, 'with name:', name);
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -190,16 +220,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) {
+        console.error('Registration error:', error);
         return { error: error.message };
       }
 
+      console.log('Registration successful:', data);
       return {};
     } catch (error) {
+      console.error('Registration exception:', error);
       return { error: 'An unexpected error occurred' };
     }
   };
 
   const logout = async () => {
+    console.log('Logging out');
     await supabase.auth.signOut();
   };
 
@@ -207,6 +241,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!authState.user || !authState.isAuthenticated) return;
 
     try {
+      console.log('Upgrading role to:', newRole);
+      
       // Update role in database
       const { error } = await supabase
         .from('user_roles')

@@ -34,23 +34,36 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      console.log('Starting registration process...');
       const { error } = await register(email, password, name, companyName || undefined);
       
       if (error) {
+        console.error('Registration failed:', error);
         toast({
           title: "Registration failed",
           description: error,
           variant: "destructive",
         });
       } else {
+        console.log('Registration successful');
         toast({
           title: "Registration successful",
-          description: "Please check your email to verify your account.",
+          description: "Please check your email to verify your account before logging in.",
         });
         onOpenChange(false);
+        // Clear form
         setName('');
         setEmail('');
         setPassword('');
@@ -58,9 +71,10 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
         setCompanyName('');
       }
     } catch (error) {
+      console.error('Registration exception:', error);
       toast({
         title: "Registration failed",
-        description: "An unexpected error occurred.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -116,6 +130,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
               onChange={(e) => setPassword(e.target.value)}
               className="bg-starlink-slate border-starlink-grey/20 text-starlink-white"
               required
+              minLength={6}
             />
           </div>
           <div className="space-y-2">
@@ -127,6 +142,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="bg-starlink-slate border-starlink-grey/20 text-starlink-white"
               required
+              minLength={6}
             />
           </div>
           <div className="flex flex-col space-y-2">
