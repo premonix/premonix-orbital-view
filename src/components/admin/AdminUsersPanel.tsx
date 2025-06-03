@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,8 @@ interface User {
   dssScore: number;
   status: 'active' | 'suspended';
   role: string;
+  companyName: string;
+  tier: string;
 }
 
 const AdminUsersPanel = () => {
@@ -43,14 +44,16 @@ const AdminUsersPanel = () => {
   const mockUsers: User[] = [
     {
       id: '1',
-      name: 'John Smith',
-      email: 'john@acmecorp.com',
+      name: 'Leon Hardwick',
+      email: 'leonedwardhardwick22@gmail.com',
       country: 'United States',
       plan: 'enterprise',
       lastLogin: '2024-01-15',
-      dssScore: 85,
+      dssScore: 95,
       status: 'active',
-      role: 'Admin'
+      role: 'Admin',
+      companyName: 'Premonix',
+      tier: 'enterprise'
     },
     {
       id: '2',
@@ -61,7 +64,9 @@ const AdminUsersPanel = () => {
       lastLogin: '2024-01-14',
       dssScore: 72,
       status: 'active',
-      role: 'Analyst'
+      role: 'Analyst',
+      companyName: 'TechStart Inc',
+      tier: 'business-pro'
     },
     {
       id: '3',
@@ -72,7 +77,9 @@ const AdminUsersPanel = () => {
       lastLogin: '2024-01-10',
       dssScore: 45,
       status: 'suspended',
-      role: 'Viewer'
+      role: 'Viewer',
+      companyName: 'Global Manufacturing',
+      tier: 'personal'
     }
   ];
 
@@ -87,6 +94,15 @@ const AdminUsersPanel = () => {
 
   const getStatusBadgeColor = (status: string) => {
     return status === 'active' ? 'bg-green-500 text-white' : 'bg-red-500 text-white';
+  };
+
+  const getTierBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'enterprise': return 'bg-purple-600 text-white';
+      case 'business-pro': return 'bg-green-600 text-white';
+      case 'personal': return 'bg-blue-600 text-white';
+      default: return 'bg-gray-600 text-white';
+    }
   };
 
   const filteredUsers = mockUsers.filter(user => {
@@ -142,8 +158,8 @@ const AdminUsersPanel = () => {
               <TableHeader>
                 <TableRow className="border-starlink-grey/30">
                   <TableHead className="text-starlink-grey-light">User</TableHead>
-                  <TableHead className="text-starlink-grey-light">Country</TableHead>
-                  <TableHead className="text-starlink-grey-light">Plan</TableHead>
+                  <TableHead className="text-starlink-grey-light">Company & Country</TableHead>
+                  <TableHead className="text-starlink-grey-light">Plan & Tier</TableHead>
                   <TableHead className="text-starlink-grey-light">Last Login</TableHead>
                   <TableHead className="text-starlink-grey-light">DSS Score</TableHead>
                   <TableHead className="text-starlink-grey-light">Status</TableHead>
@@ -165,11 +181,21 @@ const AdminUsersPanel = () => {
                         <Badge className="text-xs mt-1">{user.role}</Badge>
                       </div>
                     </TableCell>
-                    <TableCell className="text-starlink-grey-light">{user.country}</TableCell>
                     <TableCell>
-                      <Badge className={getPlanBadgeColor(user.plan)}>
-                        {user.plan}
-                      </Badge>
+                      <div>
+                        <div className="text-starlink-white">{user.companyName || 'Individual'}</div>
+                        <div className="text-sm text-starlink-grey-light">{user.country}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <Badge className={getPlanBadgeColor(user.plan)}>
+                          {user.plan}
+                        </Badge>
+                        <Badge className={getTierBadgeColor(user.tier)}>
+                          {user.tier}
+                        </Badge>
+                      </div>
                     </TableCell>
                     <TableCell className="text-starlink-grey-light">{user.lastLogin}</TableCell>
                     <TableCell>

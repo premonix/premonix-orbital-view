@@ -5,10 +5,12 @@ export interface User {
   id: string;
   email?: string;
   name?: string;
+  companyName?: string;
   role: UserRole;
   permissions: string[];
   subscription?: {
     plan: UserRole;
+    tier: 'personal' | 'business-pro' | 'enterprise';
     expiresAt?: Date;
     features: string[];
   };
@@ -68,4 +70,11 @@ export const planFeatures: Record<UserRole, string[]> = {
   registered: ['Full threat map', 'Unlimited signal feed', 'Personal dashboard', 'Basic alerts'],
   business: ['Sector risk analyzer', 'Scenario simulator', 'Team dashboards', 'Priority alerts'],
   enterprise: ['Full escalation modeling', 'API access', 'White-label features', 'Custom integrations', 'Admin console access']
+};
+
+export const tierMapping: Record<UserRole, 'personal' | 'business-pro' | 'enterprise'> = {
+  guest: 'personal',
+  registered: 'personal',
+  business: 'business-pro',
+  enterprise: 'enterprise'
 };

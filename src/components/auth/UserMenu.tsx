@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
-import { User } from 'lucide-react';
+import { User, Building } from 'lucide-react';
 
 const UserMenu = () => {
   const { user, isAuthenticated, logout, upgradeRole } = useAuth();
@@ -23,6 +23,15 @@ const UserMenu = () => {
       case 'business': return 'bg-green-500';
       case 'enterprise': return 'bg-purple-500';
       default: return 'bg-gray-500';
+    }
+  };
+
+  const getTierBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'personal': return 'bg-blue-600';
+      case 'business-pro': return 'bg-green-600';
+      case 'enterprise': return 'bg-purple-600';
+      default: return 'bg-gray-600';
     }
   };
 
@@ -45,10 +54,25 @@ const UserMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex items-center space-x-2">
           <User className="w-4 h-4" />
-          <span>{user?.name || user?.email}</span>
-          <Badge className={getRoleBadgeColor(user?.role || 'guest')}>
-            {user?.role}
-          </Badge>
+          <div className="flex flex-col items-start">
+            <span className="text-sm">{user?.name || user?.email}</span>
+            {user?.companyName && (
+              <div className="flex items-center space-x-1">
+                <Building className="w-3 h-3" />
+                <span className="text-xs text-starlink-grey-light">{user.companyName}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col space-y-1">
+            <Badge className={getRoleBadgeColor(user?.role || 'guest')}>
+              {user?.role}
+            </Badge>
+            {user?.subscription?.tier && (
+              <Badge className={getTierBadgeColor(user.subscription.tier)}>
+                {user.subscription.tier}
+              </Badge>
+            )}
+          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="glass-panel border-starlink-grey/20">
@@ -65,7 +89,7 @@ const UserMenu = () => {
             onClick={() => handleUpgrade('business')}
             className="text-starlink-blue hover:text-starlink-blue-bright"
           >
-            Upgrade to Business
+            Upgrade to Business Pro
           </DropdownMenuItem>
         )}
         
