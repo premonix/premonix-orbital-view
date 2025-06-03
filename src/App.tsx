@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import ThreatMap from "./pages/ThreatMap";
 import RiskBySector from "./pages/RiskBySector";
 import ResilienceToolkit from "./pages/ResilienceToolkit";
-import SoWhat from "./pages/SoWhat";
+import DataSources from "./pages/DataSources";
 import Reports from "./pages/Reports";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
@@ -28,7 +28,7 @@ const App = () => (
             <Route path="/threat-map" element={<ThreatMap />} />
             <Route path="/risk-by-sector" element={<RiskBySector />} />
             <Route path="/resilience-toolkit" element={<ResilienceToolkit />} />
-            <Route path="/so-what" element={<SoWhat />} />
+            <Route path="/data-sources" element={<DataSources />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
