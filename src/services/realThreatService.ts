@@ -6,6 +6,7 @@ export class RealThreatService {
   private static signalCache: ThreatSignal[] = [];
   private static lastFetch: number = 0;
   private static readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private static subscriptionCounter = 0;
 
   static async refreshThreatData(): Promise<{ success: boolean; count?: number; sources?: any; error?: string }> {
     try {
@@ -142,10 +143,14 @@ export class RealThreatService {
   }
 
   static subscribeToSignals(callback: (signals: ThreatSignal[]) => void): () => void {
-    console.log('Setting up real-time subscription...');
+    // Generate a unique channel name to avoid conflicts
+    this.subscriptionCounter++;
+    const channelName = `threat-signals-${this.subscriptionCounter}-${Date.now()}`;
+    
+    console.log(`Setting up real-time subscription on channel: ${channelName}`);
     
     const channel = supabase
-      .channel('threat-signals-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -170,7 +175,7 @@ export class RealThreatService {
 
     // Return unsubscribe function
     return () => {
-      console.log('Unsubscribing from real-time updates');
+      console.log(`Unsubscribing from channel: ${channelName}`);
       supabase.removeChannel(channel);
     };
   }
