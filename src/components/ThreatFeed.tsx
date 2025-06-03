@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronUp, ChevronDown, MapPin } from 'lucide-react';
 import { ThreatService } from '@/services/threatService';
-import { Signal } from '@/types/threat';
-import { PermissionGate } from '@/components/PermissionGate';
+import { ThreatSignal } from '@/types/threat';
+import PermissionGate from '@/components/auth/PermissionGate';
 
 interface ThreatFeedProps {
   // No props needed for now
@@ -50,7 +50,7 @@ const formatTimeAgo = (timestamp: string) => {
 };
 
 const ThreatFeed = () => {
-  const [signals, setSignals] = useState<Signal[]>([]);
+  const [signals, setSignals] = useState<ThreatSignal[]>([]);
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -84,7 +84,7 @@ const ThreatFeed = () => {
 
   return (
     <div className="fixed bottom-16 lg:bottom-6 right-4 lg:right-6 z-40 w-72 lg:w-80">
-      <PermissionGate requiredRole="registered">
+      <PermissionGate permission="view_full_feed" requiredRole="registered">
         <div className="glass-panel rounded-lg border border-starlink-grey/30">
           {/* Header */}
           <div className="p-3 lg:p-4 border-b border-starlink-grey/20">
@@ -148,7 +148,7 @@ const ThreatFeed = () => {
                         <div className="flex items-center space-x-2">
                           <span className={`w-2 h-2 rounded-full ${getSeverityColor(signal.severity)}`} />
                           <span className="text-xs text-starlink-grey-light">
-                            {formatTimeAgo(signal.timestamp)}
+                            {formatTimeAgo(signal.timestamp.toString())}
                           </span>
                         </div>
                       </div>
@@ -157,12 +157,10 @@ const ThreatFeed = () => {
                         {signal.title}
                       </h4>
                       
-                      {signal.location && (
-                        <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
-                          <MapPin className="w-3 h-3" />
-                          <span>{signal.location}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center space-x-1 text-xs text-starlink-grey-light">
+                        <MapPin className="w-3 h-3" />
+                        <span>{signal.location.country}, {signal.location.region}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
