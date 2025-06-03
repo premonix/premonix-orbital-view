@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +17,6 @@ const Navigation = () => {
     { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
-    { label: 'So What?', href: '/so-what' },
     { label: 'Reports', href: '/reports' }
   ];
 
