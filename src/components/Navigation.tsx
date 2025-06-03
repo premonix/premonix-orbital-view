@@ -15,7 +15,7 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { label: 'Threat Map', href: '/' },
+    { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
     { label: 'So What?', href: '/so-what' },

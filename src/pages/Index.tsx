@@ -1,35 +1,8 @@
-import Navigation from "@/components/Navigation";
-import WorldMap from "@/components/WorldMap";
-import HeroPanel from "@/components/HeroPanel";
-import ThreatIndicator from "@/components/ThreatIndicator";
-import Footer from "@/components/Footer";
-import ThreatFeed from "@/components/ThreatFeed";
+
+import Homepage from "./Homepage";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-starlink-dark text-starlink-white overflow-hidden">
-      {/* Navigation */}
-      <Navigation />
-      
-      {/* Main Content */}
-      <div className="relative">
-        {/* World Map Background */}
-        <WorldMap />
-        
-        {/* Hero Content Panel */}
-        <HeroPanel />
-        
-        {/* Live Threat Indicator */}
-        <ThreatIndicator />
-        
-        {/* NEW: Live Threat Feed */}
-        <ThreatFeed />
-      </div>
-      
-      {/* Footer */}
-      <Footer />
-    </div>
-  );
+  return <Homepage />;
 };
 
 export default Index;
