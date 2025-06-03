@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +29,8 @@ const Navigation = () => {
 
   const aboutItems = [
     { label: 'About', href: '/about' },
-    { label: 'Data Sources', href: '/data-sources' }
+    { label: 'Data Sources', href: '/data-sources' },
+    { label: 'Contact', href: '/contact' }
   ];
 
   const handleSwitchToRegister = () => {
@@ -51,7 +51,7 @@ const Navigation = () => {
   };
 
   const isAboutActive = () => {
-    return location.pathname === '/about' || location.pathname === '/data-sources';
+    return location.pathname === '/about' || location.pathname === '/data-sources' || location.pathname === '/contact';
   };
 
   return (

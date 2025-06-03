@@ -12,6 +12,7 @@ import ResilienceToolkit from "./pages/ResilienceToolkit";
 import DataSources from "./pages/DataSources";
 import Reports from "./pages/Reports";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
