@@ -111,14 +111,6 @@ const DisruptionOS = () => {
     { feature: "Data Feeds", augmentation: "Strategy Insights", result: "From awareness → preparedness" }
   ];
 
-  const developmentPhases = [
-    { phase: "Phase 1", feature: "Add DSS Builder", source: "DisruptionOS DSS Engine" },
-    { phase: "Phase 2", feature: "Add Initiative Risk Lens", source: "Portfolio Board + Tagging" },
-    { phase: "Phase 3", feature: "Upgrade So What? Toolkit", source: "DSS-triggered recommendations" },
-    { phase: "Phase 4", feature: "Add Playbook Scenarios", source: "Pre-loaded + editable scenarios" },
-    { phase: "Phase 5", feature: "Briefing Generator", source: "Governance Agent + DSS/Signal Graph" }
-  ];
-
   const getBadgeColor = (badge: string) => {
     switch (badge) {
       case 'Pro': return 'bg-starlink-blue text-starlink-dark';
@@ -194,7 +186,6 @@ const DisruptionOS = () => {
             <TabsList className="glass-panel border-starlink-grey/30 w-full">
               <TabsTrigger value="features">Core Features</TabsTrigger>
               <TabsTrigger value="integration">Integration Blueprint</TabsTrigger>
-              <TabsTrigger value="roadmap">Development Roadmap</TabsTrigger>
               <TabsTrigger value="impact">Strategic Impact</TabsTrigger>
             </TabsList>
 
@@ -258,35 +249,6 @@ const DisruptionOS = () => {
                         <ArrowRight className="w-5 h-5 text-starlink-blue flex-shrink-0" />
                         <div className="flex-1">
                           <span className="text-starlink-grey-light">{item.result}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="roadmap" className="space-y-6">
-              <Card className="glass-panel border-starlink-grey/30">
-                <CardHeader>
-                  <CardTitle className="text-starlink-white">Development Sequence</CardTitle>
-                  <CardDescription className="text-starlink-grey-light">
-                    Suggested implementation phases for DisruptionOS integration
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {developmentPhases.map((phase, index) => (
-                      <div key={index} className="flex items-start space-x-4">
-                        <div className="flex-shrink-0 w-8 h-8 bg-starlink-blue rounded-full flex items-center justify-center text-starlink-dark font-bold">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <Badge className="bg-starlink-slate text-starlink-white">{phase.phase}</Badge>
-                            <h4 className="font-semibold text-starlink-white">{phase.feature}</h4>
-                          </div>
-                          <p className="text-starlink-grey-light">Integration Source: {phase.source}</p>
                         </div>
                       </div>
                     ))}
