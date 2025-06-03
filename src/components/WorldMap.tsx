@@ -14,11 +14,6 @@ const WorldMap = () => {
   const [hoveredZone, setHoveredZone] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState(2024);
 
-  useEffect(() => {
-    console.log('WorldMap component mounted');
-    console.log('Current route hash:', window.location.hash);
-  }, []);
-
   const threatZones: ThreatZone[] = [
     { id: 'taiwan', name: 'Taiwan Strait', x: 75, y: 35, level: 'high', activity: 'Naval buildup' },
     { id: 'ukraine', name: 'Eastern Ukraine', x: 50, y: 25, level: 'high', activity: 'Active conflict' },
@@ -36,108 +31,62 @@ const WorldMap = () => {
     }
   };
 
-  console.log('Rendering WorldMap with', threatZones.length, 'threat zones');
-
   return (
     <div className="relative w-full h-screen bg-starlink-dark grid-overlay">
-      {/* Debug info */}
-      <div className="absolute top-4 left-4 z-50 bg-red-500 text-white p-2 rounded text-xs">
-        Debug: Map Rendered - Zones: {threatZones.length}
-      </div>
-
       {/* World Map Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-starlink-dark via-starlink-slate/50 to-starlink-dark">
-        <div className="absolute inset-0 opacity-100">
-          {/* Debug border for SVG container */}
-          <div className="w-full h-full border-4 border-yellow-400">
-            <svg viewBox="0 0 1000 500" className="w-full h-full" style={{ border: '2px solid red' }}>
-              {/* Simple test rectangle first */}
-              <rect x="100" y="100" width="200" height="100" fill="lime" stroke="blue" strokeWidth="3" />
-              
-              {/* North America - Simplified */}
-              <path
-                d="M100 150 L300 120 L350 180 L320 250 L200 280 L120 240 Z"
-                fill="rgba(148, 163, 184, 0.8)"
-                stroke="rgba(148, 163, 184, 1)"
-                strokeWidth="3"
-              />
-              
-              {/* Europe - Simplified */}
-              <path
-                d="M450 120 L550 110 L580 160 L540 200 L460 190 L440 150 Z"
-                fill="rgba(148, 163, 184, 0.8)"
-                stroke="rgba(148, 163, 184, 1)"
-                strokeWidth="3"
-              />
-              
-              {/* Asia - Simplified */}
-              <path
-                d="M580 100 L800 90 L850 150 L820 220 L650 240 L580 200 L570 150 Z"
-                fill="rgba(148, 163, 184, 0.8)"
-                stroke="rgba(148, 163, 184, 1)"
-                strokeWidth="3"
-              />
-              
-              {/* Africa - Simplified */}
-              <path
-                d="M480 200 L580 190 L600 300 L580 400 L480 410 L460 300 L470 250 Z"
-                fill="rgba(148, 163, 184, 0.8)"
-                stroke="rgba(148, 163, 184, 1)"
-                strokeWidth="3"
-              />
-              
-              {/* Australia - Simplified */}
-              <path
-                d="M720 350 L820 340 L840 380 L800 410 L720 400 L710 370 Z"
-                fill="rgba(148, 163, 184, 0.8)"
-                stroke="rgba(148, 163, 184, 1)"
-                strokeWidth="3"
-              />
-            </svg>
-          </div>
+        <div className="absolute inset-0 opacity-20">
+          <svg viewBox="0 0 1000 500" className="w-full h-full">
+            {/* Simplified world map outlines */}
+            <path
+              d="M150 200 L200 180 L280 190 L350 170 L400 180 L450 200 L500 190"
+              stroke="rgba(100, 116, 139, 0.3)"
+              strokeWidth="1"
+              fill="none"
+            />
+            <path
+              d="M600 220 L700 200 L800 210 L850 230 L900 220"
+              stroke="rgba(100, 116, 139, 0.3)"
+              strokeWidth="1"
+              fill="none"
+            />
+          </svg>
         </div>
       </div>
 
       {/* Threat Zones */}
-      {threatZones.map((zone) => {
-        console.log('Rendering zone:', zone.name, 'at', zone.x, zone.y);
-        return (
-          <div
-            key={zone.id}
-            className={`absolute w-12 h-12 rounded-full border-2 cursor-pointer transition-all duration-300 ${getZoneClass(zone.level)} ${
-              zone.level === 'high' ? 'animate-pulse-glow' : ''
-            }`}
-            style={{
-              left: `${zone.x}%`,
-              top: `${zone.y}%`,
-              transform: 'translate(-50%, -50%)',
-              zIndex: 100,
-            }}
-            onMouseEnter={() => {
-              console.log('Hovering zone:', zone.name);
-              setHoveredZone(zone.id);
-            }}
-            onMouseLeave={() => setHoveredZone(null)}
-          >
-            <div className="w-full h-full rounded-full bg-current opacity-30" />
-            
-            {/* Tooltip */}
-            {hoveredZone === zone.id && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 glass-panel rounded-lg p-3 min-w-[200px] z-10">
-                <h4 className="font-semibold text-starlink-white">{zone.name}</h4>
-                <p className="text-sm text-starlink-grey-light">{zone.activity}</p>
-                <div className="flex items-center mt-2">
-                  <div className={`w-2 h-2 rounded-full mr-2 ${
-                    zone.level === 'high' ? 'bg-starlink-red' :
-                    zone.level === 'medium' ? 'bg-starlink-orange' : 'bg-starlink-blue'
-                  }`} />
-                  <span className="text-xs uppercase tracking-wide">{zone.level} Risk</span>
-                </div>
+      {threatZones.map((zone) => (
+        <div
+          key={zone.id}
+          className={`absolute w-12 h-12 rounded-full border-2 cursor-pointer transition-all duration-300 ${getZoneClass(zone.level)} ${
+            zone.level === 'high' ? 'animate-pulse-glow' : ''
+          }`}
+          style={{
+            left: `${zone.x}%`,
+            top: `${zone.y}%`,
+            transform: 'translate(-50%, -50%)',
+          }}
+          onMouseEnter={() => setHoveredZone(zone.id)}
+          onMouseLeave={() => setHoveredZone(null)}
+        >
+          <div className="w-full h-full rounded-full bg-current opacity-30" />
+          
+          {/* Tooltip */}
+          {hoveredZone === zone.id && (
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 glass-panel rounded-lg p-3 min-w-[200px] z-10">
+              <h4 className="font-semibold text-starlink-white">{zone.name}</h4>
+              <p className="text-sm text-starlink-grey-light">{zone.activity}</p>
+              <div className="flex items-center mt-2">
+                <div className={`w-2 h-2 rounded-full mr-2 ${
+                  zone.level === 'high' ? 'bg-starlink-red' :
+                  zone.level === 'medium' ? 'bg-starlink-orange' : 'bg-starlink-blue'
+                }`} />
+                <span className="text-xs uppercase tracking-wide">{zone.level} Risk</span>
               </div>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          )}
+        </div>
+      ))}
 
       {/* Timeline Slider */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 glass-panel rounded-full px-6 py-3">
@@ -148,11 +97,7 @@ const WorldMap = () => {
             min={2024}
             max={2027}
             value={selectedYear}
-            onChange={(e) => {
-              const newYear = parseInt(e.target.value);
-              console.log('Year changed to:', newYear);
-              setSelectedYear(newYear);
-            }}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             className="w-48 h-1 bg-starlink-slate-light rounded-full appearance-none cursor-pointer custom-slider"
           />
           <span className="text-sm text-starlink-grey-light">2027 Projections</span>
