@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
-import { User, Building } from 'lucide-react';
+import { User, Building, LogOut } from 'lucide-react';
 
 const UserMenu = () => {
   const { user, isAuthenticated, logout, upgradeRole } = useAuth();
@@ -37,6 +37,16 @@ const UserMenu = () => {
 
   const handleUpgrade = (newRole: UserRole) => {
     upgradeRole(newRole);
+  };
+
+  const handleLogout = async () => {
+    console.log('UserMenu: Logout clicked');
+    try {
+      await logout();
+      console.log('UserMenu: Logout completed successfully');
+    } catch (error) {
+      console.error('UserMenu: Logout failed:', error);
+    }
   };
 
   if (!isAuthenticated) {
@@ -104,10 +114,11 @@ const UserMenu = () => {
         
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          onClick={logout}
-          className="text-red-400 hover:text-red-300"
+          onClick={handleLogout}
+          className="text-red-400 hover:text-red-300 flex items-center space-x-2"
         >
-          Logout
+          <LogOut className="w-4 h-4" />
+          <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

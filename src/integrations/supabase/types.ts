@@ -132,13 +132,6 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
-      has_role_or_higher: {
-        Args: {
-          user_id: string
-          required_role: Database["public"]["Enums"]["app_role"]
-        }
-        Returns: boolean
-      }
     }
     Enums: {
       app_role: "guest" | "registered" | "business" | "enterprise"

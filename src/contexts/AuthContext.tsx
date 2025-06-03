@@ -233,8 +233,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = async () => {
-    console.log('Logging out');
-    await supabase.auth.signOut();
+    try {
+      console.log('Logout button clicked - starting logout process');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        throw error;
+      }
+      
+      console.log('Logout successful - user signed out');
+      
+      // The auth state listener will automatically handle setting the state to guest
+      // when the session is cleared, so we don't need to manually set state here
+      
+    } catch (error) {
+      console.error('Logout exception:', error);
+      // Even if there's an error, we should reset to guest state
+      setAuthState({
+        user: {
+          id: 'guest',
+          role: 'guest',
+          permissions: rolePermissions.guest,
+          subscription: {
+            plan: 'guest',
+            tier: 'personal',
+            features: rolePermissions.guest
+          }
+        },
+        isAuthenticated: false,
+        isLoading: false
+      });
+    }
   };
 
   const upgradeRole = async (newRole: UserRole) => {
