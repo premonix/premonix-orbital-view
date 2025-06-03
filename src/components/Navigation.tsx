@@ -1,7 +1,15 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import LoginModal from '@/components/auth/LoginModal';
 import RegisterModal from '@/components/auth/RegisterModal';
 import UserMenu from '@/components/auth/UserMenu';
@@ -17,9 +25,12 @@ const Navigation = () => {
     { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
-    { label: 'Data Sources', href: '/data-sources' },
-    { label: 'Reports', href: '/reports' },
-    { label: 'About', href: '/about' }
+    { label: 'Reports', href: '/reports' }
+  ];
+
+  const aboutItems = [
+    { label: 'About', href: '/about' },
+    { label: 'Data Sources', href: '/data-sources' }
   ];
 
   const handleSwitchToRegister = () => {
@@ -37,6 +48,10 @@ const Navigation = () => {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(href);
+  };
+
+  const isAboutActive = () => {
+    return location.pathname === '/about' || location.pathname === '/data-sources';
   };
 
   return (
@@ -71,6 +86,39 @@ const Navigation = () => {
                 )}
               </Link>
             ))}
+            
+            {/* About Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`relative flex items-center space-x-1 transition-colors duration-200 ${
+                    isAboutActive() 
+                      ? 'text-starlink-white' 
+                      : 'text-starlink-grey-light hover:text-starlink-white'
+                  }`}
+                  onMouseEnter={() => setHoveredItem('About')}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <span>About</span>
+                  <ChevronDown className="w-4 h-4" />
+                  {(hoveredItem === 'About' || isAboutActive()) && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-starlink-dark border-starlink-grey/30">
+                {aboutItems.map((item) => (
+                  <DropdownMenuItem key={item.label} asChild>
+                    <Link
+                      to={item.href}
+                      className="text-starlink-grey-light hover:text-starlink-white cursor-pointer"
+                    >
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Auth Section */}
