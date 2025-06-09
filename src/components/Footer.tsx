@@ -24,7 +24,7 @@ const Footer = () => {
     {
       title: 'Privacy',
       links: [
-        { label: 'Privacy Policy', href: '/about' },
+        { label: 'Privacy Policy', href: '/privacy' },
         { label: 'Data Usage', href: '/data-sources' },
         { label: 'Security', href: '/about' },
         { label: 'Compliance', href: '/about' }
@@ -33,7 +33,7 @@ const Footer = () => {
     {
       title: 'Terms',
       links: [
-        { label: 'Terms of Service', href: '/about' },
+        { label: 'Terms of Service', href: '/terms' },
         { label: 'API Terms', href: '/data-sources' },
         { label: 'Licensing', href: '/about' },
         { label: 'Support', href: '/about' }
