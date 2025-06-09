@@ -82,6 +82,12 @@ const Footer = () => {
               Global Threat Intelligence Platform
             </div>
           </div>
+          
+          <div className="mt-2 pt-2 border-t border-starlink-grey/20">
+            <p className="text-starlink-grey text-xs text-center">
+              Premonix is a wholly owned subsidiary of Cardiff Giant Holdings Limited
+            </p>
+          </div>
         </div>
       </div>
     </footer>
