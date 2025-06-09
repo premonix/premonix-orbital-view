@@ -151,16 +151,15 @@ const Homepage = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                <Button 
-                  size="lg" 
-                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4 text-lg"
-                  asChild
-                >
-                  <Link to="/threat-map">
+                <WaitlistForm variant="modal">
+                  <Button 
+                    size="lg" 
+                    className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4 text-lg"
+                  >
                     <Globe className="w-5 h-5 mr-2" />
                     Join Waitlist
-                  </Link>
-                </Button>
+                  </Button>
+                </WaitlistForm>
                 
                 <Button 
                   size="lg" 
@@ -336,15 +335,17 @@ const Homepage = () => {
                     ))}
                   </ul>
                   
-                  <Button 
-                    className={`w-full ${
-                      plan.popular 
-                        ? 'bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark' 
-                        : 'bg-starlink-slate-light hover:bg-starlink-slate text-starlink-white'
-                    }`}
-                  >
-                    Join Waitlist
-                  </Button>
+                  <WaitlistForm variant="modal">
+                    <Button 
+                      className={`w-full ${
+                        plan.popular 
+                          ? 'bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark' 
+                          : 'bg-starlink-slate-light hover:bg-starlink-slate text-starlink-white'
+                      }`}
+                    >
+                      Join Waitlist
+                    </Button>
+                  </WaitlistForm>
                 </CardContent>
               </Card>
             ))}
@@ -371,12 +372,14 @@ const Homepage = () => {
             Join thousands of individuals and organizations preparing for tomorrow's threats with PREMONIX.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4"
-            >
-              Join Waitlist
-            </Button>
+            <WaitlistForm variant="modal">
+              <Button 
+                size="lg" 
+                className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4"
+              >
+                Join Waitlist
+              </Button>
+            </WaitlistForm>
             <Button 
               size="lg" 
               variant="outline" 

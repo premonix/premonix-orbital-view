@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Globe, Bell } from "lucide-react";
+import WaitlistForm from "./WaitlistForm";
 
 const HeroPanel = () => {
   return (
@@ -19,22 +20,26 @@ const HeroPanel = () => {
         </div>
 
         <div className="space-y-2 lg:space-y-3">
-          <Button 
-            size="lg" 
-            className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold flex items-center space-x-2 group text-sm lg:text-base"
-          >
-            <Globe className="w-4 h-4 lg:w-5 lg:h-5 group-hover:animate-spin" />
-            <span>Join Waitlist</span>
-          </Button>
+          <WaitlistForm variant="modal">
+            <Button 
+              size="lg" 
+              className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold flex items-center space-x-2 group text-sm lg:text-base"
+            >
+              <Globe className="w-4 h-4 lg:w-5 lg:h-5 group-hover:animate-spin" />
+              <span>Join Waitlist</span>
+            </Button>
+          </WaitlistForm>
           
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="w-full glass-panel border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light flex items-center space-x-2 text-sm lg:text-base"
-          >
-            <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-            <span>Get Notified</span>
-          </Button>
+          <WaitlistForm variant="modal">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full glass-panel border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light flex items-center space-x-2 text-sm lg:text-base"
+            >
+              <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
+              <span>Get Notified</span>
+            </Button>
+          </WaitlistForm>
         </div>
 
         {/* Stats */}
