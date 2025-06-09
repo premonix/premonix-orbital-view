@@ -1,4 +1,3 @@
-
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
 import CustomAlertSystem from "@/components/isometric/CustomAlertSystem";
 import ResilienceToolkit from "@/components/isometric/ResilienceToolkit";
 import HeroThreatMap from "@/components/isometric/HeroThreatMap";
+import WaitlistForm from "@/components/WaitlistForm";
 
 const Homepage = () => {
   const features = [
@@ -136,7 +136,7 @@ const Homepage = () => {
             {/* Left side - Text content */}
             <div className="space-y-8">
               <Badge className="bg-starlink-blue/20 text-starlink-blue border-starlink-blue/30 px-4 py-2 text-sm font-medium">
-                🚀 Now Live: Real-time Global Threat Intelligence + DisruptionOS
+                🚀 Coming Soon: Real-time Global Threat Intelligence + DisruptionOS
               </Badge>
               
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
@@ -158,7 +158,7 @@ const Homepage = () => {
                 >
                   <Link to="/threat-map">
                     <Globe className="w-5 h-5 mr-2" />
-                    Explore Live Threat Map
+                    Join Waitlist
                   </Link>
                 </Button>
                 
@@ -170,25 +170,15 @@ const Homepage = () => {
                 >
                   <Link to="/disruption-os">
                     <Zap className="w-5 h-5 mr-2" />
-                    Discover DisruptionOS
+                    Learn More
                   </Link>
                 </Button>
               </div>
             </div>
 
-            {/* Right side - Threat Map Preview */}
+            {/* Right side - Waitlist Form */}
             <div className="relative">
-              <div className="glass-panel rounded-xl p-4 lg:p-6">
-                <div className="w-full h-80 lg:h-96 rounded-lg overflow-hidden">
-                  <HeroThreatMap />
-                </div>
-                <div className="absolute inset-4 lg:inset-6 bg-gradient-to-t from-starlink-dark/60 to-transparent rounded-lg flex items-end">
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-starlink-white mb-2">Live Threat Intelligence</h3>
-                    <p className="text-starlink-grey-light text-sm">Real-time global monitoring across 195+ countries</p>
-                  </div>
-                </div>
-              </div>
+              <WaitlistForm />
             </div>
           </div>
           
@@ -255,14 +245,7 @@ const Homepage = () => {
                   Transform from reactive threat monitoring to proactive disruption preparedness with strategic scenario simulation, 
                   sensitivity scoring, and automated governance briefings.
                 </p>
-                <Button 
-                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold"
-                  asChild
-                >
-                  <Link to="/disruption-os">
-                    Explore DisruptionOS Features
-                  </Link>
-                </Button>
+                <WaitlistForm variant="inline" className="max-w-md mx-auto" />
               </CardContent>
             </Card>
           </div>
@@ -360,7 +343,7 @@ const Homepage = () => {
                         : 'bg-starlink-slate-light hover:bg-starlink-slate text-starlink-white'
                     }`}
                   >
-                    Get Started
+                    Join Waitlist
                   </Button>
                 </CardContent>
               </Card>
@@ -369,10 +352,10 @@ const Homepage = () => {
           
           <div className="text-center mt-12">
             <p className="text-starlink-grey-light mb-4">
-              All plans include a 14-day free trial. No credit card required.
+              All plans will include a 14-day free trial. No credit card required.
             </p>
             <Button variant="outline" className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light">
-              Contact Sales for Custom Enterprise Solutions
+              Contact Us for Custom Enterprise Solutions
             </Button>
           </div>
         </div>
@@ -385,22 +368,21 @@ const Homepage = () => {
             Don't Wait for the Storm
           </h2>
           <p className="text-xl text-starlink-grey-light mb-8">
-            Join thousands of individuals and organizations who trust PREMONIX for their threat intelligence and resilience planning.
+            Join thousands of individuals and organizations preparing for tomorrow's threats with PREMONIX.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
               className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4"
-              asChild
             >
-              <Link to="/threat-map">Start Free Trial</Link>
+              Join Waitlist
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
               className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light px-8 py-4"
             >
-              Schedule Demo
+              Learn More
             </Button>
           </div>
         </div>

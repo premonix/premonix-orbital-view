@@ -24,7 +24,7 @@ const HeroPanel = () => {
             className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold flex items-center space-x-2 group text-sm lg:text-base"
           >
             <Globe className="w-4 h-4 lg:w-5 lg:h-5 group-hover:animate-spin" />
-            <span>Explore Live Threat Map</span>
+            <span>Join Waitlist</span>
           </Button>
           
           <Button 
@@ -33,7 +33,7 @@ const HeroPanel = () => {
             className="w-full glass-panel border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light flex items-center space-x-2 text-sm lg:text-base"
           >
             <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-            <span>Get Alerts</span>
+            <span>Get Notified</span>
           </Button>
         </div>
 
@@ -48,8 +48,8 @@ const HeroPanel = () => {
             <div className="text-xs text-starlink-grey-light">Data Sources</div>
           </div>
           <div className="text-center">
-            <div className="text-lg lg:text-xl font-bold text-starlink-red">Real-time</div>
-            <div className="text-xs text-starlink-grey-light">Alerts</div>
+            <div className="text-lg lg:text-xl font-bold text-starlink-red">Coming Soon</div>
+            <div className="text-xs text-starlink-grey-light">Launch</div>
           </div>
         </div>
       </div>
