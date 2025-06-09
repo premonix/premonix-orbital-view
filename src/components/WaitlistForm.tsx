@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, CheckCircle, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -58,20 +59,49 @@ const WaitlistForm = ({
 
     setIsLoading(true);
     
-    // Simulate API call - in a real app, you'd send this to your backend
-    setTimeout(() => {
+    try {
+      const { error } = await supabase
+        .from('waitlist_submissions')
+        .insert({
+          email: email.toLowerCase().trim(),
+          marketing_consent: marketingConsent,
+          user_agent: navigator.userAgent,
+        });
+
+      if (error) {
+        // Handle duplicate email case specifically
+        if (error.code === '23505') {
+          toast({
+            title: "Already registered!",
+            description: "This email is already on our waitlist. We'll keep you updated!",
+            variant: "default",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Welcome to the waitlist!",
+          description: "We'll notify you when PREMONIX launches.",
+        });
+      }
+
       setIsSubmitted(true);
-      setIsLoading(false);
-      toast({
-        title: "Welcome to the waitlist!",
-        description: "We'll notify you when PREMONIX launches.",
-      });
       
       // Close modal after successful submission
       if (variant === 'modal') {
         setTimeout(() => setIsOpen(false), 2000);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting to waitlist:', error);
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later or contact support if the problem persists.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetForm = () => {

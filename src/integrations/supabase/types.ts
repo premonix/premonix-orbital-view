@@ -123,6 +123,33 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_submissions: {
+        Row: {
+          email: string
+          id: string
+          ip_address: unknown | null
+          marketing_consent: boolean
+          submitted_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          ip_address?: unknown | null
+          marketing_consent?: boolean
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          ip_address?: unknown | null
+          marketing_consent?: boolean
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
