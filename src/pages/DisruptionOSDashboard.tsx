@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { 
   Shield, 
   Target, 
@@ -47,6 +49,7 @@ const DisruptionOSDashboard = () => {
   const [activeModule, setActiveModule] = useState('control');
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [dssScore, setDssScore] = useState(72);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
 
   const modules = [
     {
@@ -118,6 +121,265 @@ const DisruptionOSDashboard = () => {
 
   const getActiveModule = () => {
     return modules.find(m => m.id === activeModule) || modules[0];
+  };
+
+  // Report data structures
+  const reportTypes = {
+    executiveBriefing: {
+      title: 'Executive Briefing - Strategic Overview',
+      type: 'Executive Report',
+      date: new Date().toLocaleDateString(),
+      summary: 'Comprehensive analysis of current disruption landscape and strategic recommendations',
+      sections: [
+        {
+          title: 'Current Threat Environment',
+          content: 'Global disruption sensitivity remains elevated with particular focus on supply chain vulnerabilities in Asia-Pacific region. Cyber threat activity has increased 23% over the past 30 days.',
+          metrics: [
+            { label: 'Global DSS Average', value: '67', change: '+8%' },
+            { label: 'Sector Risk Level', value: 'High', change: 'Stable' },
+            { label: 'Active Threats', value: '47', change: '+12%' }
+          ]
+        },
+        {
+          title: 'Strategic Recommendations',
+          content: 'Immediate actions required to enhance organizational resilience posture.',
+          recommendations: [
+            'Implement enhanced supply chain monitoring in APAC region',
+            'Increase cyber security budget allocation by 15%',
+            'Conduct scenario planning exercise for multi-domain disruption',
+            'Establish crisis communication protocols with key stakeholders'
+          ]
+        },
+        {
+          title: 'Forecast & Planning',
+          content: 'Next 30-day outlook based on current signal intelligence and trend analysis.',
+          forecast: {
+            'Week 1': 'Elevated cyber activity expected, maintain heightened awareness',
+            'Week 2': 'Supply chain disruption risk peaks mid-month',
+            'Week 3': 'Geopolitical tensions may impact energy markets',
+            'Week 4': 'Quarterly review and strategy adjustment recommended'
+          }
+        }
+      ]
+    },
+    dssReport: {
+      title: 'DSS Analysis Report - Sensitivity Deep Dive',
+      type: 'Risk Assessment',
+      date: new Date().toLocaleDateString(),
+      summary: 'Detailed analysis of organizational disruption sensitivity factors and trend evolution',
+      currentScore: 72,
+      historicalData: [
+        { month: 'Jan', score: 58 },
+        { month: 'Feb', score: 62 },
+        { month: 'Mar', score: 59 },
+        { month: 'Apr', score: 68 },
+        { month: 'May', score: 72 },
+        { month: 'Jun', score: 72 }
+      ],
+      breakdown: {
+        geographic: { current: 85, trend: '+12%', impact: 'High' },
+        industry: { current: 60, trend: '+3%', impact: 'Medium' },
+        dependencies: { current: 70, trend: '+8%', impact: 'High' },
+        operational: { current: 65, trend: '+5%', impact: 'Medium' }
+      }
+    },
+    threatAnalysis: {
+      title: 'Threat Intelligence Analysis',
+      type: 'Intelligence Report',
+      date: new Date().toLocaleDateString(),
+      summary: 'Comprehensive analysis of current threat landscape and emerging risks',
+      alerts: [
+        {
+          level: 'High',
+          category: 'Supply Chain',
+          description: 'Major shipping delays in Shanghai port affecting global logistics',
+          impact: 'Potential 2-3 week delays in Asia-Pacific supply routes',
+          recommendation: 'Activate alternative supplier networks, consider air freight for critical shipments'
+        },
+        {
+          level: 'Medium',
+          category: 'Cyber Security',
+          description: 'Increased ransomware targeting financial institutions',
+          impact: 'Elevated risk for organizations in financial sector',
+          recommendation: 'Enhanced endpoint protection, employee security training'
+        },
+        {
+          level: 'Medium',
+          category: 'Geopolitical',
+          description: 'Trade policy changes affecting technology sector',
+          impact: 'Potential supply chain disruptions for tech components',
+          recommendation: 'Diversify supplier base, monitor regulatory developments'
+        }
+      ]
+    }
+  };
+
+  const ReportModal = ({ report, onClose }: { report: any; onClose: () => void }) => {
+    if (!report) return null;
+
+    return (
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto glass-panel border-starlink-grey/20">
+        <DialogHeader>
+          <DialogTitle className="text-2xl text-starlink-white flex items-center">
+            <FileText className="w-6 h-6 mr-3 text-starlink-blue" />
+            {report.title}
+          </DialogTitle>
+          <div className="flex items-center space-x-4 text-sm text-starlink-grey-light">
+            <Badge className="bg-starlink-blue text-starlink-dark">{report.type}</Badge>
+            <span>Generated: {report.date}</span>
+            <Button size="sm" variant="outline" className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light">
+              <Download className="w-4 h-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </DialogHeader>
+        
+        <div className="space-y-6 mt-6">
+          {/* Summary */}
+          <Card className="glass-panel border-starlink-grey/30">
+            <CardHeader>
+              <CardTitle className="text-starlink-white">Executive Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-starlink-grey-light">{report.summary}</p>
+            </CardContent>
+          </Card>
+
+          {/* Executive Briefing Sections */}
+          {report.sections && report.sections.map((section, index) => (
+            <Card key={index} className="glass-panel border-starlink-grey/30">
+              <CardHeader>
+                <CardTitle className="text-starlink-white">{section.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-starlink-grey-light">{section.content}</p>
+                
+                {section.metrics && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {section.metrics.map((metric, idx) => (
+                      <div key={idx} className="bg-starlink-slate/20 p-4 rounded-lg">
+                        <p className="text-sm text-starlink-grey-light">{metric.label}</p>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xl font-bold text-starlink-white">{metric.value}</span>
+                          <span className={`text-sm ${metric.change.startsWith('+') ? 'text-red-500' : 'text-green-500'}`}>
+                            {metric.change}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {section.recommendations && (
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-starlink-white">Key Recommendations:</h4>
+                    <ul className="space-y-2">
+                      {section.recommendations.map((rec, idx) => (
+                        <li key={idx} className="flex items-start space-x-2">
+                          <div className="w-2 h-2 bg-starlink-blue rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-starlink-grey-light">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {section.forecast && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-starlink-white">30-Day Forecast:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {Object.entries(section.forecast).map(([period, description]: [string, any]) => (
+                        <div key={period} className="bg-starlink-slate/20 p-3 rounded-lg">
+                          <p className="font-medium text-starlink-blue">{period}</p>
+                          <p className="text-sm text-starlink-grey-light">{description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* DSS Report Specific Content */}
+          {report.currentScore && (
+            <>
+              <Card className="glass-panel border-starlink-grey/30">
+                <CardHeader>
+                  <CardTitle className="text-starlink-white">DSS Score Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold text-starlink-white mb-4">Component Analysis</h4>
+                      <div className="space-y-4">
+                        {Object.entries(report.breakdown).map(([key, data]: [string, any]) => (
+                          <div key={key} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-starlink-white capitalize">{key}</span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-starlink-white font-semibold">{data.current}</span>
+                                <Badge className={`${data.impact === 'High' ? 'bg-red-500' : data.impact === 'Medium' ? 'bg-yellow-500' : 'bg-green-500'} text-white`}>
+                                  {data.impact}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Progress value={data.current} className="h-2" />
+                            <p className="text-xs text-starlink-grey-light">Trend: {data.trend}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-starlink-white mb-4">Historical Trend</h4>
+                      <div className="h-40 bg-starlink-slate/20 rounded-lg flex items-center justify-center">
+                        <LineChart className="w-8 h-8 text-starlink-blue" />
+                        <span className="ml-2 text-starlink-grey-light">Historical trend visualization</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Threat Analysis Specific Content */}
+          {report.alerts && (
+            <Card className="glass-panel border-starlink-grey/30">
+              <CardHeader>
+                <CardTitle className="text-starlink-white">Active Threat Alerts</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {report.alerts.map((alert, index) => (
+                  <div key={index} className="border border-starlink-grey/30 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Badge className={`${alert.level === 'High' ? 'bg-red-500' : 'bg-yellow-500'} text-white`}>
+                          {alert.level} Risk
+                        </Badge>
+                        <span className="font-semibold text-starlink-white">{alert.category}</span>
+                      </div>
+                      <AlertTriangle className={`w-5 h-5 ${alert.level === 'High' ? 'text-red-500' : 'text-yellow-500'}`} />
+                    </div>
+                    <p className="text-starlink-white">{alert.description}</p>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-sm font-medium text-starlink-blue">Impact: </span>
+                        <span className="text-sm text-starlink-grey-light">{alert.impact}</span>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-starlink-blue">Recommendation: </span>
+                        <span className="text-sm text-starlink-grey-light">{alert.recommendation}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </DialogContent>
+    );
   };
 
   const renderControlDashboard = () => (
@@ -192,22 +454,69 @@ const DisruptionOSDashboard = () => {
 
         <Card className="glass-panel border-starlink-grey/30">
           <CardHeader>
-            <CardTitle className="text-starlink-white">Recent Activities</CardTitle>
-            <CardDescription className="text-starlink-grey-light">Last 24 hours</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-starlink-white">Recent Activities</CardTitle>
+                <CardDescription className="text-starlink-grey-light">Last 24 hours</CardDescription>
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark"
+                    onClick={() => setSelectedReport(reportTypes.executiveBriefing)}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Report
+                  </Button>
+                </DialogTrigger>
+                <ReportModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+              </Dialog>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {[
-                { time: '2 hours ago', action: 'DSS score updated', value: '+5 points' },
-                { time: '4 hours ago', action: 'New signal processed', value: 'Supply chain alert' },
-                { time: '6 hours ago', action: 'Briefing generated', value: 'Executive summary' }
+                { 
+                  time: '2 hours ago', 
+                  action: 'Executive briefing generated', 
+                  value: 'Strategic overview',
+                  reportType: 'executiveBriefing'
+                },
+                { 
+                  time: '4 hours ago', 
+                  action: 'Threat analysis completed', 
+                  value: 'Supply chain alert',
+                  reportType: 'threatAnalysis'
+                },
+                { 
+                  time: '6 hours ago', 
+                  action: 'DSS report updated', 
+                  value: '+5 points increase',
+                  reportType: 'dssReport'
+                }
               ].map((item, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-starlink-blue rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-starlink-white">{item.action}</p>
-                    <p className="text-xs text-starlink-grey-light">{item.time} - {item.value}</p>
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-starlink-blue rounded-full"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-starlink-white">{item.action}</p>
+                      <p className="text-xs text-starlink-grey-light">{item.time} - {item.value}</p>
+                    </div>
                   </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-starlink-blue hover:bg-starlink-blue/20"
+                        onClick={() => setSelectedReport(reportTypes[item.reportType as keyof typeof reportTypes])}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <ReportModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+                  </Dialog>
                 </div>
               ))}
             </div>
@@ -239,28 +548,45 @@ const DisruptionOSDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="glass-panel border-starlink-grey/30">
-          <CardHeader>
-            <CardTitle className="text-starlink-white text-lg">DSS Components</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { name: 'Geographic', score: 85, color: 'bg-red-500' },
-                { name: 'Industry', score: 60, color: 'bg-yellow-500' },
-                { name: 'Dependencies', score: 70, color: 'bg-orange-500' }
-              ].map((component, index) => (
-                <div key={index} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-starlink-white">{component.name}</span>
-                    <span className="text-starlink-grey-light">{component.score}</span>
-                  </div>
-                  <Progress value={component.score} className="h-2" />
-                </div>
-              ))}
+      <Card className="glass-panel border-starlink-grey/30">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-starlink-white text-lg">DSS Components</CardTitle>
             </div>
-          </CardContent>
-        </Card>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  size="sm" 
+                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark"
+                  onClick={() => setSelectedReport(reportTypes.dssReport)}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Detailed Report
+                </Button>
+              </DialogTrigger>
+              <ReportModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[
+              { name: 'Geographic', score: 85, color: 'bg-red-500' },
+              { name: 'Industry', score: 60, color: 'bg-yellow-500' },
+              { name: 'Dependencies', score: 70, color: 'bg-orange-500' }
+            ].map((component, index) => (
+              <div key={index} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-starlink-white">{component.name}</span>
+                  <span className="text-starlink-grey-light">{component.score}</span>
+                </div>
+                <Progress value={component.score} className="h-2" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
         <Card className="glass-panel border-starlink-grey/30">
           <CardHeader>
