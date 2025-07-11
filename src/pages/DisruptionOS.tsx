@@ -328,7 +328,13 @@ const DisruptionOS = () => {
                       Join the next evolution of threat intelligence and strategic preparedness
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Button className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold">
+                      <Button 
+                        className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold"
+                        onClick={() => window.location.href = '/disruption-os/dashboard'}
+                      >
+                        Access Dashboard
+                      </Button>
+                      <Button className="bg-starlink-orange hover:bg-starlink-orange/80 text-white font-semibold">
                         Start Pro Trial
                       </Button>
                       <Button 
