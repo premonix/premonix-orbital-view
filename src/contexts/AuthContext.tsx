@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
-        .single();
+        .maybeSingle();
 
       console.log('Profile fetch completed. Error:', profileError, 'Data:', profile);
 
