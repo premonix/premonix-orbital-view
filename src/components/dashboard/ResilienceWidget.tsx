@@ -17,8 +17,18 @@ import {
   FileText,
   Users,
   ArrowRight,
-  Calendar
+  Calendar,
+  BarChart3
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  AreaChart, 
+  CartesianGrid, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Area 
+} from 'recharts';
 
 interface ResilienceWidgetProps {
   userProfile?: any;
