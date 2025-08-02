@@ -77,49 +77,58 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
 
   // Calculate DSS (Disruption Sensitivity Score) based on user profile and threat data
   const calculateDSS = () => {
-    if (!userProfile) return { score: 0, level: 'Unknown', factors: [] };
+    console.log('Calculating DSS with:', { userProfile, threatSignalsCount: threatSignals.length });
+    
+    // If no user profile, return a default base score
+    if (!userProfile) {
+      console.log('No user profile, returning base score of 35');
+      return { score: 35, level: 'Low', factors: ['Complete assessment for accurate score'] };
+    }
 
     let score = 0;
     const factors = [];
 
-    // Geographic risk
+    // Geographic risk based on threat signals
     const locationThreats = threatSignals.filter(signal => 
       signal.country === userProfile.location
     ).length;
+    
+    console.log('Location threats found:', locationThreats);
+    
     if (locationThreats > 5) {
       score += 25;
       factors.push('High regional threat activity');
     } else if (locationThreats > 2) {
       score += 15;
       factors.push('Moderate regional threat activity');
+    } else {
+      score += 5;
+      factors.push('Low regional threat activity');
     }
 
-    // Business dependencies
-    if (userProfile.dependencies?.length > 3) {
+    // Recent cyber threats
+    const recentCyber = threatSignals.filter(signal => 
+      signal.category === 'Cyber' && 
+      new Date(signal.timestamp) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    ).length;
+    
+    if (recentCyber > 3) {
       score += 20;
-      factors.push('Multiple critical dependencies');
-    }
-
-    // Critical infrastructure
-    if (userProfile.hasCriticalInfrastructure) {
-      score += 25;
-      factors.push('Critical infrastructure exposure');
-    }
-
-    // Remote workers
-    if (userProfile.hasRemoteWorkers) {
+      factors.push('High cyber threat activity');
+    } else if (recentCyber > 1) {
       score += 10;
-      factors.push('Remote workforce complexity');
+      factors.push('Moderate cyber threat activity');
     }
 
-    // Team size vulnerability
-    if (userProfile.teamSize > 100) {
-      score += 15;
-      factors.push('Large organization coordination');
-    }
+    // Add base operational risk
+    score += 15;
+    factors.push('Standard operational risk baseline');
 
     const level = score >= 70 ? 'High' : score >= 40 ? 'Medium' : 'Low';
-    return { score: Math.min(score, 100), level, factors };
+    const finalScore = Math.min(score, 100);
+    
+    console.log('Calculated DSS:', { score: finalScore, level, factors });
+    return { score: finalScore, level, factors };
   };
 
   const dss = calculateDSS();
@@ -132,9 +141,12 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
     userId,
     dssHistoryLength: dssHistory.length,
     currentDSSScore,
+    dssCalculatedScore: dss.score,
     displayScore,
     displayLevel,
-    isLoadingHistory
+    isLoadingHistory,
+    userProfile: userProfile ? 'exists' : 'null',
+    threatSignalsCount: threatSignals.length
   });
 
   // Calculate trend from history
