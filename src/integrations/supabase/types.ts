@@ -86,6 +86,56 @@ export type Database = {
         }
         Relationships: []
       }
+      dss_assessments: {
+        Row: {
+          assessment_data: Json
+          category_scores: Json
+          completed_at: string
+          created_at: string
+          id: string
+          organization_id: string | null
+          overall_score: number
+          recommendations: string[] | null
+          risk_level: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          assessment_data: Json
+          category_scores: Json
+          completed_at?: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          overall_score: number
+          recommendations?: string[] | null
+          risk_level: string
+          user_id: string
+          version?: string
+        }
+        Update: {
+          assessment_data?: Json
+          category_scores?: Json
+          completed_at?: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          overall_score?: number
+          recommendations?: string[] | null
+          risk_level?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dss_assessments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dss_score_history: {
         Row: {
           assessment_data: Json
@@ -113,6 +163,123 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: string
+        }
+        Relationships: []
+      }
+      onboarding_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          step: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          step: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          step?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      organization_profiles: {
+        Row: {
+          annual_revenue_usd: number | null
+          created_at: string
+          description: string | null
+          employee_count: number | null
+          existing_security_measures: string[] | null
+          id: string
+          key_assets: string[] | null
+          locations: string[] | null
+          name: string
+          primary_region: Database["public"]["Enums"]["geographic_region"]
+          regulatory_requirements: string[] | null
+          risk_tolerance: number | null
+          sector: Database["public"]["Enums"]["organization_sector"]
+          size: Database["public"]["Enums"]["organization_size"]
+          supply_chain_complexity: number | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          annual_revenue_usd?: number | null
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          existing_security_measures?: string[] | null
+          id?: string
+          key_assets?: string[] | null
+          locations?: string[] | null
+          name: string
+          primary_region: Database["public"]["Enums"]["geographic_region"]
+          regulatory_requirements?: string[] | null
+          risk_tolerance?: number | null
+          sector: Database["public"]["Enums"]["organization_sector"]
+          size: Database["public"]["Enums"]["organization_size"]
+          supply_chain_complexity?: number | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          annual_revenue_usd?: number | null
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          existing_security_measures?: string[] | null
+          id?: string
+          key_assets?: string[] | null
+          locations?: string[] | null
+          name?: string
+          primary_region?: Database["public"]["Enums"]["geographic_region"]
+          regulatory_requirements?: string[] | null
+          risk_tolerance?: number | null
+          sector?: Database["public"]["Enums"]["organization_sector"]
+          size?: Database["public"]["Enums"]["organization_size"]
+          supply_chain_complexity?: number | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -181,6 +348,51 @@ export type Database = {
           status?: string
           time_period?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          max_organizations: number | null
+          max_users: number | null
+          name: string
+          price_monthly: number | null
+          price_yearly: number | null
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features: Json
+          id?: string
+          is_active?: boolean | null
+          max_organizations?: number | null
+          max_users?: number | null
+          name: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          max_organizations?: number | null
+          max_users?: number | null
+          name?: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          stripe_price_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -499,6 +711,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist_submissions: {
         Row: {
           email: string
@@ -531,6 +793,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_initial_dss_score: {
+        Args: {
+          org_sector: Database["public"]["Enums"]["organization_sector"]
+          org_size: Database["public"]["Enums"]["organization_size"]
+          supply_complexity: number
+          primary_region: Database["public"]["Enums"]["geographic_region"]
+          employee_count?: number
+        }
+        Returns: number
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -552,6 +824,33 @@ export type Database = {
         | "team_admin"
         | "enterprise_admin"
         | "premonix_super_user"
+      geographic_region:
+        | "north_america"
+        | "south_america"
+        | "europe"
+        | "africa"
+        | "asia_pacific"
+        | "middle_east"
+        | "oceania"
+        | "global"
+      organization_sector:
+        | "technology"
+        | "financial_services"
+        | "healthcare"
+        | "manufacturing"
+        | "energy_utilities"
+        | "government_public_sector"
+        | "education"
+        | "retail_consumer_goods"
+        | "telecommunications"
+        | "transportation_logistics"
+        | "agriculture"
+        | "real_estate"
+        | "entertainment_media"
+        | "non_profit"
+        | "consulting"
+        | "other"
+      organization_size: "micro" | "small" | "medium" | "large" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -691,6 +990,35 @@ export const Constants = {
         "enterprise_admin",
         "premonix_super_user",
       ],
+      geographic_region: [
+        "north_america",
+        "south_america",
+        "europe",
+        "africa",
+        "asia_pacific",
+        "middle_east",
+        "oceania",
+        "global",
+      ],
+      organization_sector: [
+        "technology",
+        "financial_services",
+        "healthcare",
+        "manufacturing",
+        "energy_utilities",
+        "government_public_sector",
+        "education",
+        "retail_consumer_goods",
+        "telecommunications",
+        "transportation_logistics",
+        "agriculture",
+        "real_estate",
+        "entertainment_media",
+        "non_profit",
+        "consulting",
+        "other",
+      ],
+      organization_size: ["micro", "small", "medium", "large", "enterprise"],
     },
   },
 } as const
