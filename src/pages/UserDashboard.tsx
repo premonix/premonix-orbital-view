@@ -29,6 +29,7 @@ import { PersonalizedThreatWidget } from '@/components/dashboard/PersonalizedThr
 import { EnhancedRealTimeStream } from '@/components/dashboard/EnhancedRealTimeStream';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
+import { useRealTime, RealTimeStatus } from '@/contexts/RealTimeContext';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
 import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -282,7 +283,13 @@ const UserDashboard = () => {
           <SidebarInset className="flex-1">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
               <SidebarTrigger className="-ml-1" />
-              <div className="flex items-center space-x-4 ml-auto">
+              
+              {/* Real-Time Status */}
+              <div className="flex-1">
+                <RealTimeStatus />
+              </div>
+              
+              <div className="flex items-center space-x-4">
                 <Button 
                   variant="outline" 
                   size="sm"
