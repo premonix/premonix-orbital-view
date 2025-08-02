@@ -13,6 +13,7 @@ import {
   FileText, 
   Beaker, 
   BarChart,
+  Activity,
   Lock
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,12 +25,14 @@ import AdminBillingPanel from '@/components/admin/AdminBillingPanel';
 import AdminAuditPanel from '@/components/admin/AdminAuditPanel';
 import AdminBetaPanel from '@/components/admin/AdminBetaPanel';
 import AdminAnalyticsPanel from '@/components/admin/AdminAnalyticsPanel';
+import SystemMonitoringPanel from '@/components/admin/SystemMonitoringPanel';
 
 const AdminConsole = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('monitoring');
 
   const adminTabs = [
+    { id: 'monitoring', label: 'Monitoring', icon: <Activity className="w-4 h-4" />, component: SystemMonitoringPanel },
     { id: 'users', label: 'Users', icon: <Users className="w-4 h-4" />, component: AdminUsersPanel },
     { id: 'organizations', label: 'Organizations', icon: <Building className="w-4 h-4" />, component: AdminOrgsPanel },
     { id: 'roles', label: 'Roles', icon: <Shield className="w-4 h-4" />, component: AdminRolesPanel },
@@ -88,7 +91,7 @@ const AdminConsole = () => {
 
             {/* Admin Console Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="glass-panel border-starlink-grey/30 w-full grid grid-cols-7">
+              <TabsList className="glass-panel border-starlink-grey/30 w-full grid grid-cols-8">
                 {adminTabs.map((tab) => (
                   <TabsTrigger 
                     key={tab.id} 
