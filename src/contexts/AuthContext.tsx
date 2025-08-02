@@ -37,18 +37,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       
       
-      // Fetch profile and role with individual error handling
+      // Try fetching profile with a timeout to prevent hanging
       console.log('Fetching profile for user ID:', supabaseUser.id);
       
-      const { data: profile, error: profileError } = await supabase
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
         .single();
-
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        return null;
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+      );
+      
+      let profile, profileError;
+      try {
+        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
+        profile = result.data;
+        profileError = result.error;
+      } catch (error) {
+        console.error('Profile fetch failed or timed out:', error);
+        // If profile fetch fails, create a minimal user object
+        profile = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata?.name || supabaseUser.email
+        };
+        profileError = null;
       }
 
       console.log('Profile fetched successfully:', profile);
