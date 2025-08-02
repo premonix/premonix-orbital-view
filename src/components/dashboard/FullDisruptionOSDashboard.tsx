@@ -32,6 +32,7 @@ import {
   Calendar,
   Clock
 } from "lucide-react";
+import { DSSAssessment } from './DSSAssessment';
 
 interface FullDisruptionOSDashboardProps {
   userId: string;
@@ -42,6 +43,10 @@ export const FullDisruptionOSDashboard = ({ userId }: FullDisruptionOSDashboardP
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [dssScore, setDssScore] = useState(72);
   const [selectedReport, setSelectedReport] = useState<any>(null);
+
+  const handleDSSScoreUpdate = (newScore: number) => {
+    setDssScore(newScore);
+  };
 
   const modules = [
     {
@@ -388,39 +393,11 @@ export const FullDisruptionOSDashboard = ({ userId }: FullDisruptionOSDashboardP
 
       <Card>
         <CardHeader>
-          <CardTitle>DSS Builder</CardTitle>
-          <CardDescription>Configure your disruption sensitivity parameters</CardDescription>
+          <CardTitle>DSS Builder & Assessment</CardTitle>
+          <CardDescription>Configure your disruption sensitivity parameters and complete the assessment</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="location">Primary Location</Label>
-                <Input id="location" defaultValue="New York, NY" />
-              </div>
-              <div>
-                <Label htmlFor="industry">Industry Sector</Label>
-                <Input id="industry" defaultValue="Financial Services" />
-              </div>
-              <div>
-                <Label htmlFor="dependencies">Key Dependencies</Label>
-                <Textarea id="dependencies" placeholder="List critical dependencies..." />
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="team-size">Team Size</Label>
-                <Input id="team-size" type="number" defaultValue="50" />
-              </div>
-              <div>
-                <Label htmlFor="revenue">Annual Revenue</Label>
-                <Input id="revenue" defaultValue="$10M - $50M" />
-              </div>
-              <Button className="w-full">
-                Update DSS Profile
-              </Button>
-            </div>
-          </div>
+          <DSSAssessment userId={userId} onScoreUpdate={handleDSSScoreUpdate} />
         </CardContent>
       </Card>
     </div>
