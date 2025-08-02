@@ -31,9 +31,12 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
       const { error } = await login(email, password);
       
       if (error) {
+        console.error('Login error details:', error);
         toast({
           title: "Login failed",
-          description: error,
+          description: error === "Invalid login credentials" 
+            ? "Please check your email and password and try again." 
+            : error,
           variant: "destructive",
         });
       } else {
