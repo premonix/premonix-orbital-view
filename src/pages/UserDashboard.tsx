@@ -33,14 +33,18 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    if (user) {
+    if (user && user.id) {
       fetchDashboardData();
       trackDashboardVisit();
     }
   }, [user]);
 
   const fetchDashboardData = async () => {
-    if (!user) return;
+    if (!user || !user.id || typeof user.id !== 'string') {
+      console.warn('Invalid user or user ID:', user);
+      setLoading(false);
+      return;
+    }
 
     try {
       // Fetch user preferences
@@ -363,9 +367,9 @@ const UserDashboard = () => {
 
           <TabsContent value="analytics" className="space-y-6">
             <AnalyticsWidget 
-              analytics={analytics}
-              threatSignals={threatSignals}
-              userId={user.id}
+              analytics={analytics || []}
+              threatSignals={threatSignals || []}
+              userId={user?.id || ''}
             />
           </TabsContent>
 

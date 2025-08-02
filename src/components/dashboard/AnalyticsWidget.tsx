@@ -33,6 +33,16 @@ export const AnalyticsWidget = ({ analytics, threatSignals, userId }: AnalyticsW
   }).reverse();
 
   const getAnalyticsForDate = (date: string) => {
+    if (!analytics || !Array.isArray(analytics)) {
+      return {
+        date,
+        threats_viewed: 0,
+        alerts_triggered: 0,
+        dashboard_visits: 0,
+        most_viewed_category: '',
+        avg_session_duration: 0
+      };
+    }
     return analytics.find(a => a.date === date) || {
       date,
       threats_viewed: 0,
