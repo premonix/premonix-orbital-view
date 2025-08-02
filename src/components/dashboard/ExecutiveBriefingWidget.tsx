@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAIReportGeneration } from '@/hooks/useAIReportGeneration';
 import { 
   FileText, 
@@ -22,6 +24,7 @@ interface ExecutiveBriefingWidgetProps {
 }
 
 export const ExecutiveBriefingWidget = ({ userId, threatSignals }: ExecutiveBriefingWidgetProps) => {
+  const [showReportModal, setShowReportModal] = useState(false);
   const { generateReport, downloadReport, shareReport, isGenerating, lastGeneratedReport } = useAIReportGeneration();
 
   const handleGenerateReport = async () => {
@@ -121,6 +124,10 @@ export const ExecutiveBriefingWidget = ({ userId, threatSignals }: ExecutiveBrie
           <div className="flex gap-2">
             {lastGeneratedReport && (
               <>
+                <Button size="sm" variant="default" onClick={() => setShowReportModal(true)}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Report
+                </Button>
                 <Button size="sm" variant="outline" onClick={handleDownloadReport}>
                   <FileDown className="w-4 h-4 mr-2" />
                   Download
@@ -218,6 +225,102 @@ export const ExecutiveBriefingWidget = ({ userId, threatSignals }: ExecutiveBrie
           </div>
         </div>
       </CardContent>
+      
+      {/* Report Preview Modal */}
+      <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {lastGeneratedReport?.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {lastGeneratedReport && (
+            <div className="space-y-6">
+              {/* Report Metadata */}
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">
+                    Report Type: {lastGeneratedReport.metadata.report_type.replace('_', ' ').toUpperCase()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Generated: {new Date(lastGeneratedReport.metadata.generated_at).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Time Period: {lastGeneratedReport.metadata.time_period}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleDownloadReport}>
+                    Download HTML
+                  </Button>
+                </div>
+              </div>
+
+              {/* Executive Summary */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Executive Summary</h3>
+                <p className="text-sm leading-relaxed">{lastGeneratedReport.executive_summary}</p>
+              </div>
+
+              {/* Key Findings */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Key Findings</h3>
+                <ul className="space-y-2">
+                  {lastGeneratedReport.key_findings.map((finding, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <span className="font-medium text-primary mt-0.5">{index + 1}.</span>
+                      <span>{finding}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Recommendations */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Recommendations</h3>
+                <ul className="space-y-2">
+                  {lastGeneratedReport.recommendations.map((rec, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <span className="font-medium text-green-600 mt-0.5">{index + 1}.</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Risk Assessment */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Risk Assessment</h3>
+                <p className="text-sm leading-relaxed">{lastGeneratedReport.risk_assessment}</p>
+              </div>
+
+              {/* Detailed Analysis */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">Detailed Analysis</h3>
+                <div className="text-sm leading-relaxed whitespace-pre-line">
+                  {lastGeneratedReport.detailed_analysis}
+                </div>
+              </div>
+
+              {/* Appendices */}
+              {lastGeneratedReport.appendices && lastGeneratedReport.appendices.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Appendices</h3>
+                  <ul className="space-y-2">
+                    {lastGeneratedReport.appendices.map((appendix, index) => (
+                      <li key={index} className="text-sm">
+                        <strong>Appendix {index + 1}:</strong> {appendix}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
