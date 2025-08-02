@@ -97,12 +97,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        
+        console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
+          console.log('User found in session, fetching profile...');
           // User is authenticated, fetch their profile
           const userProfile = await fetchUserProfile(session.user);
+          console.log('User profile result:', userProfile);
           if (userProfile) {
+            console.log('Setting user state:', userProfile);
             setAuthState({
               user: userProfile,
               isAuthenticated: true,
