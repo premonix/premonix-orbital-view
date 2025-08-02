@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DSSAssessment } from './DSSAssessment';
 import { 
   Shield, 
   Target, 
@@ -23,6 +25,8 @@ interface ResilienceWidgetProps {
 
 export const ResilienceWidget = ({ userProfile, threatSignals, userId }: ResilienceWidgetProps) => {
   const [activeSection, setActiveSection] = useState('overview');
+  const [isDSSDialogOpen, setIsDSSDialogOpen] = useState(false);
+  const [currentDSSScore, setCurrentDSSScore] = useState(0);
 
   // Calculate DSS (Disruption Sensitivity Score) based on user profile and threat data
   const calculateDSS = () => {
@@ -206,10 +210,26 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
             </div>
           )}
 
-          <Button variant="outline" size="sm" className="w-full">
-            <Target className="w-4 h-4 mr-2" />
-            Recalculate DSS
-          </Button>
+          <Dialog open={isDSSDialogOpen} onOpenChange={setIsDSSDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full">
+                <Target className="w-4 h-4 mr-2" />
+                Recalculate DSS
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>DSS Assessment</DialogTitle>
+              </DialogHeader>
+              <DSSAssessment 
+                userId={userId} 
+                onScoreUpdate={(score) => {
+                  setCurrentDSSScore(score);
+                  setIsDSSDialogOpen(false);
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
 
