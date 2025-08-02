@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.health-check]
 verify_jwt = false
 
+[functions.resend-confirmation]
+verify_jwt = false
+
 [functions.secure-contact-form]
 verify_jwt = false
 
