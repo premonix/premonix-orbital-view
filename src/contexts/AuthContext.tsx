@@ -35,14 +35,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
+      console.log('=== STARTING PROFILE FETCH ===');
       console.log('Fetching profile for user ID:', supabaseUser.id);
       
       // Fetch profile
+      console.log('About to fetch profile...');
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
         .single();
+
+      console.log('Profile fetch completed. Error:', profileError, 'Data:', profile);
 
       if (profileError) {
         console.error('Profile fetch error:', profileError);
@@ -52,9 +56,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('Profile fetched successfully:', profile);
 
       // Fetch role
+      console.log('About to fetch role...');
       const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', { 
         user_id: supabaseUser.id 
       });
+      
+      console.log('Role fetch completed. Error:', roleError, 'Data:', roleData);
       
       if (roleError) {
         console.error('Role fetch error:', roleError);
@@ -64,6 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('Role fetched:', roleData);
 
       // Convert legacy roles to new role structure
+      console.log('Converting role...');
       const convertLegacyRole = (legacyRole: string): UserRole => {
         switch (legacyRole) {
           case 'registered': return 'individual';
@@ -76,7 +84,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const role: UserRole = roleData ? convertLegacyRole(roleData) : 'individual';
       const permissions = rolePermissions[role];
 
-      return {
+      console.log('Building user object...');
+      const userObject = {
         id: supabaseUser.id,
         email: profile.email,
         name: profile.name,
@@ -89,8 +98,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           features: permissions
         }
       };
+
+      console.log('=== PROFILE FETCH COMPLETE ===', userObject);
+      return userObject;
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      console.error('=== ERROR IN FETCHUSERPROFILE ===', error);
       return null;
     }
   };
