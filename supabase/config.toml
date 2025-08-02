@@ -1,5 +1,11 @@
 project_id = "eydehwbjzpanyzzshgyd"
 
+[functions.threat-feed-ingestion]
+verify_jwt = false
+
+[functions.scheduled-threat-ingestion]
+verify_jwt = false
+
 [functions.signal-ingestion]
 verify_jwt = false
 
@@ -13,4 +19,22 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.password-reset]
+verify_jwt = false
+
+[functions.send-welcome-email]
+verify_jwt = false
+
+[functions.send-threat-alerts]
+verify_jwt = false
+
+[functions.send-weekly-digest]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.customer-portal]
 verify_jwt = false

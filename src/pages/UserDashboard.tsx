@@ -22,6 +22,7 @@ import { DisruptionOSModulesWidget } from '@/components/dashboard/DisruptionOSMo
 import { ExecutiveBriefingWidget } from '@/components/dashboard/ExecutiveBriefingWidget';
 import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWidget';
 import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
+import { DataSourcesWidget } from '@/components/dashboard/DataSourcesWidget';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
@@ -411,7 +412,10 @@ const UserDashboard = () => {
                 )}
 
                 {activeTab === 'admin' && isSuperAdmin && (
-                  <SuperAdminWidget userId={user.id} />
+                  <div className="space-y-6">
+                    <DataSourcesWidget />
+                    <SuperAdminWidget userId={user.id} />
+                  </div>
                 )}
 
                 {activeTab === 'executive' && (

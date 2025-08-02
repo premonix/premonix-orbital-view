@@ -53,6 +53,56 @@ export type Database = {
         }
         Relationships: []
       }
+      data_ingestion_logs: {
+        Row: {
+          completed_at: string | null
+          data_source_id: string
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          metadata: Json | null
+          records_inserted: number | null
+          records_processed: number | null
+          records_updated: number | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          data_source_id: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          records_inserted?: number | null
+          records_processed?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status: string
+        }
+        Update: {
+          completed_at?: string | null
+          data_source_id?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          metadata?: Json | null
+          records_inserted?: number | null
+          records_processed?: number | null
+          records_updated?: number | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_ingestion_logs_data_source_id_fkey"
+            columns: ["data_source_id"]
+            isOneToOne: false
+            referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_pipeline_logs: {
         Row: {
           created_at: string | null
@@ -83,6 +133,51 @@ export type Database = {
           pipeline_name?: string
           records_processed?: number | null
           status?: string
+        }
+        Relationships: []
+      }
+      data_sources: {
+        Row: {
+          api_key_name: string | null
+          configuration: Json
+          created_at: string
+          endpoint_url: string | null
+          id: string
+          is_active: boolean
+          last_error: string | null
+          last_fetch_at: string | null
+          name: string
+          refresh_interval_minutes: number
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_name?: string | null
+          configuration?: Json
+          created_at?: string
+          endpoint_url?: string | null
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_fetch_at?: string | null
+          name: string
+          refresh_interval_minutes?: number
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_name?: string | null
+          configuration?: Json
+          created_at?: string
+          endpoint_url?: string | null
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_fetch_at?: string | null
+          name?: string
+          refresh_interval_minutes?: number
+          source_type?: string
+          updated_at?: string
         }
         Relationships: []
       }
