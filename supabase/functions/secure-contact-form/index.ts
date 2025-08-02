@@ -15,6 +15,26 @@ interface ContactFormRequest {
   message: string;
 }
 
+// Rate limiting map (in production, use Redis or similar)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (ip: string, maxRequests = 5, windowMs = 60000): boolean => {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxRequests) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -22,6 +42,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for') || 
+                    req.headers.get('x-real-ip') || 
+                    'unknown';
+    
+    // Check rate limit
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -33,6 +69,17 @@ const handler = async (req: Request): Promise<Response> => {
     if (!firstName || !lastName || !email || !subject || !message) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Validate field lengths
+    if (firstName.length > 50 || lastName.length > 50 || subject.length > 200 || message.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: 'Field length exceeds maximum allowed' }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -77,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
         message: sanitizedMessage,
         status: 'new',
         submitted_at: new Date().toISOString(),
-        ip_address: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
+        ip_address: clientIP,
         user_agent: req.headers.get('user-agent') || 'unknown'
       })
       .select()
@@ -88,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw error;
     }
 
-    console.log('Contact form submission saved:', data.id);
+    console.log('Secure contact form submission saved:', data.id);
 
     return new Response(
       JSON.stringify({ 
@@ -98,14 +145,18 @@ const handler = async (req: Request): Promise<Response> => {
       }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'X-RateLimit-Remaining': String(4 - (rateLimitMap.get(clientIP)?.count || 0)),
+          ...corsHeaders 
+        },
       }
     );
 
   } catch (error: any) {
-    console.error('Error in send-contact-form function:', error);
+    console.error('Error in secure-contact-form function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },

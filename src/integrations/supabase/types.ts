@@ -793,6 +793,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_admin_role: {
+        Args: { target_user_email: string }
+        Returns: boolean
+      }
       calculate_initial_dss_score: {
         Args: {
           org_sector: Database["public"]["Enums"]["organization_sector"]
@@ -807,9 +811,17 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      sanitize_text_input: {
+        Args: { input_text: string; max_length?: number }
+        Returns: string
+      }
       update_dashboard_analytics: {
         Args: { p_user_id: string; p_action: string; p_category?: string }
         Returns: undefined
+      }
+      validate_email: {
+        Args: { email_input: string }
+        Returns: boolean
       }
     }
     Enums: {

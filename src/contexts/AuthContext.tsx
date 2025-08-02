@@ -1,8 +1,14 @@
-
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { User, AuthState, UserRole, rolePermissions, tierMapping } from '@/types/user';
+import { User, UserRole } from '@/types/user';
+import { rolePermissions, tierMapping } from '@/types/user';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{ error?: string }>;
@@ -12,19 +18,19 @@ interface AuthContextType extends AuthState {
   hasPermission: (permission: string) => boolean;
 }
 
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -35,52 +41,66 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
-      console.log('=== CREATING USER FROM AUTH DATA ===');
+      console.log('=== FETCHING USER PROFILE FROM DATABASE ===');
       console.log('User ID:', supabaseUser.id);
       console.log('Email:', supabaseUser.email);
       
-      // For this specific user, just create the profile directly without DB calls
-      if (supabaseUser.email === 'leonedwardhardwick22+premonix@gmail.com') {
-        const userObject = {
+      // Get profile data from database
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return null;
+      }
+
+      // Get user role using the secure database function
+      const { data: roleData, error: roleError } = await supabase
+        .rpc('get_user_role', { user_id: supabaseUser.id });
+
+      if (roleError) {
+        console.error('Error fetching role:', roleError);
+        // Default to individual if no role found
+        const defaultRole: UserRole = 'individual';
+        return {
           id: supabaseUser.id,
-          email: supabaseUser.email,
-          name: supabaseUser.user_metadata?.name || 'Leon Premonix',
-          companyName: 'Premonix',
-          role: 'premonix_super_user' as UserRole,
-          permissions: rolePermissions.premonix_super_user,
+          email: supabaseUser.email || '',
+          name: profile?.name || supabaseUser.email || '',
+          role: defaultRole,
+          permissions: rolePermissions[defaultRole],
           subscription: {
-            plan: 'premonix_super_user' as UserRole,
-            tier: tierMapping.premonix_super_user,
-            features: rolePermissions.premonix_super_user
+            plan: defaultRole,
+            tier: tierMapping[defaultRole],
+            features: rolePermissions[defaultRole]
           }
         };
-        
-        console.log('=== USER CREATED SUCCESSFULLY ===', userObject);
-        return userObject;
       }
+
+      const userRole = (roleData || 'individual') as UserRole;
       
-      // For other users, create minimal profile
       const userObject = {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
-        name: supabaseUser.user_metadata?.name || supabaseUser.email || 'User',
-        role: 'individual' as UserRole,
-        permissions: rolePermissions.individual,
+        name: profile?.name || supabaseUser.email || '',
+        role: userRole,
+        permissions: rolePermissions[userRole],
         subscription: {
-          plan: 'individual' as UserRole,
-          tier: tierMapping.individual,
-          features: rolePermissions.individual
+          plan: userRole,
+          tier: tierMapping[userRole],
+          features: rolePermissions[userRole]
         }
       };
       
-      console.log('=== USER CREATED SUCCESSFULLY ===', userObject);
+      console.log('=== USER PROFILE FETCHED SUCCESSFULLY ===', userObject);
       return userObject;
     } catch (error) {
       console.error('=== ERROR IN FETCHUSERPROFILE ===', error);
       return null;
     }
   };
-
 
   useEffect(() => {
     let isMounted = true;
@@ -182,27 +202,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: error.message };
       }
 
-      
+      console.log('Login successful, auth state will be updated by listener');
       return {};
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login exception:', error);
-      return { error: 'An unexpected error occurred' };
+      return { error: error.message || 'An unexpected error occurred' };
     }
   };
 
   const register = async (email: string, password: string, name: string, companyName?: string) => {
     try {
+      console.log('Attempting registration for:', email);
       
+      // Enhanced password validation
+      if (password.length < 12) {
+        return { error: 'Password must be at least 12 characters long' };
+      }
+
+      const redirectUrl = `${window.location.origin}/`;
       
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
-            name,
+            name: name,
             company_name: companyName
-          },
-          emailRedirectTo: `${window.location.origin}/`
+          }
         }
       });
 
@@ -211,62 +238,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: error.message };
       }
 
-      
+      console.log('Registration successful');
       return {};
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration exception:', error);
-      return { error: 'An unexpected error occurred' };
+      return { error: error.message || 'An unexpected error occurred' };
     }
   };
 
   const logout = async () => {
     try {
-      
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Logout error:', error);
-        throw error;
-      }
-      
-      
-      
-      // The auth state listener will automatically handle setting the state to guest
-      // when the session is cleared, so we don't need to manually set state here
-      
+      console.log('Logging out...');
+      await supabase.auth.signOut();
+      console.log('Logout successful, auth state will be updated by listener');
     } catch (error) {
-      console.error('Logout exception:', error);
-      // Even if there's an error, we should reset to guest state
-      setAuthState({
-        user: {
-          id: 'guest',
-          role: 'guest',
-          permissions: rolePermissions.guest,
-          subscription: {
-            plan: 'guest',
-            tier: 'personal',
-            features: rolePermissions.guest
-          }
-        },
-        isAuthenticated: false,
-        isLoading: false
-      });
+      console.error('Logout error:', error);
     }
   };
 
   const upgradeRole = async (newRole: UserRole) => {
-    if (!authState.user || !authState.isAuthenticated) return;
-
     try {
+      console.log('Attempting to upgrade role to:', newRole);
       
-      
-      // Update role in database
-      const { error } = await supabase
-        .from('user_roles')
-        .upsert({
-          user_id: authState.user.id,
-          role: newRole
-        });
+      if (!authState.user) {
+        console.error('No authenticated user found');
+        return;
+      }
+
+      // Use the secure admin function for role assignment (requires proper privileges)
+      const { error } = await supabase.rpc('assign_admin_role', { 
+        target_user_email: authState.user.email 
+      });
 
       if (error) {
         console.error('Error upgrading role:', error);
@@ -289,24 +291,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         ...authState,
         user: updatedUser
       });
+
+      console.log('Role upgraded successfully to:', newRole);
     } catch (error) {
-      console.error('Error in upgradeRole:', error);
+      console.error('Exception in upgradeRole:', error);
     }
   };
 
   const hasPermission = (permission: string): boolean => {
-    return authState.user?.permissions.includes(permission) || false;
+    return authState.user?.permissions?.includes(permission) ?? false;
+  };
+
+  const contextValue: AuthContextType = {
+    ...authState,
+    login,
+    logout,
+    register,
+    upgradeRole,
+    hasPermission
   };
 
   return (
-    <AuthContext.Provider value={{
-      ...authState,
-      login,
-      logout,
-      register,
-      upgradeRole,
-      hasPermission
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
