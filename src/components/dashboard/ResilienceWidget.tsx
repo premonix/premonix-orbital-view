@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { DSSAssessment } from './DSSAssessment';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -47,6 +47,8 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
   const loadDSSHistory = async () => {
     try {
       setIsLoadingHistory(true);
+      console.log('Loading DSS history for user:', userId);
+      
       const { data, error } = await supabase
         .from('dss_score_history')
         .select('*')
@@ -54,12 +56,17 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
         .order('created_at', { ascending: false })
         .limit(10);
 
+      console.log('DSS history query result:', { data, error });
+
       if (error) throw error;
       setDssHistory(data || []);
       
       // Set current score from most recent entry
       if (data && data.length > 0) {
+        console.log('Setting current DSS score to:', data[0].score);
         setCurrentDSSScore(data[0].score);
+      } else {
+        console.log('No DSS history found, using calculated score');
       }
     } catch (error) {
       console.error('Error loading DSS history:', error);
@@ -120,6 +127,15 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
   // Use current score from history if available, otherwise use calculated score
   const displayScore = dssHistory.length > 0 ? currentDSSScore : dss.score;
   const displayLevel = displayScore >= 70 ? 'High' : displayScore >= 40 ? 'Medium' : 'Low';
+
+  console.log('ResilienceWidget render state:', {
+    userId,
+    dssHistoryLength: dssHistory.length,
+    currentDSSScore,
+    displayScore,
+    displayLevel,
+    isLoadingHistory
+  });
 
   // Calculate trend from history
   const getDSSTrend = () => {
@@ -291,6 +307,9 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>DSS Assessment</DialogTitle>
+                <DialogDescription>
+                  Complete the assessment to calculate your organization's Disruption Sensitivity Score
+                </DialogDescription>
               </DialogHeader>
               <DSSAssessment 
                 userId={userId} 
