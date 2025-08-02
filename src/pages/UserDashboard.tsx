@@ -24,6 +24,7 @@ import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWid
 import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
+import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
 import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDashboardNavigation } from '@/hooks/useNavigation';
@@ -478,6 +479,18 @@ const UserDashboard = () => {
 
                 {activeTab === 'settings' && (
                   <EmailPreferencesWidget userId={user?.id || ''} />
+                )}
+
+                {activeTab === 'subscription' && (
+                  <div className="space-y-6">
+                    <div className="mb-8">
+                      <h1 className="text-3xl font-bold text-foreground mb-2">Subscription Management</h1>
+                      <p className="text-muted-foreground">
+                        Manage your PREMONIX subscription, billing, and plan upgrades.
+                      </p>
+                    </div>
+                    <SubscriptionPlans />
+                  </div>
                 )}
               </div>
             </div>
