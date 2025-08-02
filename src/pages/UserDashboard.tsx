@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboardingStatus } from '@/hooks/useOnboardingStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +38,15 @@ interface DashboardPreferences {
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { hasCompletedOnboarding, isLoading } = useOnboardingStatus();
+
+  // Redirect to onboarding if user hasn't completed it
+  useEffect(() => {
+    if (user && !isLoading && !hasCompletedOnboarding) {
+      navigate('/onboarding');
+    }
+  }, [user, hasCompletedOnboarding, isLoading, navigate]);
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<DashboardPreferences | null>(null);
   const [showSettings, setShowSettings] = useState(false);
