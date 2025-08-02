@@ -56,6 +56,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return null;
       }
 
+      console.log('Profile fetched successfully:', profile);
+      console.log('Role fetched:', roleData, roleError ? 'Error:' + roleError : '');
+
       // Convert legacy roles to new role structure
       const convertLegacyRole = (legacyRole: string): UserRole => {
         switch (legacyRole) {
@@ -193,7 +196,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
-      
+      console.log('Attempting login for:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
