@@ -3,7 +3,7 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { WeeklyDigestEmail } from '../send-welcome-email/_templates/weekly-digest-email.tsx';
+import { WeeklyDigestEmail } from './_templates/weekly-digest-email.tsx';
 
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
