@@ -19,6 +19,7 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdminConsole from "./pages/AdminConsole";
+import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import SoWhat from "./pages/SoWhat";
 import NotFound from "./pages/NotFound";
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<AdminConsole />} />
+            <Route path="/onboarding" element={<OrganizationOnboarding />} />
             <Route path="/sowhat" element={<SoWhat />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
