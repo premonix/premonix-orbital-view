@@ -20,6 +20,7 @@ import { DisruptionOSModulesWidget } from '@/components/dashboard/DisruptionOSMo
 import { ExecutiveBriefingWidget } from '@/components/dashboard/ExecutiveBriefingWidget';
 import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWidget';
 import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
+import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -408,7 +409,7 @@ const UserDashboard = () => {
                 )}
 
                 {activeTab === 'disruption-os' && (
-                  <DisruptionOSModulesWidget userId={user.id} />
+                  <FullDisruptionOSDashboard userId={user.id} />
                 )}
 
                 {activeTab === 'threats' && (
