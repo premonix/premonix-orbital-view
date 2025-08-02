@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { mainNavItems, aboutNavItems } from '@/constants/navigation';
+import { navGroups } from '@/constants/navigation';
 import { MobileNavigation } from '@/components/navigation/MobileNavigation';
 import { NavigationDropdown } from '@/components/navigation/NavigationDropdown';
 import { AuthSection } from '@/components/navigation/AuthSection';
@@ -9,11 +9,18 @@ import { useActiveRoute, useNavigationState } from '@/hooks/useNavigation';
 const Navigation = () => {
   const { isAuthenticated } = useAuth();
   const { isActiveRoute } = useActiveRoute();
-  const { hoveredItem, mobileMenuOpen, handleMouseEnter, handleMouseLeave, toggleMobileMenu, closeMobileMenu } = useNavigationState();
+  const { hoveredItem, mobileMenuOpen, handleMouseEnter, handleMouseLeave, toggleMobileMenu } = useNavigationState();
 
-  const visibleNavItems = mainNavItems.filter(
-    item => !item.authRequired || isAuthenticated
-  );
+  const getVisibleNavGroups = () => {
+    return navGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => !item.authRequired || isAuthenticated)
+    })).filter(group => group.items.length > 0);
+  };
+
+  const isGroupActive = (group: any) => {
+    return group.items.some((item: any) => isActiveRoute(item.href));
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
@@ -28,31 +35,13 @@ const Navigation = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          {visibleNavItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.label}
-                to={item.href}
-                className={`relative flex items-center space-x-1 transition-colors duration-200 ${
-                  isActiveRoute(item.href) 
-                    ? 'text-foreground' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                onMouseEnter={() => handleMouseEnter(item.label)}
-                onMouseLeave={handleMouseLeave}
-              >
-                {Icon && <Icon className="w-4 h-4" />}
-                <span>{item.label}</span>
-                {(hoveredItem === item.label || isActiveRoute(item.href)) && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-pulse" />
-                )}
-              </Link>
-            );
-          })}
-          
-          {/* About Dropdown */}
-          <NavigationDropdown label="About" items={aboutNavItems} />
+          {getVisibleNavGroups().map((group) => (
+            <NavigationDropdown 
+              key={group.label}
+              label={group.label} 
+              items={group.items}
+            />
+          ))}
         </div>
 
         {/* Mobile Navigation & Auth Section */}
