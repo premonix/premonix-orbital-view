@@ -190,14 +190,14 @@ export const AIReportGenerator = ({ threatSignals = [], className }: AIReportGen
                       {formatContent(lastGeneratedReport.executive_summary)}
                     </p>
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button 
                         size="sm" 
-                        variant="outline"
+                        variant="default"
                         onClick={() => setShowReportModal(true)}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        View
+                        View Report
                       </Button>
                       <Button 
                         size="sm" 
