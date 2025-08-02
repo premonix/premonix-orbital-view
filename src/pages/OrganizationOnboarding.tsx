@@ -11,12 +11,14 @@ const OrganizationOnboarding = () => {
   const { user } = useAuth();
 
   const handleOnboardingComplete = (profile: OrganizationProfile, dssScore: number) => {
-    // Redirect to dashboard after successful onboarding
+    // Redirect to dashboard after successful onboarding with success state
     navigate('/dashboard', { 
       state: { 
         onboardingCompleted: true, 
         initialDSSScore: dssScore,
-        organizationProfile: profile
+        organizationProfile: profile,
+        isNewUser: true,
+        completionTimestamp: new Date().toISOString()
       } 
     });
   };

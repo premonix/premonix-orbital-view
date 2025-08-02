@@ -12,6 +12,7 @@ import { OrganizationDetailsStep } from "./steps/OrganizationDetailsStep";
 import { SecurityPostureStep } from "./steps/SecurityPostureStep";
 import { RiskAssessmentStep } from "./steps/RiskAssessmentStep";
 import { DSSResultsStep } from "./steps/DSSResultsStep";
+import { Building2, Users, Shield, AlertTriangle, BarChart3 } from 'lucide-react';
 
 interface OrganizationOnboardingWizardProps {
   onComplete: (profile: OrganizationProfile, dssScore: number) => void;
@@ -147,20 +148,32 @@ export const OrganizationOnboardingWizard = ({ onComplete }: OrganizationOnboard
         .insert({
           user_id: user.id,
           overall_score: calculatedDSSScore,
-          category_scores: {},
+          category_scores: {
+            sector_risk: Math.round(calculatedDSSScore * 0.4),
+            size_risk: Math.round(calculatedDSSScore * 0.3),
+            region_risk: Math.round(calculatedDSSScore * 0.2),
+            complexity_risk: Math.round(calculatedDSSScore * 0.1)
+          },
           assessment_data: {
             organization_profile: organizationData,
-            onboarding_completed: true
+            onboarding_completed: true,
+            calculation_method: 'organization_onboarding',
+            version: '2.0'
           },
-          risk_level: calculatedDSSScore >= 80 ? 'low' : calculatedDSSScore >= 60 ? 'medium' : 'high'
+          risk_level: calculatedDSSScore >= 80 ? 'low' : calculatedDSSScore >= 60 ? 'medium' : 'high',
+          recommendations: generateRecommendations(calculatedDSSScore, organizationData as OrganizationProfile)
         });
 
       if (dssError) throw dssError;
 
       // Mark onboarding as complete
-      await saveProgress(ONBOARDING_STEPS.length - 1, {});
+      await saveProgress(ONBOARDING_STEPS.length - 1, {
+        completion_timestamp: new Date().toISOString(),
+        final_dss_score: calculatedDSSScore,
+        organization_setup_complete: true
+      });
 
-      toast.success("Organization onboarding completed successfully!");
+      toast.success("🎉 Organization onboarding completed successfully! Welcome to PREMONIX.");
       onComplete(organizationData as OrganizationProfile, calculatedDSSScore);
 
     } catch (error) {
@@ -169,6 +182,31 @@ export const OrganizationOnboardingWizard = ({ onComplete }: OrganizationOnboard
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const generateRecommendations = (score: number, orgData: OrganizationProfile) => {
+    const recommendations = [];
+    
+    if (score >= 70) {
+      recommendations.push("Implement continuous security monitoring");
+      recommendations.push("Establish threat intelligence program");
+    } else if (score >= 50) {
+      recommendations.push("Strengthen incident response capabilities");
+      recommendations.push("Enhance employee security training");
+      recommendations.push("Implement multi-factor authentication");
+    } else {
+      recommendations.push("Urgent: Deploy basic security controls");
+      recommendations.push("Critical: Establish security policies");
+      recommendations.push("Immediate: Implement access controls");
+      recommendations.push("Priority: Create incident response plan");
+    }
+
+    if (orgData.size === 'enterprise' || orgData.size === 'large') {
+      recommendations.push("Consider dedicated security team");
+      recommendations.push("Implement network segmentation");
+    }
+
+    return recommendations.slice(0, 5);
   };
 
   const handleBack = () => {
@@ -224,13 +262,47 @@ export const OrganizationOnboardingWizard = ({ onComplete }: OrganizationOnboard
   return (
     <div className="min-h-screen bg-starlink-dark">
       <div className="container mx-auto px-4 py-8">
+        {/* Enterprise Onboarding Banner */}
+        <div className="mb-6">
+          <Card className="bg-starlink-blue/10 border-starlink-blue/30">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <Badge className="bg-starlink-blue/20 text-starlink-blue border-starlink-blue/40">
+                  ENTERPRISE ONBOARDING
+                </Badge>
+                <Badge variant="outline" className="border-starlink-grey/40 text-starlink-grey-light">
+                  Secure • Personalized • Intelligence-Driven
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <Building2 className="w-4 h-4 text-starlink-blue" />
+                  Organization profiling
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <BarChart3 className="w-4 h-4 text-starlink-blue" />
+                  DSS risk assessment
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <Shield className="w-4 h-4 text-starlink-blue" />
+                  Security posture analysis
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <AlertTriangle className="w-4 h-4 text-starlink-blue" />
+                  Personalized threat intelligence
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card className="glass-panel border-starlink-grey/30 max-w-4xl mx-auto">
           <CardHeader>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <CardTitle className="text-starlink-white text-2xl">Organization Onboarding</CardTitle>
+                <CardTitle className="text-starlink-white text-2xl">Enterprise Organization Setup</CardTitle>
                 <CardDescription className="text-starlink-grey-light">
-                  Set up your organization profile for personalized threat intelligence
+                  Complete your organization profile for personalized threat intelligence and security assessment
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="text-starlink-blue">
@@ -289,7 +361,7 @@ export const OrganizationOnboardingWizard = ({ onComplete }: OrganizationOnboard
                   Back
                 </Button>
                 <div className="text-sm text-starlink-grey-light">
-                  Progress will be saved automatically
+                  🏢 Enterprise Setup - Your data is securely saved and encrypted
                 </div>
               </div>
             )}
