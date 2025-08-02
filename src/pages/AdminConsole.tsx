@@ -52,7 +52,7 @@ const AdminConsole = () => {
         <div className="max-w-7xl mx-auto">
           <PermissionGate 
             permission="admin_console_access" 
-            requiredRole="enterprise"
+            requiredRole="enterprise_admin"
             fallback={
               <Card className="glass-panel border-red-500/50">
                 <CardHeader>

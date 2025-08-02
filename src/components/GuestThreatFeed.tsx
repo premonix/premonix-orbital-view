@@ -101,7 +101,7 @@ const GuestThreatFeed = () => {
   };
 
   const handleUpgrade = () => {
-    upgradeRole('registered');
+    upgradeRole('individual');
   };
 
   return (

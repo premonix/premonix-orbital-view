@@ -114,7 +114,7 @@ const GuestDashboardPreview = () => {
               </p>
             </div>
             <Button 
-              onClick={() => upgradeRole('registered')}
+              onClick={() => upgradeRole('individual')}
               className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium px-8"
             >
               <Zap className="w-4 h-4 mr-2" />

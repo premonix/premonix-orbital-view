@@ -61,14 +61,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error('Error fetching user role:', roleError);
       }
 
-      const role: UserRole = roleData || 'registered';
+      // Convert legacy roles to new role structure
+      const convertLegacyRole = (legacyRole: string): UserRole => {
+        switch (legacyRole) {
+          case 'registered': return 'individual';
+          case 'business': return 'team_admin';
+          case 'enterprise': return 'enterprise_admin';
+          default: return legacyRole as UserRole;
+        }
+      };
+
+      const role: UserRole = roleData ? convertLegacyRole(roleData) : 'individual';
       const permissions = rolePermissions[role];
 
       return {
         id: supabaseUser.id,
         email: profile.email,
         name: profile.name,
-        companyName: role === 'enterprise' && supabaseUser.email === 'leonedwardhardwick22@gmail.com' ? 'Premonix' : undefined,
+        companyName: role === 'premonix_super_user' && supabaseUser.email?.includes('leonedwardhardwick22') ? 'Premonix' : undefined,
         role,
         permissions,
         subscription: {

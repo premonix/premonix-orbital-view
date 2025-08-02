@@ -25,7 +25,7 @@ const PermissionGate = ({ permission, children, fallback, requiredRole }: Permis
 
   // Default upgrade prompt
   const currentRole = user?.role || 'guest';
-  const targetRole = requiredRole || 'registered';
+  const targetRole = requiredRole || 'individual';
 
   return (
     <div className="glass-panel rounded-lg p-6 text-center">
