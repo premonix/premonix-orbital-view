@@ -38,6 +38,7 @@ const UserDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<DashboardPreferences | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [threatSignals, setThreatSignals] = useState<any[]>([]);
   const [userAlerts, setUserAlerts] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -262,7 +263,11 @@ const UserDashboard = () => {
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
               <SidebarTrigger className="-ml-1" />
               <div className="flex items-center space-x-4 ml-auto">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setActiveTab('settings')}
+                >
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Button>

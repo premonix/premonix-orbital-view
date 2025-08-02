@@ -361,8 +361,14 @@ const Homepage = () => {
             <p className="text-starlink-grey-light mb-4">
               All plans will include a 14-day free trial. No credit card required.
             </p>
-            <Button variant="outline" className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light">
-              Contact Us for Custom Enterprise Solutions
+            <Button 
+              variant="outline" 
+              className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light"
+              asChild
+            >
+              <Link to="/contact">
+                Contact Us for Custom Enterprise Solutions
+              </Link>
             </Button>
           </div>
         </div>
@@ -390,8 +396,11 @@ const Homepage = () => {
               size="lg" 
               variant="outline" 
               className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light px-8 py-4"
+              asChild
             >
-              Learn More
+              <Link to="/about">
+                Learn More
+              </Link>
             </Button>
           </div>
         </div>

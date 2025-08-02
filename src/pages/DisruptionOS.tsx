@@ -20,8 +20,12 @@ import {
   Globe,
   Settings
 } from "lucide-react";
+import { ScheduleDemoModal } from "@/components/ScheduleDemoModal";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const DisruptionOS = () => {
+  const { toast } = useToast();
   const coreFeatures = [
     {
       icon: <Shield className="w-6 h-6" />,
@@ -330,19 +334,31 @@ const DisruptionOS = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button 
                         className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold"
-                        onClick={() => window.location.href = '/disruption-os/dashboard'}
+                        asChild
                       >
-                        Access Dashboard
-                      </Button>
-                      <Button className="bg-starlink-orange hover:bg-starlink-orange/80 text-white font-semibold">
-                        Start Pro Trial
+                        <Link to="/disruption-os/dashboard">
+                          Access Dashboard
+                        </Link>
                       </Button>
                       <Button 
-                        variant="outline" 
-                        className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light"
+                        className="bg-starlink-orange hover:bg-starlink-orange/80 text-white font-semibold"
+                        onClick={() => {
+                          toast({
+                            title: "Pro Trial Coming Soon!",
+                            description: "Pro trial access will be available at launch. Join our waitlist to be notified.",
+                          });
+                        }}
                       >
-                        Schedule Demo
+                        Start Pro Trial
                       </Button>
+                      <ScheduleDemoModal>
+                        <Button 
+                          variant="outline" 
+                          className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light"
+                        >
+                          Schedule Demo
+                        </Button>
+                      </ScheduleDemoModal>
                     </div>
                   </div>
                 </CardContent>
