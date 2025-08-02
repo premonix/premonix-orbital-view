@@ -102,8 +102,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: 'PREMONIX Alerts <alerts@resend.dev>',
-      to: [recipientEmail],
-      subject,
+      to: ['leonedwardhardwick22+premonix@gmail.com'], // Test email override
+      subject: `[TEST] ${subject} - Original: ${recipientEmail}`,
       html,
     });
 
