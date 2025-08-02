@@ -19,9 +19,9 @@ const UserMenu = () => {
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case 'guest': return 'bg-gray-500';
-      case 'registered': return 'bg-blue-500';
-      case 'business': return 'bg-green-500';
-      case 'enterprise': return 'bg-purple-500';
+      case 'individual': return 'bg-blue-500';
+      case 'team_admin': return 'bg-green-500';
+      case 'enterprise_admin': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
@@ -94,18 +94,18 @@ const UserMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         
-        {user?.role === 'registered' && (
+        {user?.role === 'individual' && (
           <DropdownMenuItem 
-            onClick={() => handleUpgrade('business')}
+            onClick={() => handleUpgrade('team_admin')}
             className="text-starlink-blue hover:text-starlink-blue-bright"
           >
             Upgrade to Business Pro
           </DropdownMenuItem>
         )}
         
-        {user?.role === 'business' && (
+        {user?.role === 'team_admin' && (
           <DropdownMenuItem 
-            onClick={() => handleUpgrade('enterprise')}
+            onClick={() => handleUpgrade('enterprise_admin')}
             className="text-starlink-blue hover:text-starlink-blue-bright"
           >
             Upgrade to Enterprise

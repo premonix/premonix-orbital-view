@@ -14,28 +14,28 @@ const GuestDashboardPreview = () => {
       description: "Real-time global threat landscape",
       icon: TrendingUp,
       preview: "12 Active Threats | 3 High Priority",
-      requiredRole: 'registered' as const
+      requiredRole: 'individual' as const
     },
     {
       title: "Personal Alerts",
       description: "Custom notifications for your location",
       icon: Bell,
       preview: "5 New Alerts | 2 Urgent",
-      requiredRole: 'registered' as const
+      requiredRole: 'individual' as const
     },
     {
       title: "Analytics Dashboard",
       description: "Threat trends and insights",
       icon: BarChart3,
       preview: "Regional analysis and forecasts",
-      requiredRole: 'business' as const
+      requiredRole: 'team_admin' as const
     },
     {
       title: "Sector Risk Analysis",
       description: "Industry-specific threat intelligence",
       icon: Shield,
       preview: "Monitor risks in your sector",
-      requiredRole: 'business' as const
+      requiredRole: 'team_admin' as const
     }
   ];
 

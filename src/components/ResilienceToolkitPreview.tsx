@@ -219,13 +219,13 @@ const ResilienceToolkitPreview = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
-                  onClick={() => upgradeRole('registered')}
+                  onClick={() => upgradeRole('individual')}
                   className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8"
                 >
                   Start Free - Access Dashboard
                 </Button>
                 <Button 
-                  onClick={() => upgradeRole('business')}
+                  onClick={() => upgradeRole('team_admin')}
                   variant="outline"
                   className="border-starlink-blue/40 text-starlink-blue hover:bg-starlink-blue/10 px-8"
                 >

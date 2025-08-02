@@ -5,14 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 interface FeaturePreviewOverlayProps {
   featureName: string;
   description: string;
-  requiredRole?: 'registered' | 'business' | 'enterprise';
+  requiredRole?: 'individual' | 'pro' | 'team_member' | 'team_admin' | 'enterprise_admin' | 'premonix_super_user';
   className?: string;
 }
 
 const FeaturePreviewOverlay = ({ 
   featureName, 
   description, 
-  requiredRole = 'registered',
+  requiredRole = 'individual',
   className = ""
 }: FeaturePreviewOverlayProps) => {
   const { upgradeRole } = useAuth();
@@ -23,9 +23,9 @@ const FeaturePreviewOverlay = ({
 
   const getIcon = () => {
     switch (requiredRole) {
-      case 'business':
+      case 'team_admin':
         return <TrendingUp className="w-5 h-5 text-starlink-blue" />;
-      case 'enterprise':
+      case 'enterprise_admin':
         return <Shield className="w-5 h-5 text-starlink-purple" />;
       default:
         return <Zap className="w-5 h-5 text-starlink-blue" />;
@@ -34,9 +34,9 @@ const FeaturePreviewOverlay = ({
 
   const getButtonText = () => {
     switch (requiredRole) {
-      case 'business':
+      case 'team_admin':
         return 'Upgrade to Business';
-      case 'enterprise':
+      case 'enterprise_admin':
         return 'Upgrade to Enterprise';
       default:
         return 'Register Free';
@@ -45,9 +45,9 @@ const FeaturePreviewOverlay = ({
 
   const getColor = () => {
     switch (requiredRole) {
-      case 'business':
+      case 'team_admin':
         return 'from-green-500/10 to-blue-500/10 border-green-500/30';
-      case 'enterprise':
+      case 'enterprise_admin':
         return 'from-purple-500/10 to-blue-500/10 border-purple-500/30';
       default:
         return 'from-starlink-blue/10 to-starlink-purple/10 border-starlink-blue/30';

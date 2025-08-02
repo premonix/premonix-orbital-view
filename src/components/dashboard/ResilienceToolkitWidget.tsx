@@ -42,7 +42,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Interactive Tool",
           icon: <FileText className="w-5 h-5" />,
           status: "available",
-          requiredRole: 'business' as const,
+          requiredRole: 'team_admin' as const,
           action: () => setActiveView('business-impact')
         },
         {
@@ -51,7 +51,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Analysis Tool",
           icon: <Zap className="w-5 h-5" />,
           status: "beta",
-          requiredRole: 'business' as const,
+          requiredRole: 'team_admin' as const,
           action: () => setActiveView('supply-chain')
         }
       ]
@@ -65,7 +65,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Framework",
           icon: <Users className="w-5 h-5" />,
           status: "available",
-          requiredRole: 'registered' as const,
+          requiredRole: 'individual' as const,
           action: () => setActiveView('crisis-playbook')
         },
         {
@@ -74,7 +74,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Templates",
           icon: <FileText className="w-5 h-5" />,
           status: "available",
-          requiredRole: 'registered' as const,
+          requiredRole: 'individual' as const,
           action: () => setActiveView('communication')
         }
       ]
@@ -88,7 +88,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Course",
           icon: <PlayCircle className="w-5 h-5" />,
           status: "available",
-          requiredRole: 'registered' as const,
+          requiredRole: 'individual' as const,
           action: () => setActiveView('training')
         },
         {
@@ -97,7 +97,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
           type: "Simulation",
           icon: <Users className="w-5 h-5" />,
           status: "coming-soon",
-          requiredRole: 'enterprise' as const,
+          requiredRole: 'enterprise_admin' as const,
           action: () => {}
         }
       ]
@@ -110,21 +110,21 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
       type: "Report",
       size: "2.4 MB",
       downloads: "1,247",
-      requiredRole: 'registered' as const
+      requiredRole: 'individual' as const
     },
     {
       title: "Cyber Resilience Checklist",
       type: "PDF",
       size: "580 KB",
       downloads: "3,156",
-      requiredRole: 'registered' as const
+      requiredRole: 'individual' as const
     },
     {
       title: "Supply Chain Risk Framework",
       type: "Guide",
       size: "1.8 MB",
       downloads: "892",
-      requiredRole: 'business' as const
+      requiredRole: 'team_admin' as const
     }
   ];
 
@@ -146,37 +146,37 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
     switch (activeView) {
       case 'business-impact':
         return (
-          <PermissionGate permission="scenario_simulator" requiredRole="business">
+          <PermissionGate permission="scenario_simulator" requiredRole="team_admin">
             <BusinessImpactAssessment />
           </PermissionGate>
         );
       case 'crisis-playbook':
         return (
-          <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+          <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
             <CrisisResponsePlaybook />
           </PermissionGate>
         );
       case 'training':
         return (
-          <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+          <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
             <ThreatAwarenessTraining />
           </PermissionGate>
         );
       case 'profile-form':
         return (
-          <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+          <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
             <UserProfileForm onComplete={handleProfileComplete} />
           </PermissionGate>
         );
       case 'personalized-toolkit':
         return currentUserProfile ? (
-          <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+          <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
             <ResilienceToolkitComponent userProfile={currentUserProfile} />
           </PermissionGate>
         ) : null;
       case 'supply-chain':
         return (
-          <PermissionGate permission="scenario_simulator" requiredRole="business">
+          <PermissionGate permission="scenario_simulator" requiredRole="team_admin">
             <Card className="glass-panel border-starlink-orange/50 max-w-2xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-starlink-orange">Supply Chain Risk Mapper</CardTitle>
@@ -207,7 +207,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
         );
       case 'communication':
         return (
-          <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+          <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
             <Card className="glass-panel border-starlink-blue/50 max-w-4xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-starlink-blue">Crisis Communication Templates</CardTitle>
@@ -362,7 +362,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
                       <CardContent className="pt-0">
                         <p className="text-starlink-grey-light mb-3 text-sm">{tool.description}</p>
                         <PermissionGate 
-                          permission={tool.requiredRole === 'business' ? 'scenario_simulator' : 'view_resilience_toolkit'}
+                          permission={tool.requiredRole === 'team_admin' ? 'scenario_simulator' : 'view_resilience_toolkit'}
                           requiredRole={tool.requiredRole}
                           fallback={
                             <Button 
@@ -412,7 +412,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
                         {resource.downloads} downloads
                       </span>
                       <PermissionGate 
-                        permission={resource.requiredRole === 'business' ? 'scenario_simulator' : 'view_resilience_toolkit'}
+                        permission={resource.requiredRole === 'team_admin' ? 'scenario_simulator' : 'view_resilience_toolkit'}
                         requiredRole={resource.requiredRole}
                         fallback={
                           <Button 
@@ -449,7 +449,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
                 Comprehensive training programs to enhance your team's threat awareness and response capabilities
               </p>
               <div className="flex space-x-3 justify-center">
-                <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+                <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
                   <Button 
                     onClick={() => setActiveView('training')}
                     className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark"
@@ -457,7 +457,7 @@ export const ResilienceToolkitWidget = ({ userProfile, threatSignals, userId }: 
                     Start Training Program
                   </Button>
                 </PermissionGate>
-                <PermissionGate permission="view_resilience_toolkit" requiredRole="registered">
+                <PermissionGate permission="view_resilience_toolkit" requiredRole="individual">
                   <Button 
                     onClick={() => setActiveView('profile-form')}
                     variant="outline"

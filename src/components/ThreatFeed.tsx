@@ -112,7 +112,7 @@ const ThreatFeed = () => {
 
   return (
     <div className="fixed bottom-16 lg:bottom-6 right-4 lg:right-6 z-40 w-72 lg:w-80">
-      <PermissionGate permission="view_full_feed" requiredRole="registered">
+      <PermissionGate permission="view_full_feed" requiredRole="individual">
         <div className="glass-panel rounded-lg border border-starlink-grey/30">
           {/* Header */}
           <div className="p-3 lg:p-4 border-b border-starlink-grey/20">
