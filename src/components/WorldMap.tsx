@@ -5,8 +5,13 @@ import SignalPulse from './SignalPulse';
 import MapControls from './MapControls';
 import HeatZoneOverlay from './HeatZoneOverlay';
 import ThreatPopup from './ThreatPopup';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Lock, Zap } from 'lucide-react';
 
 const WorldMap = () => {
+  const { isAuthenticated, upgradeRole } = useAuth();
   const [selectedZone, setSelectedZone] = useState<{zone: ThreatZone, x: number, y: number} | null>(null);
   const [selectedYear, setSelectedYear] = useState(2024);
   const [viewMode, setViewMode] = useState<'2d' | 'globe'>('2d');
@@ -371,8 +376,46 @@ const WorldMap = () => {
           <span className="text-starlink-white">{viewMode.toUpperCase()} View</span>
           <div className="text-starlink-grey">|</div>
           <span className="text-starlink-blue">{selectedYear}</span>
+          {!isAuthenticated && (
+            <>
+              <div className="text-starlink-grey">|</div>
+              <Badge variant="outline" className="text-xs text-orange-300 border-orange-300/30">
+                Guest Mode
+              </Badge>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Guest Upgrade Prompt - Layer 9 */}
+      {!isAuthenticated && (
+        <div className="absolute top-20 lg:top-24 left-4 right-4 lg:left-6 lg:right-6 z-30">
+          <div className="glass-panel rounded-lg p-3 lg:p-4 bg-gradient-to-r from-starlink-blue/10 to-starlink-purple/10 border border-starlink-blue/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-starlink-blue/20 rounded-full">
+                  <Lock className="w-4 h-4 text-starlink-blue" />
+                </div>
+                <div>
+                  <h3 className="text-sm lg:text-base font-semibold text-starlink-white">
+                    Limited Threat View
+                  </h3>
+                  <p className="text-xs lg:text-sm text-starlink-grey-light">
+                    Register for unlimited signals, real-time alerts, and dashboard access
+                  </p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => upgradeRole('registered')}
+                className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
+              >
+                <Zap className="w-4 h-4 mr-1" />
+                Register Free
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

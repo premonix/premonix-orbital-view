@@ -11,8 +11,11 @@ import CustomAlertSystem from "@/components/isometric/CustomAlertSystem";
 import ResilienceToolkit from "@/components/isometric/ResilienceToolkit";
 import HeroThreatMap from "@/components/isometric/HeroThreatMap";
 import WaitlistForm from "@/components/WaitlistForm";
+import GuestDashboardPreview from "@/components/GuestDashboardPreview";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Homepage = () => {
+  const { isAuthenticated } = useAuth();
   const features = [
     {
       icon: Globe,
@@ -250,6 +253,9 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+
+      {/* Guest Dashboard Preview */}
+      {!isAuthenticated && <GuestDashboardPreview />}
 
       {/* User Personas Section */}
       <section className="py-20 px-6">

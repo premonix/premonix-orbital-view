@@ -4,8 +4,12 @@ import WorldMap from "@/components/WorldMap";
 import ThreatIndicator from "@/components/ThreatIndicator";
 import Footer from "@/components/Footer";
 import ThreatFeed from "@/components/ThreatFeed";
+import GuestThreatFeed from "@/components/GuestThreatFeed";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ThreatMap = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-starlink-dark text-starlink-white overflow-hidden">
       {/* Navigation */}
@@ -19,8 +23,8 @@ const ThreatMap = () => {
         {/* Live Threat Indicator */}
         <ThreatIndicator />
         
-        {/* Live Threat Feed */}
-        <ThreatFeed />
+        {/* Conditional Threat Feed */}
+        {isAuthenticated ? <ThreatFeed /> : <GuestThreatFeed />}
       </div>
       
       {/* Footer */}
