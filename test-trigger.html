@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trigger Test Emails</title>
+</head>
+<body>
+    <button onclick="triggerEmails()">Send Test Emails</button>
+    <div id="result"></div>
+
+    <script>
+        async function triggerEmails() {
+            try {
+                const response = await fetch('https://eydehwbjzpanyzzshgyd.supabase.co/functions/v1/send-test-emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                console.log('Test emails triggered:', result);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        // Auto-trigger on load
+        window.onload = () => triggerEmails();
+    </script>
+</body>
+</html>
