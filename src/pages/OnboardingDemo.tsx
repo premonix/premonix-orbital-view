@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { OrganizationProfile } from "@/types/organization";
+import { OrganizationProfile, OrganizationSector, OrganizationSize, GeographicRegion } from "@/types/organization";
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { BasicInfoStep } from "@/components/onboarding/steps/BasicInfoStep";
 import { OrganizationDetailsStep } from "@/components/onboarding/steps/OrganizationDetailsStep";
 import { SecurityPostureStep } from "@/components/onboarding/steps/SecurityPostureStep";
 import { RiskAssessmentStep } from "@/components/onboarding/steps/RiskAssessmentStep";
 import { DSSResultsStep } from "@/components/onboarding/steps/DSSResultsStep";
+import { Building2, Users, Shield, AlertTriangle, BarChart3 } from 'lucide-react';
 
 const ONBOARDING_STEPS = [
   { id: 'basic_info', title: 'Organization Info', description: 'Basic details about your organization' },
@@ -27,46 +29,64 @@ const OnboardingDemo = () => {
   const currentStep = ONBOARDING_STEPS[currentStepIndex];
   const progressPercentage = ((currentStepIndex + 1) / ONBOARDING_STEPS.length) * 100;
 
-  // Simple DSS calculation for demo purposes
-  const calculateDemoDSSScore = (orgProfile: Partial<OrganizationProfile>) => {
-    let score = 40; // Base score
-    
-    // Sector risk adjustments
-    const sectorScores: Record<string, number> = {
-      'technology': 20,
+  // Real DSS calculation matching the database function
+  const calculateRealDSSScore = (orgProfile: OrganizationProfile) => {
+    let baseScore = 0;
+    let sectorRisk = 0;
+    let sizeRisk = 0;
+    let regionRisk = 0;
+    let complexityRisk = 0;
+
+    // Sector-based risk scoring (matches database function)
+    const sectorScores: Record<OrganizationSector, number> = {
       'financial_services': 25,
-      'healthcare': 22,
-      'manufacturing': 18,
-      'energy_utilities': 28,
       'government_public_sector': 30,
-      'education': 12,
+      'energy_utilities': 28,
+      'healthcare': 22,
+      'technology': 20,
+      'telecommunications': 24,
+      'transportation_logistics': 26,
+      'manufacturing': 18,
       'retail_consumer_goods': 15,
+      'education': 12,
+      'agriculture': 14,
+      'real_estate': 10,
+      'entertainment_media': 16,
+      'consulting': 13,
+      'non_profit': 8,
       'other': 15
     };
-    
-    if (orgProfile.sector) {
-      score += sectorScores[orgProfile.sector] || 15;
-    }
-    
-    // Size adjustments
-    const sizeScores: Record<string, number> = {
-      'micro': 5,
-      'small': 10,
-      'medium': 15,
+
+    // Size-based risk scoring
+    const sizeScores: Record<OrganizationSize, number> = {
+      'enterprise': 25,
       'large': 20,
-      'enterprise': 25
+      'medium': 15,
+      'small': 10,
+      'micro': 5
     };
+
+    // Regional risk scoring
+    const regionScores: Record<GeographicRegion, number> = {
+      'middle_east': 20,
+      'africa': 18,
+      'asia_pacific': 15,
+      'south_america': 12,
+      'europe': 10,
+      'north_america': 8,
+      'oceania': 6,
+      'global': 25
+    };
+
+    sectorRisk = sectorScores[orgProfile.sector] || 15;
+    sizeRisk = sizeScores[orgProfile.size] || 10;
+    regionRisk = regionScores[orgProfile.primary_region] || 10;
+    complexityRisk = (orgProfile.supply_chain_complexity || 3) * 5;
+
+    baseScore = sectorRisk + sizeRisk + regionRisk + complexityRisk;
     
-    if (orgProfile.size) {
-      score += sizeScores[orgProfile.size] || 10;
-    }
-    
-    // Security measures bonus
-    if (orgProfile.existing_security_measures) {
-      score -= orgProfile.existing_security_measures.length * 2; // More security = lower risk score
-    }
-    
-    return Math.max(20, Math.min(85, score)); // Keep between 20-85
+    // Ensure score is within bounds
+    return Math.max(0, Math.min(100, baseScore));
   };
 
   const handleStepComplete = (stepData: any) => {
@@ -74,8 +94,8 @@ const OnboardingDemo = () => {
     setOrganizationData(updatedData);
 
     // Calculate DSS score when reaching risk assessment
-    if (currentStep.id === 'risk_assessment') {
-      const dssScore = calculateDemoDSSScore(updatedData);
+    if (currentStep.id === 'risk_assessment' && updatedData.sector && updatedData.size && updatedData.primary_region) {
+      const dssScore = calculateRealDSSScore(updatedData as OrganizationProfile);
       setCalculatedDSSScore(dssScore);
     }
 
@@ -85,13 +105,37 @@ const OnboardingDemo = () => {
   };
 
   const handleFinishDemo = () => {
-    alert(`Demo Complete! 
+    // Simulate what would happen in the real version
+    const organizationProfile = organizationData as OrganizationProfile;
     
-Organization: ${organizationData.name}
-Sector: ${organizationData.sector}
-DSS Score: ${calculatedDSSScore}
+    console.log('Organization Profile that would be saved:', {
+      organization_profiles: organizationProfile,
+      dss_assessment: {
+        overall_score: calculatedDSSScore,
+        risk_level: calculatedDSSScore! >= 80 ? 'low' : calculatedDSSScore! >= 60 ? 'medium' : 'high',
+        assessment_data: { organization_profile: organizationProfile }
+      },
+      onboarding_progress: {
+        step: 'organization_onboarding',
+        completed_at: new Date().toISOString(),
+        data: { organization_profile: organizationProfile }
+      }
+    });
 
-In the real version, this would save to the database and redirect to your personalized dashboard.`);
+    alert(`✅ Demo Complete! 
+
+🏢 Organization: ${organizationProfile.name}
+🏭 Sector: ${organizationProfile.sector?.replace('_', ' ')}
+📊 Size: ${organizationProfile.size}
+🌍 Region: ${organizationProfile.primary_region?.replace('_', ' ')}
+🛡️ DSS Score: ${calculatedDSSScore}
+
+📋 What would happen in the real version:
+• Organization profile saved to database
+• DSS assessment recorded with ${calculatedDSSScore! >= 80 ? 'LOW' : calculatedDSSScore! >= 60 ? 'MEDIUM' : 'HIGH'} risk level
+• Onboarding progress marked complete
+• Redirect to personalized dashboard
+• Threat intelligence customized for your sector & region`);
   };
 
   const handleBack = () => {
@@ -152,14 +196,32 @@ In the real version, this would save to the database and redirect to your person
         {/* Demo Banner */}
         <div className="mb-6">
           <Card className="bg-starlink-blue/10 border-starlink-blue/30">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-4">
                 <Badge className="bg-starlink-blue/20 text-starlink-blue border-starlink-blue/40">
-                  DEMO MODE
+                  ORGANIZATIONAL ONBOARDING DEMO
                 </Badge>
-                <p className="text-starlink-white text-sm">
-                  This is a demo of the organization onboarding flow. No data will be saved.
-                </p>
+                <Badge variant="outline" className="border-starlink-grey/40 text-starlink-grey-light">
+                  No Authentication Required
+                </Badge>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <Building2 className="w-4 h-4 text-starlink-blue" />
+                  Enterprise-focused setup
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <BarChart3 className="w-4 h-4 text-starlink-blue" />
+                  Real DSS calculation
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <Shield className="w-4 h-4 text-starlink-blue" />
+                  Security posture assessment
+                </div>
+                <div className="flex items-center gap-2 text-starlink-white">
+                  <AlertTriangle className="w-4 h-4 text-starlink-blue" />
+                  Risk-based recommendations
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -169,9 +231,9 @@ In the real version, this would save to the database and redirect to your person
           <CardHeader>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <CardTitle className="text-starlink-white text-2xl">Organization Onboarding Demo</CardTitle>
+                <CardTitle className="text-starlink-white text-2xl">Enterprise Organization Onboarding</CardTitle>
                 <CardDescription className="text-starlink-grey-light">
-                  Experience the full onboarding process for personalized threat intelligence
+                  Complete organizational setup for personalized threat intelligence and security assessment
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="text-starlink-blue">
@@ -229,7 +291,7 @@ In the real version, this would save to the database and redirect to your person
                   Back
                 </button>
                 <div className="text-sm text-starlink-grey-light">
-                  Demo Mode - No data is saved
+                  🏢 Enterprise Demo - Database integration simulated
                 </div>
               </div>
             )}
