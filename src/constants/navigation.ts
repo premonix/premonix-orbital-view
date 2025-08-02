@@ -117,7 +117,8 @@ export const dashboardNavGroups: NavGroup[] = [
     label: 'Management',
     items: [
       { label: 'Alerts', href: 'alerts', icon: Database },
-      { label: 'Settings', href: 'settings', icon: Info }
+      { label: 'Settings', href: 'settings', icon: Info },
+      { label: 'Admin Console', href: 'admin', icon: Shield, authRequired: true }
     ]
   }
 ];

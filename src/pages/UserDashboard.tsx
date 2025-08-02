@@ -19,6 +19,7 @@ import { EmailPreferencesWidget } from '@/components/dashboard/EmailPreferencesW
 import { DisruptionOSModulesWidget } from '@/components/dashboard/DisruptionOSModulesWidget';
 import { ExecutiveBriefingWidget } from '@/components/dashboard/ExecutiveBriefingWidget';
 import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWidget';
+import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -239,6 +240,9 @@ const UserDashboard = () => {
   const threatSummary = getThreatSummary();
   const unreadAlerts = userAlerts.filter(alert => !alert.is_read).length;
 
+  // Check if user is super admin - check both role field and user_roles table data
+  const isSuperAdmin = (user as any)?.role === 'premonix_super_user';
+
   const unreadCounts = {
     alerts: unreadAlerts,
   };
@@ -373,11 +377,20 @@ const UserDashboard = () => {
                     
                     <DisruptionOSModulesWidget userId={user.id} />
                     
+                    {/* Super Admin Section - Only visible to super admins */}
+                    {isSuperAdmin && (
+                      <SuperAdminWidget userId={user.id} />
+                    )}
+                    
                     <ThreatMapWidget 
                       threatSignals={threatSignals}
                       userPreferences={preferences?.location_preferences}
                     />
                   </div>
+                )}
+
+                {activeTab === 'admin' && isSuperAdmin && (
+                  <SuperAdminWidget userId={user.id} />
                 )}
 
                 {activeTab === 'executive' && (

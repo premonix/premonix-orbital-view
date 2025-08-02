@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { dashboardNavGroups } from '@/constants/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardSidebarProps {
   activeTab: string;
@@ -25,6 +26,21 @@ export const DashboardSidebar = ({
   unreadCounts = {} 
 }: DashboardSidebarProps) => {
   const { state } = useSidebar();
+  const { user } = useAuth();
+
+  // Filter navigation groups based on user permissions
+  const getVisibleNavGroups = () => {
+    return dashboardNavGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        // Show admin console only for super admin users
+        if (item.href === 'admin') {
+          return (user as any)?.role === 'premonix_super_user';
+        }
+        return !item.authRequired || user;
+      })
+    })).filter(group => group.items.length > 0);
+  };
 
   return (
     <Sidebar className="border-r border-border">
@@ -43,7 +59,7 @@ export const DashboardSidebar = ({
       </SidebarHeader>
 
       <SidebarContent>
-        {dashboardNavGroups.map((group) => (
+        {getVisibleNavGroups().map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
