@@ -337,85 +337,138 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
       </Card>
 
       {/* DSS History and Progress */}
-      {dssHistory.length > 0 && (
-        <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-starlink-white">
-              <Calendar className="w-5 h-5" />
-              <span>DSS Progress History</span>
-            </CardTitle>
-            <CardDescription className="text-starlink-grey-light">
-              Track your resilience improvements over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {dssHistory.slice(0, 5).map((entry, index) => {
-                const isLatest = index === 0;
-                const date = new Date(entry.created_at).toLocaleDateString();
-                const time = new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const level = entry.score >= 70 ? 'High' : entry.score >= 40 ? 'Medium' : 'Low';
-                
-                return (
-                  <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg ${isLatest ? 'bg-primary/10 border border-primary/20' : 'bg-starlink-dark-secondary/50'}`}>
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${isLatest ? 'bg-primary' : 'bg-starlink-grey'}`} />
-                      <div>
-                        <div className="text-sm font-medium text-starlink-white">
-                          {date} at {time}
-                          {isLatest && <Badge variant="outline" className="ml-2 text-xs">Latest</Badge>}
+      <Card className="glass-panel">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-starlink-white">
+            <BarChart3 className="w-5 h-5" />
+            <span>DSS Progress Timeline</span>
+          </CardTitle>
+          <CardDescription className="text-starlink-grey-light">
+            Track your resilience improvements over time
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {dssHistory.length > 0 ? (
+            <>
+              {/* Chart Visualization */}
+              <div className="h-64 mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={dssHistory.slice().reverse().map(entry => ({
+                    date: new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    score: entry.score,
+                    level: entry.score >= 70 ? 'High' : entry.score >= 40 ? 'Medium' : 'Low'
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#9CA3AF"
+                      fontSize={12}
+                    />
+                    <YAxis 
+                      stroke="#9CA3AF"
+                      fontSize={12}
+                      domain={[0, 100]}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#1F2937', 
+                        border: '1px solid #374151',
+                        borderRadius: '8px',
+                        color: '#F9FAFB'
+                      }}
+                      formatter={(value: any) => [`${value} Risk Score`, 'DSS']}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="#3B82F6" 
+                      fill="#3B82F6" 
+                      fillOpacity={0.2}
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Recent Assessments List */}
+              <div className="space-y-3 mb-4">
+                <h4 className="text-sm font-medium text-starlink-white">Recent Assessments</h4>
+                {dssHistory.slice(0, 3).map((entry, index) => {
+                  const isLatest = index === 0;
+                  const date = new Date(entry.created_at).toLocaleDateString();
+                  const time = new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  const level = entry.score >= 70 ? 'High' : entry.score >= 40 ? 'Medium' : 'Low';
+                  
+                  return (
+                    <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg ${isLatest ? 'bg-primary/10 border border-primary/20' : 'bg-starlink-dark-secondary/50'}`}>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-2 h-2 rounded-full ${isLatest ? 'bg-primary' : 'bg-starlink-grey'}`} />
+                        <div>
+                          <div className="text-sm font-medium text-starlink-white">
+                            {date} at {time}
+                            {isLatest && <Badge variant="outline" className="ml-2 text-xs">Latest</Badge>}
+                          </div>
+                          <div className="text-xs text-starlink-grey-light">
+                            Assessment completed
+                          </div>
                         </div>
-                        <div className="text-xs text-starlink-grey-light">
-                          Assessment completed
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-lg font-bold ${getDSSColor(level)}`}>
+                          {entry.score}
+                        </div>
+                        <div className={`text-xs ${getDSSColor(level)}`}>
+                          {level} Risk
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`text-lg font-bold ${getDSSColor(level)}`}>
-                        {entry.score}
-                      </div>
-                      <div className={`text-xs ${getDSSColor(level)}`}>
-                        {level} Risk
-                      </div>
+                  );
+                })}
+              </div>
+              
+              {/* Statistics */}
+              <div className="pt-4 border-t border-starlink-dark-secondary">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-lg font-bold text-starlink-white">
+                      {dssHistory.length}
+                    </div>
+                    <div className="text-xs text-starlink-grey-light">Total Assessments</div>
+                  </div>
+                  <div>
+                    <div className={`text-lg font-bold ${trend.trend === 'improving' ? 'text-green-400' : trend.trend === 'declining' ? 'text-red-400' : 'text-starlink-white'}`}>
+                      {trend.trend === 'improving' ? '↓' : trend.trend === 'declining' ? '↑' : '→'}
+                    </div>
+                    <div className="text-xs text-starlink-grey-light">
+                      {trend.trend === 'improving' ? 'Improving' : trend.trend === 'declining' ? 'Declining' : 'Stable'}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-            
-            {dssHistory.length > 5 && (
-              <div className="mt-4 text-center">
-                <Button variant="ghost" size="sm" className="text-starlink-grey-light hover:text-starlink-white">
-                  View All History ({dssHistory.length} assessments)
-                </Button>
-              </div>
-            )}
-            
-            <div className="mt-4 pt-4 border-t border-starlink-dark-secondary">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-lg font-bold text-starlink-white">
-                    {dssHistory.length}
+                  <div>
+                    <div className="text-lg font-bold text-starlink-white">
+                      {Math.round(dssHistory.reduce((sum, entry) => sum + entry.score, 0) / dssHistory.length)}
+                    </div>
+                    <div className="text-xs text-starlink-grey-light">Average Score</div>
                   </div>
-                  <div className="text-xs text-starlink-grey-light">Assessments</div>
-                </div>
-                <div>
-                  <div className={`text-lg font-bold ${trend.trend === 'improving' ? 'text-green-400' : trend.trend === 'declining' ? 'text-red-400' : 'text-starlink-white'}`}>
-                    {trend.trend === 'improving' ? '↓' : trend.trend === 'declining' ? '↑' : '→'}
-                  </div>
-                  <div className="text-xs text-starlink-grey-light">Trend</div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-starlink-white">
-                    {Math.round(dssHistory.reduce((sum, entry) => sum + entry.score, 0) / dssHistory.length)}
-                  </div>
-                  <div className="text-xs text-starlink-grey-light">Avg Score</div>
                 </div>
               </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <BarChart3 className="w-12 h-12 text-starlink-grey mx-auto mb-4" />
+              <p className="text-starlink-grey-light mb-2">No assessment history yet</p>
+              <p className="text-sm text-starlink-grey mb-4">Complete your first DSS assessment to see progress over time</p>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsDSSDialogOpen(true)}
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Take Assessment
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {/* Resilience Recommendations */}
       <Card className="glass-panel">
