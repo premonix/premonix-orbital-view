@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      dss_score_history: {
+        Row: {
+          assessment_data: Json
+          created_at: string
+          id: string
+          score: number
+          updated_at: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          assessment_data?: Json
+          created_at?: string
+          id?: string
+          score: number
+          updated_at?: string
+          user_id: string
+          version?: string
+        }
+        Update: {
+          assessment_data?: Json
+          created_at?: string
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

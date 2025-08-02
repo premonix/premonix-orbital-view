@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DSSAssessment } from './DSSAssessment';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Shield, 
   Target, 
@@ -12,9 +13,11 @@ import {
   CheckCircle, 
   Clock, 
   TrendingUp,
+  TrendingDown,
   FileText,
   Users,
-  ArrowRight
+  ArrowRight,
+  Calendar
 } from 'lucide-react';
 
 interface ResilienceWidgetProps {
@@ -23,10 +26,47 @@ interface ResilienceWidgetProps {
   userId: string;
 }
 
+interface DSSHistoryEntry {
+  id: string;
+  score: number;
+  created_at: string;
+  assessment_data: any;
+}
+
 export const ResilienceWidget = ({ userProfile, threatSignals, userId }: ResilienceWidgetProps) => {
   const [activeSection, setActiveSection] = useState('overview');
   const [isDSSDialogOpen, setIsDSSDialogOpen] = useState(false);
   const [currentDSSScore, setCurrentDSSScore] = useState(0);
+  const [dssHistory, setDssHistory] = useState<DSSHistoryEntry[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  useEffect(() => {
+    loadDSSHistory();
+  }, [userId]);
+
+  const loadDSSHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const { data, error } = await supabase
+        .from('dss_score_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setDssHistory(data || []);
+      
+      // Set current score from most recent entry
+      if (data && data.length > 0) {
+        setCurrentDSSScore(data[0].score);
+      }
+    } catch (error) {
+      console.error('Error loading DSS history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   // Calculate DSS (Disruption Sensitivity Score) based on user profile and threat data
   const calculateDSS = () => {
@@ -76,6 +116,25 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
   };
 
   const dss = calculateDSS();
+  
+  // Use current score from history if available, otherwise use calculated score
+  const displayScore = dssHistory.length > 0 ? currentDSSScore : dss.score;
+  const displayLevel = displayScore >= 70 ? 'High' : displayScore >= 40 ? 'Medium' : 'Low';
+
+  // Calculate trend from history
+  const getDSSTrend = () => {
+    if (dssHistory.length < 2) return { trend: 'stable', change: 0 };
+    
+    const latest = dssHistory[0].score;
+    const previous = dssHistory[1].score;
+    const change = latest - previous;
+    
+    if (change > 5) return { trend: 'improving', change };
+    if (change < -5) return { trend: 'declining', change };
+    return { trend: 'stable', change };
+  };
+
+  const trend = getDSSTrend();
 
   // Generate resilience recommendations based on threat data
   const getResilienceRecommendations = () => {
@@ -116,7 +175,7 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
       });
     }
 
-    if (dss.score >= 70) {
+    if (displayScore >= 70) {
       recommendations.push({
         priority: 'High',
         title: 'Comprehensive Resilience Plan',
@@ -187,14 +246,26 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
                 Your organization's exposure to disruption events
               </CardDescription>
             </div>
-            <div className={`text-right ${getDSSColor(dss.level)}`}>
-              <div className="text-2xl font-bold">{dss.score}/100</div>
-              <div className="text-sm">{dss.level} Risk</div>
+            <div className={`text-right ${getDSSColor(displayLevel)}`}>
+              <div className="text-2xl font-bold">{displayScore}/100</div>
+              <div className="text-sm">{displayLevel} Risk</div>
+              {trend.trend !== 'stable' && (
+                <div className="flex items-center justify-end mt-1">
+                  {trend.trend === 'improving' ? (
+                    <TrendingDown className="w-3 h-3 text-green-400 mr-1" />
+                  ) : (
+                    <TrendingUp className="w-3 h-3 text-red-400 mr-1" />
+                  )}
+                  <span className={`text-xs ${trend.trend === 'improving' ? 'text-green-400' : 'text-red-400'}`}>
+                    {Math.abs(trend.change)} pts
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Progress value={dss.score} className="h-2" />
+          <Progress value={displayScore} className="h-2" />
           
           {dss.factors.length > 0 && (
             <div className="space-y-2">
@@ -226,12 +297,94 @@ export const ResilienceWidget = ({ userProfile, threatSignals, userId }: Resilie
                 onScoreUpdate={(score) => {
                   setCurrentDSSScore(score);
                   setIsDSSDialogOpen(false);
+                  loadDSSHistory(); // Reload history after new assessment
                 }}
               />
             </DialogContent>
           </Dialog>
         </CardContent>
       </Card>
+
+      {/* DSS History and Progress */}
+      {dssHistory.length > 0 && (
+        <Card className="glass-panel">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-starlink-white">
+              <Calendar className="w-5 h-5" />
+              <span>DSS Progress History</span>
+            </CardTitle>
+            <CardDescription className="text-starlink-grey-light">
+              Track your resilience improvements over time
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {dssHistory.slice(0, 5).map((entry, index) => {
+                const isLatest = index === 0;
+                const date = new Date(entry.created_at).toLocaleDateString();
+                const time = new Date(entry.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const level = entry.score >= 70 ? 'High' : entry.score >= 40 ? 'Medium' : 'Low';
+                
+                return (
+                  <div key={entry.id} className={`flex items-center justify-between p-3 rounded-lg ${isLatest ? 'bg-primary/10 border border-primary/20' : 'bg-starlink-dark-secondary/50'}`}>
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${isLatest ? 'bg-primary' : 'bg-starlink-grey'}`} />
+                      <div>
+                        <div className="text-sm font-medium text-starlink-white">
+                          {date} at {time}
+                          {isLatest && <Badge variant="outline" className="ml-2 text-xs">Latest</Badge>}
+                        </div>
+                        <div className="text-xs text-starlink-grey-light">
+                          Assessment completed
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-lg font-bold ${getDSSColor(level)}`}>
+                        {entry.score}
+                      </div>
+                      <div className={`text-xs ${getDSSColor(level)}`}>
+                        {level} Risk
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {dssHistory.length > 5 && (
+              <div className="mt-4 text-center">
+                <Button variant="ghost" size="sm" className="text-starlink-grey-light hover:text-starlink-white">
+                  View All History ({dssHistory.length} assessments)
+                </Button>
+              </div>
+            )}
+            
+            <div className="mt-4 pt-4 border-t border-starlink-dark-secondary">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-bold text-starlink-white">
+                    {dssHistory.length}
+                  </div>
+                  <div className="text-xs text-starlink-grey-light">Assessments</div>
+                </div>
+                <div>
+                  <div className={`text-lg font-bold ${trend.trend === 'improving' ? 'text-green-400' : trend.trend === 'declining' ? 'text-red-400' : 'text-starlink-white'}`}>
+                    {trend.trend === 'improving' ? '↓' : trend.trend === 'declining' ? '↑' : '→'}
+                  </div>
+                  <div className="text-xs text-starlink-grey-light">Trend</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-starlink-white">
+                    {Math.round(dssHistory.reduce((sum, entry) => sum + entry.score, 0) / dssHistory.length)}
+                  </div>
+                  <div className="text-xs text-starlink-grey-light">Avg Score</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Resilience Recommendations */}
       <Card className="glass-panel">

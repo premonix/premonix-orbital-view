@@ -229,6 +229,24 @@ export const DSSAssessment = ({ userId, onScoreUpdate }: DSSAssessmentProps) => 
 
   const saveAssessment = async () => {
     try {
+      // Save DSS score to history table
+      const { error: historyError } = await supabase
+        .from('dss_score_history')
+        .insert({
+          user_id: userId,
+          score: dssScore,
+          assessment_data: {
+            responses,
+            completed_at: new Date().toISOString(),
+            version: '1.0'
+          }
+        });
+
+      if (historyError) {
+        console.error('Error saving DSS score history:', historyError);
+        throw historyError;
+      }
+
       // Get current preferences
       const { data: currentPrefs } = await supabase
         .from('user_dashboard_preferences')
