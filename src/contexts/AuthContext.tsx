@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole } from '@/types/user';
 import { rolePermissions, tierMapping } from '@/types/user';
 
+interface SubscriptionInfo {
+  subscribed: boolean;
+  subscription_tier: string;
+  subscription_end: string | null;
+}
+
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -16,6 +22,9 @@ interface AuthContextType extends AuthState {
   register: (email: string, password: string, name: string, companyName?: string) => Promise<{ error?: string }>;
   upgradeRole: (newRole: UserRole) => Promise<void>;
   hasPermission: (permission: string) => boolean;
+  checkSubscription: () => Promise<void>;
+  createCheckoutSession: (planId: string) => Promise<{ url?: string; error?: string }>;
+  openCustomerPortal: () => Promise<{ url?: string; error?: string }>;
 }
 
 interface AuthProviderProps {
@@ -302,13 +311,82 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return authState.user?.permissions?.includes(permission) ?? false;
   };
 
+  const checkSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+      
+      const subscriptionInfo: SubscriptionInfo = data;
+      if (authState.user && subscriptionInfo.subscription_tier) {
+        const updatedUser: User = {
+          ...authState.user,
+          role: subscriptionInfo.subscription_tier as UserRole,
+          permissions: rolePermissions[subscriptionInfo.subscription_tier as UserRole] || [],
+          subscription: {
+            plan: subscriptionInfo.subscription_tier as UserRole,
+            tier: tierMapping[subscriptionInfo.subscription_tier as UserRole] || 'personal',
+            features: rolePermissions[subscriptionInfo.subscription_tier as UserRole] || [],
+            expiresAt: subscriptionInfo.subscription_end ? new Date(subscriptionInfo.subscription_end) : undefined
+          }
+        };
+        
+        setAuthState({
+          ...authState,
+          user: updatedUser
+        });
+      }
+    } catch (error) {
+      console.error('Exception in checkSubscription:', error);
+    }
+  };
+
+  const createCheckoutSession = async (planId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId }
+      });
+      
+      if (error) {
+        console.error('Error creating checkout session:', error);
+        return { error: error.message };
+      }
+      
+      return { url: data.url };
+    } catch (error: any) {
+      console.error('Exception in createCheckoutSession:', error);
+      return { error: error.message || 'Failed to create checkout session' };
+    }
+  };
+
+  const openCustomerPortal = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        console.error('Error opening customer portal:', error);
+        return { error: error.message };
+      }
+      
+      return { url: data.url };
+    } catch (error: any) {
+      console.error('Exception in openCustomerPortal:', error);
+      return { error: error.message || 'Failed to open customer portal' };
+    }
+  };
+
   const contextValue: AuthContextType = {
     ...authState,
     login,
     logout,
     register,
     upgradeRole,
-    hasPermission
+    hasPermission,
+    checkSubscription,
+    createCheckoutSession,
+    openCustomerPortal
   };
 
   return (

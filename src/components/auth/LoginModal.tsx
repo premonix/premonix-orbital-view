@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 interface LoginModalProps {
   open: boolean;
@@ -18,6 +19,7 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -104,9 +106,23 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
             >
               Don't have an account? Register
             </Button>
+            
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm text-starlink-grey-light hover:text-starlink-white"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              Forgot your password?
+            </Button>
           </div>
         </form>
       </DialogContent>
+
+      <ForgotPasswordModal
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+      />
     </Dialog>
   );
 };
