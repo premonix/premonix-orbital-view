@@ -103,6 +103,42 @@ const handler = async (req: Request): Promise<Response> => {
             console.error(`Error inserting signals for ${source.name}:`, insertError);
           } else {
             insertedCount = insertedSignals?.length || 0;
+            
+            // Trigger AI analysis for new threats (async)
+            if (insertedSignals && insertedSignals.length > 0) {
+              console.log(`Triggering AI analysis for ${insertedSignals.length} new threats`);
+              supabase.functions.invoke('ai-threat-analysis', {
+                body: {
+                  threats: insertedSignals.map(signal => ({
+                    id: signal.id,
+                    title: signal.title,
+                    summary: signal.summary,
+                    source_name: signal.source_name,
+                    existing_category: signal.category,
+                    existing_severity: signal.severity
+                  }))
+                }
+              }).catch(error => {
+                console.error('AI analysis trigger failed:', error);
+              });
+
+              // Broadcast new threats via real-time stream (async)
+              for (const signal of insertedSignals) {
+                fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/realtime-threat-stream`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+                  },
+                  body: JSON.stringify({
+                    type: 'broadcast_new_threat',
+                    threat: signal
+                  })
+                }).catch(error => {
+                  console.error('Real-time broadcast failed:', error);
+                });
+              }
+            }
           }
         }
 

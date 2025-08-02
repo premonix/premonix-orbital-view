@@ -23,6 +23,8 @@ import { ExecutiveBriefingWidget } from '@/components/dashboard/ExecutiveBriefin
 import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWidget';
 import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
 import { DataSourcesWidget } from '@/components/dashboard/DataSourcesWidget';
+import { RealTimeThreatStream } from '@/components/dashboard/RealTimeThreatStream';
+import { AIThreatAnalysisWidget } from '@/components/dashboard/AIThreatAnalysisWidget';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
@@ -413,6 +415,10 @@ const UserDashboard = () => {
 
                 {activeTab === 'admin' && isSuperAdmin && (
                   <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <RealTimeThreatStream />
+                      <AIThreatAnalysisWidget />
+                    </div>
                     <DataSourcesWidget />
                     <SuperAdminWidget userId={user.id} />
                   </div>
