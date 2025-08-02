@@ -11,7 +11,9 @@ import { ThreatMapWidget } from '@/components/dashboard/ThreatMapWidget';
 import { AnalyticsWidget } from '@/components/dashboard/AnalyticsWidget';
 import { DashboardCustomizer } from '@/components/dashboard/DashboardCustomizer';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
-import { Settings, LayoutGrid, Bell, BarChart3, Map, AlertTriangle } from 'lucide-react';
+import { ResilienceWidget } from '@/components/dashboard/ResilienceWidget';
+import { DecisionSupportWidget } from '@/components/dashboard/DecisionSupportWidget';
+import { Settings, LayoutGrid, Bell, BarChart3, Map, AlertTriangle, Shield, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface DashboardPreferences {
@@ -321,7 +323,7 @@ const UserDashboard = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-starlink-dark-secondary">
+          <TabsList className="grid w-full grid-cols-6 bg-starlink-dark-secondary">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <LayoutGrid className="w-4 h-4" />
               <span>Overview</span>
@@ -329,6 +331,14 @@ const UserDashboard = () => {
             <TabsTrigger value="threats" className="flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4" />
               <span>Threats</span>
+            </TabsTrigger>
+            <TabsTrigger value="resilience" className="flex items-center space-x-2">
+              <Shield className="w-4 h-4" />
+              <span>Resilience</span>
+            </TabsTrigger>
+            <TabsTrigger value="decision" className="flex items-center space-x-2">
+              <Brain className="w-4 h-4" />
+              <span>Decision</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
@@ -362,6 +372,23 @@ const UserDashboard = () => {
               threatSignals={threatSignals}
               userPreferences={preferences?.location_preferences}
               showFilters={true}
+            />
+          </TabsContent>
+
+          <TabsContent value="resilience" className="space-y-6">
+            <ResilienceWidget 
+              userProfile={preferences}
+              threatSignals={threatSignals || []}
+              userId={user?.id || ''}
+            />
+          </TabsContent>
+
+          <TabsContent value="decision" className="space-y-6">
+            <DecisionSupportWidget 
+              threatSignals={threatSignals || []}
+              userAlerts={userAlerts || []}
+              analytics={analytics || []}
+              userId={user?.id || ''}
             />
           </TabsContent>
 
