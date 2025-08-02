@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.realtime-threat-stream]
 verify_jwt = false
 
+[functions.ai-report-generation]
+verify_jwt = false
+
 [functions.threat-feed-ingestion]
 verify_jwt = false
 

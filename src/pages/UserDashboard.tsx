@@ -27,6 +27,7 @@ import { RealTimeThreatStream } from '@/components/dashboard/RealTimeThreatStrea
 import { AIThreatAnalysisWidget } from '@/components/dashboard/AIThreatAnalysisWidget';
 import { PersonalizedThreatWidget } from '@/components/dashboard/PersonalizedThreatWidget';
 import { EnhancedRealTimeStream } from '@/components/dashboard/EnhancedRealTimeStream';
+import { AIReportGenerator } from '@/components/dashboard/AIReportGenerator';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import { useRealTime, RealTimeStatus } from '@/contexts/RealTimeContext';
@@ -490,11 +491,14 @@ const UserDashboard = () => {
                 )}
 
                 {activeTab === 'analytics' && (
-                  <AnalyticsWidget 
-                    analytics={analytics || []}
-                    threatSignals={threatSignals || []}
-                    userId={user?.id || ''}
-                  />
+                  <div className="space-y-6">
+                    <AIReportGenerator threatSignals={threatSignals} />
+                    <AnalyticsWidget 
+                      analytics={analytics || []}
+                      threatSignals={threatSignals || []}
+                      userId={user?.id || ''}
+                    />
+                  </div>
                 )}
 
                 {activeTab === 'alerts' && (

@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAIReportGeneration } from '@/hooks/useAIReportGeneration';
 import { 
   FileText, 
   Download, 
@@ -9,7 +10,10 @@ import {
   TrendingUp,
   AlertTriangle,
   Eye,
-  BarChart3
+  BarChart3,
+  Brain,
+  Share,
+  FileDown
 } from "lucide-react";
 
 interface ExecutiveBriefingWidgetProps {
@@ -18,6 +22,32 @@ interface ExecutiveBriefingWidgetProps {
 }
 
 export const ExecutiveBriefingWidget = ({ userId, threatSignals }: ExecutiveBriefingWidgetProps) => {
+  const { generateReport, downloadReport, shareReport, isGenerating, lastGeneratedReport } = useAIReportGeneration();
+
+  const handleGenerateReport = async () => {
+    const report = await generateReport({
+      type: 'executive',
+      title: `Executive Intelligence Brief - ${new Date().toLocaleDateString()}`,
+      data: {
+        threatSignals,
+        userId
+      },
+      time_period: 'current'
+    });
+  };
+
+  const handleDownloadReport = () => {
+    if (lastGeneratedReport) {
+      downloadReport(lastGeneratedReport, 'html');
+    }
+  };
+
+  const handleShareReport = () => {
+    if (lastGeneratedReport) {
+      shareReport(lastGeneratedReport);
+    }
+  };
+
   const recentActivities = [
     {
       time: '2 hours ago',
@@ -85,13 +115,40 @@ export const ExecutiveBriefingWidget = ({ userId, threatSignals }: ExecutiveBrie
               <span>Executive Intelligence</span>
             </CardTitle>
             <CardDescription>
-              Strategic briefings and critical insights
+              AI-powered strategic briefings and critical insights
             </CardDescription>
           </div>
-          <Button size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Generate Report
-          </Button>
+          <div className="flex gap-2">
+            {lastGeneratedReport && (
+              <>
+                <Button size="sm" variant="outline" onClick={handleDownloadReport}>
+                  <FileDown className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleShareReport}>
+                  <Share className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </>
+            )}
+            <Button 
+              size="sm" 
+              onClick={handleGenerateReport}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <Brain className="w-4 h-4 mr-2 animate-pulse" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Brain className="w-4 h-4 mr-2" />
+                  AI Report
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
