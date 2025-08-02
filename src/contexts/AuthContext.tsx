@@ -152,6 +152,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
+    // Check for existing session on initialization
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      
+      console.log('Initial session check:', session?.user?.email);
+      
+      if (session?.user) {
+        console.log('Found existing session, fetching profile...');
+        fetchUserProfile(session.user).then(userProfile => {
+          if (!isMounted) return;
+          
+          if (userProfile) {
+            console.log('Setting initial authenticated user state:', userProfile);
+            setAuthState({
+              user: userProfile,
+              isAuthenticated: true,
+              isLoading: false
+            });
+          } else {
+            console.log('Initial profile fetch failed');
+            setAuthState({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+          }
+        });
+      } else {
+        console.log('No existing session found');
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
+    });
+
     return () => {
       isMounted = false;
       subscription.unsubscribe();
