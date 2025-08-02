@@ -16,6 +16,9 @@ import { ResilienceWidget } from '@/components/dashboard/ResilienceWidget';
 import { ResilienceToolkitWidget } from '@/components/dashboard/ResilienceToolkitWidget';
 import { DecisionSupportWidget } from '@/components/dashboard/DecisionSupportWidget';
 import { EmailPreferencesWidget } from '@/components/dashboard/EmailPreferencesWidget';
+import { DisruptionOSModulesWidget } from '@/components/dashboard/DisruptionOSModulesWidget';
+import { ExecutiveBriefingWidget } from '@/components/dashboard/ExecutiveBriefingWidget';
+import { ThreatWatchlistWidget } from '@/components/dashboard/ThreatWatchlistWidget';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -355,11 +358,44 @@ const UserDashboard = () => {
                         onMarkAsRead={markAlertAsRead}
                       />
                     </div>
+                    
+                    {/* Enhanced with DisruptionOS Features */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <ExecutiveBriefingWidget 
+                        userId={user.id}
+                        threatSignals={threatSignals}
+                      />
+                      <ThreatWatchlistWidget 
+                        userId={user.id}
+                        threatSignals={threatSignals}
+                      />
+                    </div>
+                    
+                    <DisruptionOSModulesWidget userId={user.id} />
+                    
                     <ThreatMapWidget 
                       threatSignals={threatSignals}
                       userPreferences={preferences?.location_preferences}
                     />
                   </div>
+                )}
+
+                {activeTab === 'executive' && (
+                  <ExecutiveBriefingWidget 
+                    userId={user.id}
+                    threatSignals={threatSignals}
+                  />
+                )}
+
+                {activeTab === 'watchlist' && (
+                  <ThreatWatchlistWidget 
+                    userId={user.id}
+                    threatSignals={threatSignals}
+                  />
+                )}
+
+                {activeTab === 'disruption-os' && (
+                  <DisruptionOSModulesWidget userId={user.id} />
                 )}
 
                 {activeTab === 'threats' && (

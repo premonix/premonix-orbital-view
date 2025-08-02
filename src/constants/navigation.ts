@@ -96,24 +96,27 @@ export const aboutNavItems: NavItem[] = navGroups.find(group => group.label === 
 
 export const dashboardNavGroups: NavGroup[] = [
   {
-    label: 'Monitoring',
+    label: 'Intelligence',
     items: [
       { label: 'Overview', href: 'overview', icon: LayoutGrid },
       { label: 'Threats', href: 'threats', icon: Map },
-      { label: 'Alerts', href: 'alerts', icon: FileText }
+      { label: 'Executive Brief', href: 'executive', icon: FileText },
+      { label: 'Watchlist', href: 'watchlist', icon: Info }
+    ]
+  },
+  {
+    label: 'Operations',
+    items: [
+      { label: 'Resilience', href: 'resilience', icon: Shield },
+      { label: 'Decision Support', href: 'decision', icon: Zap },
+      { label: 'Analytics', href: 'analytics', icon: LayoutGrid },
+      { label: 'DisruptionOS', href: 'disruption-os', icon: Building }
     ]
   },
   {
     label: 'Management',
     items: [
-      { label: 'Resilience', href: 'resilience', icon: Shield },
-      { label: 'Decision Support', href: 'decision', icon: Zap },
-      { label: 'Analytics', href: 'analytics', icon: LayoutGrid }
-    ]
-  },
-  {
-    label: 'Configuration',
-    items: [
+      { label: 'Alerts', href: 'alerts', icon: Database },
       { label: 'Settings', href: 'settings', icon: Info }
     ]
   }
