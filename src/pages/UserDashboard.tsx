@@ -12,6 +12,7 @@ import { AnalyticsWidget } from '@/components/dashboard/AnalyticsWidget';
 import { DashboardCustomizer } from '@/components/dashboard/DashboardCustomizer';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { ResilienceWidget } from '@/components/dashboard/ResilienceWidget';
+import { ResilienceToolkitWidget } from '@/components/dashboard/ResilienceToolkitWidget';
 import { DecisionSupportWidget } from '@/components/dashboard/DecisionSupportWidget';
 import { Settings, LayoutGrid, Bell, BarChart3, Map, AlertTriangle, Shield, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -378,6 +379,11 @@ const UserDashboard = () => {
           <TabsContent value="resilience" className="space-y-6">
             <ResilienceWidget 
               userProfile={preferences}
+              threatSignals={threatSignals || []}
+              userId={user?.id || ''}
+            />
+            <ResilienceToolkitWidget
+              userProfile={null}
               threatSignals={threatSignals || []}
               userId={user?.id || ''}
             />
