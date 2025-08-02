@@ -61,8 +61,8 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
       } else {
         console.log('Registration successful');
         toast({
-          title: "Registration successful",
-          description: "Welcome to PREMONIX! Redirecting to your dashboard...",
+          title: "Registration successful!",
+          description: "Please check your email and click the confirmation link to complete setup.",
         });
         onOpenChange(false);
         // Clear form
@@ -72,10 +72,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
         setConfirmPassword('');
         setCompanyName('');
         
-        // Auto-redirect to dashboard after successful registration
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000); // Longer delay to show welcome message
+        // Don't redirect automatically - wait for email confirmation
       }
     } catch (error) {
       console.error('Registration exception:', error);
