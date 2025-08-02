@@ -25,6 +25,7 @@ import { SuperAdminWidget } from '@/components/dashboard/SuperAdminWidget';
 import { DataSourcesWidget } from '@/components/dashboard/DataSourcesWidget';
 import { RealTimeThreatStream } from '@/components/dashboard/RealTimeThreatStream';
 import { AIThreatAnalysisWidget } from '@/components/dashboard/AIThreatAnalysisWidget';
+import { PersonalizedThreatWidget } from '@/components/dashboard/PersonalizedThreatWidget';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
@@ -376,6 +377,9 @@ const UserDashboard = () => {
               <div className="space-y-6">
                 {activeTab === 'overview' && (
                   <div className="space-y-6">
+                    {/* Personalized Intelligence Section */}
+                    <PersonalizedThreatWidget />
+                    
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <ThreatOverviewWidget 
                         threatSignals={threatSignals} 

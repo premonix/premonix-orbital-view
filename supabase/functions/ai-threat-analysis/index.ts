@@ -15,12 +15,34 @@ const corsHeaders = {
 };
 
 interface ThreatAnalysisRequest {
+  id?: string;
   title: string;
   summary?: string;
   content?: string;
   source_name: string;
   existing_category?: string;
   existing_severity?: string;
+}
+
+interface UserContext {
+  user_id: string;
+  organization: {
+    sector: string;
+    size: string;
+    primary_region: string;
+    locations: string[];
+    employee_count?: number;
+    supply_chain_complexity?: number;
+    risk_tolerance?: number;
+    existing_security_measures: string[];
+    regulatory_requirements: string[];
+  };
+  dss_assessment: {
+    overall_score: number;
+    risk_level: string;
+    category_scores: Record<string, number>;
+    recommendations: string[];
+  };
 }
 
 interface AIThreatAnalysis {
@@ -62,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { threats }: { threats: ThreatAnalysisRequest[] } = await req.json();
+    const { threats, user_id }: { threats: ThreatAnalysisRequest[], user_id?: string } = await req.json();
 
     if (!threats || !Array.isArray(threats)) {
       throw new Error('Invalid request: threats array required');
@@ -70,13 +92,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Processing ${threats.length} threats for AI analysis`);
 
+    // Get user context for personalization if user_id provided
+    let userContext: UserContext | null = null;
+    if (user_id) {
+      userContext = await getUserContext(user_id);
+      console.log(`Retrieved user context for personalization: ${user_id}`);
+    }
+
     const analyses = [];
 
     for (const threat of threats) {
       try {
         console.log(`Analyzing threat: ${threat.title}`);
         
-        const analysis = await analyzeThreatWithAI(threat);
+        const analysis = await analyzeThreatWithAI(threat, userContext);
         analyses.push({
           ...threat,
           ai_analysis: analysis
@@ -122,8 +151,92 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-async function analyzeThreatWithAI(threat: ThreatAnalysisRequest): Promise<AIThreatAnalysis> {
-  const prompt = `You are an expert threat intelligence analyst. Analyze this threat data and provide a comprehensive assessment.
+async function getUserContext(user_id: string): Promise<UserContext | null> {
+  try {
+    // Get organization profile
+    const { data: orgProfile } = await supabase
+      .from('organization_profiles')
+      .select('*')
+      .eq('user_id', user_id)
+      .single();
+
+    // Get latest DSS assessment
+    const { data: dssAssessment } = await supabase
+      .from('dss_assessments')
+      .select('*')
+      .eq('user_id', user_id)
+      .order('completed_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!orgProfile) {
+      console.log(`No organization profile found for user: ${user_id}`);
+      return null;
+    }
+
+    return {
+      user_id,
+      organization: {
+        sector: orgProfile.sector || 'other',
+        size: orgProfile.size || 'medium',
+        primary_region: orgProfile.primary_region || 'global',
+        locations: orgProfile.locations || [],
+        employee_count: orgProfile.employee_count,
+        supply_chain_complexity: orgProfile.supply_chain_complexity,
+        risk_tolerance: orgProfile.risk_tolerance,
+        existing_security_measures: orgProfile.existing_security_measures || [],
+        regulatory_requirements: orgProfile.regulatory_requirements || []
+      },
+      dss_assessment: dssAssessment ? {
+        overall_score: dssAssessment.overall_score,
+        risk_level: dssAssessment.risk_level,
+        category_scores: dssAssessment.category_scores || {},
+        recommendations: dssAssessment.recommendations || []
+      } : {
+        overall_score: 50,
+        risk_level: 'medium',
+        category_scores: {},
+        recommendations: []
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching user context:', error);
+    return null;
+  }
+}
+
+async function analyzeThreatWithAI(threat: ThreatAnalysisRequest, userContext?: UserContext | null): Promise<AIThreatAnalysis> {
+  let contextPrompt = '';
+  
+  if (userContext) {
+    contextPrompt = `
+
+USER CONTEXT FOR PERSONALIZATION:
+Organization Sector: ${userContext.organization.sector}
+Organization Size: ${userContext.organization.size}
+Primary Region: ${userContext.organization.primary_region}
+Operational Locations: ${userContext.organization.locations.join(', ') || 'Not specified'}
+Employee Count: ${userContext.organization.employee_count || 'Not specified'}
+Supply Chain Complexity: ${userContext.organization.supply_chain_complexity || 'Not specified'}
+Risk Tolerance: ${userContext.organization.risk_tolerance || 'Not specified'}
+Existing Security Measures: ${userContext.organization.existing_security_measures.join(', ') || 'Not specified'}
+Regulatory Requirements: ${userContext.organization.regulatory_requirements.join(', ') || 'Not specified'}
+
+DSS Risk Assessment:
+Overall Score: ${userContext.dss_assessment.overall_score}/100
+Risk Level: ${userContext.dss_assessment.risk_level}
+Category Scores: ${JSON.stringify(userContext.dss_assessment.category_scores)}
+Current Recommendations: ${userContext.dss_assessment.recommendations.join(', ') || 'None'}
+
+PERSONALIZATION INSTRUCTIONS:
+- Adjust threat_score and relevance_score based on user's sector and regional exposure
+- Weight recommendations based on organization size and existing security measures
+- Consider DSS vulnerabilities when assessing immediate_threat status
+- Factor in supply chain complexity for related threat assessment
+- Align recommended actions with organization's capabilities and risk tolerance`;
+  }
+
+  const prompt = `You are an expert threat intelligence analyst. Analyze this threat data and provide a comprehensive assessment${userContext ? ' personalized for the specific user context' : ''}.
 
 THREAT DATA:
 Title: ${threat.title}
@@ -131,7 +244,7 @@ Summary: ${threat.summary || 'N/A'}
 Content: ${threat.content || 'N/A'}
 Source: ${threat.source_name}
 Current Category: ${threat.existing_category || 'Unknown'}
-Current Severity: ${threat.existing_severity || 'Unknown'}
+Current Severity: ${threat.existing_severity || 'Unknown'}${contextPrompt}
 
 Please provide a detailed analysis in the following JSON format (respond ONLY with valid JSON):
 

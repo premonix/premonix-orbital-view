@@ -75,6 +75,13 @@ export const AIThreatAnalysisWidget = () => {
     try {
       console.log('Starting AI-powered threat analysis...');
 
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please log in to run personalized analysis');
+        return;
+      }
+
       // Get recent threats that need analysis
       const { data: threats, error: threatsError } = await supabase
         .from('threat_signals')
@@ -89,11 +96,12 @@ export const AIThreatAnalysisWidget = () => {
         return;
       }
 
-      toast.info(`Analyzing ${threats.length} threats with AI...`);
+      toast.info(`Analyzing ${threats.length} threats with personalized AI intelligence...`);
 
-      // Call AI analysis edge function
+      // Call AI analysis edge function with user context
       const { data: analysisData, error: analysisError } = await supabase.functions.invoke('ai-threat-analysis', {
         body: {
+          user_id: user.id,
           threats: threats.map(threat => ({
             id: threat.id,
             title: threat.title,
