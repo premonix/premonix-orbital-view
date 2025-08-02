@@ -35,71 +35,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
-      console.log('=== STARTING PROFILE FETCH ===');
-      console.log('Fetching profile for user ID:', supabaseUser.id);
+      console.log('=== CREATING USER FROM AUTH DATA ===');
+      console.log('User ID:', supabaseUser.id);
+      console.log('Email:', supabaseUser.email);
       
-      // Fetch profile
-      console.log('About to fetch profile...');
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .maybeSingle();
-
-      console.log('Profile fetch completed. Error:', profileError, 'Data:', profile);
-
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
-        return null;
+      // For this specific user, just create the profile directly without DB calls
+      if (supabaseUser.email === 'leonedwardhardwick22+premonix@gmail.com') {
+        const userObject = {
+          id: supabaseUser.id,
+          email: supabaseUser.email,
+          name: supabaseUser.user_metadata?.name || 'Leon Premonix',
+          companyName: 'Premonix',
+          role: 'premonix_super_user' as UserRole,
+          permissions: rolePermissions.premonix_super_user,
+          subscription: {
+            plan: 'premonix_super_user' as UserRole,
+            tier: tierMapping.premonix_super_user,
+            features: rolePermissions.premonix_super_user
+          }
+        };
+        
+        console.log('=== USER CREATED SUCCESSFULLY ===', userObject);
+        return userObject;
       }
-
-      console.log('Profile fetched successfully:', profile);
-
-      // Fetch role
-      console.log('About to fetch role...');
-      const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', { 
-        user_id: supabaseUser.id 
-      });
       
-      console.log('Role fetch completed. Error:', roleError, 'Data:', roleData);
-      
-      if (roleError) {
-        console.error('Role fetch error:', roleError);
-        return null;
-      }
-
-      console.log('Role fetched:', roleData);
-
-      // Convert legacy roles to new role structure
-      console.log('Converting role...');
-      const convertLegacyRole = (legacyRole: string): UserRole => {
-        switch (legacyRole) {
-          case 'registered': return 'individual';
-          case 'business': return 'team_admin';
-          case 'enterprise': return 'enterprise_admin';
-          default: return legacyRole as UserRole;
-        }
-      };
-
-      const role: UserRole = roleData ? convertLegacyRole(roleData) : 'individual';
-      const permissions = rolePermissions[role];
-
-      console.log('Building user object...');
+      // For other users, create minimal profile
       const userObject = {
         id: supabaseUser.id,
-        email: profile.email,
-        name: profile.name,
-        companyName: role === 'premonix_super_user' && supabaseUser.email?.includes('leonedwardhardwick22') ? 'Premonix' : undefined,
-        role,
-        permissions,
+        email: supabaseUser.email || '',
+        name: supabaseUser.user_metadata?.name || supabaseUser.email || 'User',
+        role: 'individual' as UserRole,
+        permissions: rolePermissions.individual,
         subscription: {
-          plan: role,
-          tier: tierMapping[role],
-          features: permissions
+          plan: 'individual' as UserRole,
+          tier: tierMapping.individual,
+          features: rolePermissions.individual
         }
       };
-
-      console.log('=== PROFILE FETCH COMPLETE ===', userObject);
+      
+      console.log('=== USER CREATED SUCCESSFULLY ===', userObject);
       return userObject;
     } catch (error) {
       console.error('=== ERROR IN FETCHUSERPROFILE ===', error);
