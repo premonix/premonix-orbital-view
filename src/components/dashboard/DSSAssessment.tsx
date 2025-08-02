@@ -229,7 +229,9 @@ export const DSSAssessment = ({ userId, onScoreUpdate }: DSSAssessmentProps) => 
 
   const saveAssessment = async () => {
     try {
-      // Save DSS score to history table
+      console.log('Saving DSS assessment:', { responses, dssScore, userId });
+      
+      // Save to DSS history table with enhanced assessment data
       const { error: historyError } = await supabase
         .from('dss_score_history')
         .insert({
@@ -237,15 +239,28 @@ export const DSSAssessment = ({ userId, onScoreUpdate }: DSSAssessmentProps) => 
           score: dssScore,
           assessment_data: {
             responses,
+            questions_answered: Object.keys(responses).length,
+            total_questions: dssQuestions.length,
+            completion_percentage: getCompletionPercentage(),
+            score_breakdown: {
+              cyber_security: responses['cyber-security'] || 0,
+              business_continuity: responses['business-continuity'] || 0,
+              supply_chain: responses['supply-chain'] || 0,
+              geographic_risk: responses['geographic-risk'] || 0,
+              team_size: responses['team-size'] || 0
+            },
             completed_at: new Date().toISOString(),
             version: '1.0'
-          }
+          },
+          version: '1.0'
         });
 
       if (historyError) {
-        console.error('Error saving DSS score history:', historyError);
+        console.error('Error saving to DSS history:', historyError);
         throw historyError;
       }
+
+      console.log('Successfully saved DSS assessment to history table');
 
       // Get current preferences
       const { data: currentPrefs } = await supabase

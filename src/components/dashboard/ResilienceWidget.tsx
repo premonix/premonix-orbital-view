@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { DSSAssessment } from './DSSAssessment';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
+import { DSSAssessment } from './DSSAssessment';
 import { 
   Shield, 
   Target, 
   AlertTriangle, 
   CheckCircle, 
-  Clock, 
   TrendingUp,
   TrendingDown,
   FileText,
@@ -20,15 +19,7 @@ import {
   Calendar,
   BarChart3
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  CartesianGrid, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Area 
-} from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ResilienceWidgetProps {
   userProfile?: any;
