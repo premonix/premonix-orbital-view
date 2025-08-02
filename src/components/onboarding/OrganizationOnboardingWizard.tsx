@@ -85,6 +85,8 @@ export const OrganizationOnboardingWizard = ({ onComplete }: OrganizationOnboard
         step: 'organization_onboarding',
         data: progressData,
         completed_at: stepIndex === ONBOARDING_STEPS.length - 1 ? new Date().toISOString() : null
+      }, {
+        onConflict: 'user_id,step'
       });
 
     if (error) {

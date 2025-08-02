@@ -42,9 +42,12 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const { hasCompletedOnboarding, isLoading } = useOnboardingStatus();
 
-  // Redirect to onboarding if user hasn't completed it
+  // Redirect to onboarding if user hasn't completed it (with bypass option)
   useEffect(() => {
-    if (user && !isLoading && !hasCompletedOnboarding) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const skipOnboarding = urlParams.get('skip') === 'true';
+    
+    if (user && !isLoading && !hasCompletedOnboarding && !skipOnboarding) {
       navigate('/onboarding');
     }
   }, [user, hasCompletedOnboarding, isLoading, navigate]);
