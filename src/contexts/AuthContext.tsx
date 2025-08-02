@@ -35,60 +35,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
-      
-      
-      // Try fetching profile with a timeout to prevent hanging
       console.log('Fetching profile for user ID:', supabaseUser.id);
       
-      const profilePromise = supabase
+      // Fetch profile
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
         .single();
-      
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
-      );
-      
-      let profile, profileError;
-      try {
-        const result = await Promise.race([profilePromise, timeoutPromise]) as any;
-        profile = result.data;
-        profileError = result.error;
-      } catch (error) {
-        console.error('Profile fetch failed or timed out:', error);
-        // If profile fetch fails, create a minimal user object
-        profile = {
-          id: supabaseUser.id,
-          email: supabaseUser.email,
-          name: supabaseUser.user_metadata?.name || supabaseUser.email
-        };
-        profileError = null;
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        return null;
       }
 
       console.log('Profile fetched successfully:', profile);
 
-      // Simplified role fetch with timeout and fallback
-      let roleData = 'individual'; // Default fallback role
-      try {
-        const rolePromise = supabase.rpc('get_user_role', { user_id: supabaseUser.id });
-        const roleTimeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Role fetch timeout')), 3000)
-        );
-        
-        const roleResult = await Promise.race([rolePromise, roleTimeoutPromise]) as any;
-        if (roleResult.data) {
-          roleData = roleResult.data;
-        }
-        console.log('Role fetched:', roleData);
-      } catch (error) {
-        console.error('Role fetch failed, using default:', error);
-        // For this specific user, set the correct role as fallback
-        if (supabaseUser.email === 'leonedwardhardwick22+premonix@gmail.com') {
-          roleData = 'premonix_super_user';
-        }
+      // Fetch role
+      const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', { 
+        user_id: supabaseUser.id 
+      });
+      
+      if (roleError) {
+        console.error('Role fetch error:', roleError);
+        return null;
       }
+
+      console.log('Role fetched:', roleData);
 
       // Convert legacy roles to new role structure
       const convertLegacyRole = (legacyRole: string): UserRole => {
