@@ -14,6 +14,7 @@ import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { ResilienceWidget } from '@/components/dashboard/ResilienceWidget';
 import { ResilienceToolkitWidget } from '@/components/dashboard/ResilienceToolkitWidget';
 import { DecisionSupportWidget } from '@/components/dashboard/DecisionSupportWidget';
+import { EmailPreferencesWidget } from '@/components/dashboard/EmailPreferencesWidget';
 import { Settings, LayoutGrid, Bell, BarChart3, Map, AlertTriangle, Shield, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -324,7 +325,7 @@ const UserDashboard = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-starlink-dark-secondary">
+          <TabsList className="grid w-full grid-cols-7 bg-starlink-dark-secondary">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <LayoutGrid className="w-4 h-4" />
               <span>Overview</span>
@@ -348,6 +349,10 @@ const UserDashboard = () => {
             <TabsTrigger value="alerts" className="flex items-center space-x-2">
               <Bell className="w-4 h-4" />
               <span>Alerts {unreadAlerts > 0 && `(${unreadAlerts})`}</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-2">
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
             </TabsTrigger>
           </TabsList>
 
@@ -412,6 +417,10 @@ const UserDashboard = () => {
               onMarkAsRead={markAlertAsRead}
               preferences={preferences?.alert_preferences}
             />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <EmailPreferencesWidget userId={user?.id || ''} />
           </TabsContent>
         </Tabs>
       </div>
