@@ -104,6 +104,119 @@ export type Database = {
         }
         Relationships: []
       }
+      user_alerts: {
+        Row: {
+          alert_type: string
+          id: string
+          is_dismissed: boolean
+          is_read: boolean
+          metadata: Json | null
+          threat_signal_id: string | null
+          triggered_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_type: string
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          metadata?: Json | null
+          threat_signal_id?: string | null
+          triggered_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_type?: string
+          id?: string
+          is_dismissed?: boolean
+          is_read?: boolean
+          metadata?: Json | null
+          threat_signal_id?: string | null
+          triggered_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_alerts_threat_signal_id_fkey"
+            columns: ["threat_signal_id"]
+            isOneToOne: false
+            referencedRelation: "threat_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_dashboard_analytics: {
+        Row: {
+          alerts_triggered: number | null
+          avg_session_duration: number | null
+          created_at: string
+          dashboard_visits: number | null
+          date: string
+          id: string
+          most_viewed_category: string | null
+          threats_viewed: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts_triggered?: number | null
+          avg_session_duration?: number | null
+          created_at?: string
+          dashboard_visits?: number | null
+          date?: string
+          id?: string
+          most_viewed_category?: string | null
+          threats_viewed?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerts_triggered?: number | null
+          avg_session_duration?: number | null
+          created_at?: string
+          dashboard_visits?: number | null
+          date?: string
+          id?: string
+          most_viewed_category?: string | null
+          threats_viewed?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_dashboard_preferences: {
+        Row: {
+          alert_preferences: Json | null
+          created_at: string
+          dashboard_layout: Json | null
+          id: string
+          location_preferences: Json | null
+          theme_preferences: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_preferences?: Json | null
+          created_at?: string
+          dashboard_layout?: Json | null
+          id?: string
+          location_preferences?: Json | null
+          theme_preferences?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_preferences?: Json | null
+          created_at?: string
+          dashboard_layout?: Json | null
+          id?: string
+          location_preferences?: Json | null
+          theme_preferences?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -163,6 +276,10 @@ export type Database = {
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      update_dashboard_analytics: {
+        Args: { p_user_id: string; p_action: string; p_category?: string }
+        Returns: undefined
       }
     }
     Enums: {
