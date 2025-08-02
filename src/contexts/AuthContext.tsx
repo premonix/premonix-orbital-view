@@ -35,30 +35,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
-      console.log('Fetching profile for user:', supabaseUser.id);
       
-      // Fetch user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
+      
+      // Parallel fetch profile and role for better performance
+      const [profileResult, roleResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', supabaseUser.id)
+          .single(),
+        supabase
+          .rpc('get_user_role', { user_id: supabaseUser.id })
+      ]);
+
+      const { data: profile, error: profileError } = profileResult;
+      const { data: roleData, error: roleError } = roleResult;
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
         return null;
-      }
-
-      console.log('Profile fetched:', profile);
-
-      // Fetch user role
-      const { data: roleData, error: roleError } = await supabase
-        .rpc('get_user_role', { user_id: supabaseUser.id });
-
-      console.log('Role fetched:', roleData, 'Error:', roleError);
-      
-      if (roleError) {
-        console.error('Error fetching user role:', roleError);
       }
 
       // Convert legacy roles to new role structure
@@ -94,12 +89,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    console.log('Setting up auth listener');
+    
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        
         
         if (session?.user) {
           // User is authenticated, fetch their profile
@@ -149,7 +144,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
+      
       if (session?.user) {
         fetchUserProfile(session.user).then(userProfile => {
           if (userProfile) {
@@ -198,7 +193,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Attempting login for:', email);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -209,7 +204,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: error.message };
       }
 
-      console.log('Login successful');
+      
       return {};
     } catch (error) {
       console.error('Login exception:', error);
@@ -219,7 +214,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const register = async (email: string, password: string, name: string, companyName?: string) => {
     try {
-      console.log('Attempting registration for:', email, 'with name:', name);
+      
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -238,7 +233,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return { error: error.message };
       }
 
-      console.log('Registration successful:', data);
+      
       return {};
     } catch (error) {
       console.error('Registration exception:', error);
@@ -248,7 +243,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      console.log('Logout button clicked - starting logout process');
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -256,7 +251,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw error;
       }
       
-      console.log('Logout successful - user signed out');
+      
       
       // The auth state listener will automatically handle setting the state to guest
       // when the session is cleared, so we don't need to manually set state here
@@ -285,7 +280,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!authState.user || !authState.isAuthenticated) return;
 
     try {
-      console.log('Upgrading role to:', newRole);
+      
       
       // Update role in database
       const { error } = await supabase
