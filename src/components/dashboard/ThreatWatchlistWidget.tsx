@@ -41,33 +41,52 @@ export const ThreatWatchlistWidget = ({ userId, threatSignals }: ThreatWatchlist
 
   const fetchWatchlistItems = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch watchlist items
+      const { data: watchlistData, error: watchlistError } = await supabase
         .from('threat_watchlist')
-        .select(`
-          *,
-          threat_signals (
-            title,
-            category,
-            severity,
-            country
-          )
-        `)
+        .select('*')
         .eq('user_id', userId)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching watchlist:', error);
+      if (watchlistError) {
+        console.error('Error fetching watchlist:', watchlistError);
         toast({
           title: "Error loading watchlist",
           description: "Failed to load watchlist items",
           variant: "destructive",
         });
-      } else {
-        setWatchlistItems(data || []);
+        return;
       }
+
+      // If there are watchlist items with threat_signal_id, fetch the related threat signals
+      const itemsWithSignals = [];
+      for (const item of watchlistData || []) {
+        let enrichedItem: any = { ...item };
+        
+        if (item.threat_signal_id) {
+          const { data: signalData } = await supabase
+            .from('threat_signals')
+            .select('title, category, severity, country')
+            .eq('id', item.threat_signal_id)
+            .maybeSingle();
+          
+          if (signalData) {
+            enrichedItem.threat_signals = signalData;
+          }
+        }
+        
+        itemsWithSignals.push(enrichedItem);
+      }
+
+      setWatchlistItems(itemsWithSignals);
     } catch (error) {
       console.error('Error fetching watchlist:', error);
+      toast({
+        title: "Error loading watchlist",
+        description: "Failed to load watchlist items",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
