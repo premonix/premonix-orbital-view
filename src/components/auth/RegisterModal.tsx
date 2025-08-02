@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 interface RegisterModalProps {
@@ -21,6 +22,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
   const [companyName, setCompanyName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +62,7 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
         console.log('Registration successful');
         toast({
           title: "Registration successful",
-          description: "Please check your email to verify your account before logging in.",
+          description: "Welcome to PREMONIX! Redirecting to your dashboard...",
         });
         onOpenChange(false);
         // Clear form
@@ -69,6 +71,11 @@ const RegisterModal = ({ open, onOpenChange, onSwitchToLogin }: RegisterModalPro
         setPassword('');
         setConfirmPassword('');
         setCompanyName('');
+        
+        // Auto-redirect to dashboard after successful registration
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000); // Longer delay to show welcome message
       }
     } catch (error) {
       console.error('Registration exception:', error);

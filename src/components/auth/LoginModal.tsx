@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 interface LoginModalProps {
@@ -18,6 +19,7 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +42,11 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
         onOpenChange(false);
         setEmail('');
         setPassword('');
+        
+        // Auto-redirect to dashboard after successful login
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 500); // Small delay to allow toast to show
       }
     } catch (error) {
       toast({
