@@ -21,6 +21,7 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
+    { label: 'Dashboard', href: '/dashboard', authRequired: true },
     { label: 'Threat Map', href: '/threat-map' },
     { label: 'Risk by Sector', href: '/risk-by-sector' },
     { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
@@ -69,7 +70,9 @@ const Navigation = () => {
 
           {/* Navigation Items */}
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
+            {navItems
+              .filter((item) => !(item as any).authRequired || isAuthenticated)
+              .map((item) => (
               <Link
                 key={item.label}
                 to={item.href}

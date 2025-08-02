@@ -11,6 +11,7 @@ import RiskBySector from "./pages/RiskBySector";
 import ResilienceToolkit from "./pages/ResilienceToolkit";
 import DisruptionOS from "./pages/DisruptionOS";
 import DisruptionOSDashboard from "./pages/DisruptionOSDashboard";
+import UserDashboard from "./pages/UserDashboard";
 import DataSources from "./pages/DataSources";
 import Reports from "./pages/Reports";
 import About from "./pages/About";
@@ -31,6 +32,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/threat-map" element={<ThreatMap />} />
             <Route path="/risk-by-sector" element={<RiskBySector />} />
             <Route path="/resilience-toolkit" element={<ResilienceToolkit />} />
