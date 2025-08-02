@@ -34,8 +34,14 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-contact-form', {
-        body: formData
+      const { error } = await supabase.functions.invoke('contact-form-submission', {
+        body: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          organization: formData.organization,
+          subject: formData.subject,
+          message: formData.message
+        }
       });
 
       if (error) throw error;

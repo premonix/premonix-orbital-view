@@ -43,6 +43,7 @@ export const DSSAssessment = ({ userId, onScoreUpdate }: DSSAssessmentProps) => 
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [dssScore, setDssScore] = useState(0);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [hasCompletedAssessment, setHasCompletedAssessment] = useState(false);
 
   const dssQuestions: DSSQuestion[] = [
@@ -190,7 +191,7 @@ export const DSSAssessment = ({ userId, onScoreUpdate }: DSSAssessmentProps) => 
     }));
   };
 
-  const calculateDSSScore = () => {
+  const calculateDSSScore = async () => {
     setIsCalculating(true);
     
     let totalScore = 0;

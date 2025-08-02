@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_submissions: {
+        Row: {
+          email: string
+          id: string
+          ip_address: unknown | null
+          message: string
+          name: string
+          organization: string | null
+          status: string
+          subject: string
+          submitted_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          ip_address?: unknown | null
+          message: string
+          name: string
+          organization?: string | null
+          status?: string
+          subject: string
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          ip_address?: unknown | null
+          message?: string
+          name?: string
+          organization?: string | null
+          status?: string
+          subject?: string
+          submitted_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       data_pipeline_logs: {
         Row: {
           created_at: string | null
@@ -97,6 +136,51 @@ export type Database = {
           email?: string
           id?: string
           name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          download_count: number | null
+          file_url: string | null
+          id: string
+          severity: string
+          status: string
+          time_period: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_url?: string | null
+          id?: string
+          severity: string
+          status?: string
+          time_period: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_url?: string | null
+          id?: string
+          severity?: string
+          status?: string
+          time_period?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -194,6 +278,48 @@ export type Database = {
           timestamp?: string
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      threat_watchlist: {
+        Row: {
+          created_at: string
+          custom_description: string | null
+          custom_title: string | null
+          id: string
+          notes: string | null
+          priority: string
+          status: string
+          tags: string[] | null
+          threat_signal_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_description?: string | null
+          custom_title?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          status?: string
+          tags?: string[] | null
+          threat_signal_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_description?: string | null
+          custom_title?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          status?: string
+          tags?: string[] | null
+          threat_signal_id?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -307,6 +433,45 @@ export type Database = {
           theme_preferences?: Json | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_email_preferences: {
+        Row: {
+          alert_frequency: string
+          created_at: string
+          digest_day: string
+          id: string
+          marketing_emails: boolean
+          security_updates: boolean
+          threat_alerts: boolean
+          updated_at: string
+          user_id: string
+          weekly_digest: boolean
+        }
+        Insert: {
+          alert_frequency?: string
+          created_at?: string
+          digest_day?: string
+          id?: string
+          marketing_emails?: boolean
+          security_updates?: boolean
+          threat_alerts?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_digest?: boolean
+        }
+        Update: {
+          alert_frequency?: string
+          created_at?: string
+          digest_day?: string
+          id?: string
+          marketing_emails?: boolean
+          security_updates?: boolean
+          threat_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_digest?: boolean
         }
         Relationships: []
       }

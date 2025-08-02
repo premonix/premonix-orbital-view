@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -17,69 +17,37 @@ const Reports = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const reports = [
-    {
-      title: "Global Threat Intelligence Summary",
-      date: "2024-12-02",
-      type: "Weekly Brief",
-      category: "Global",
-      severity: "High",
-      description: "Comprehensive analysis of emerging threats across all regions and sectors",
-      pages: 24,
-      classification: "Restricted"
-    },
-    {
-      title: "Cyber Warfare Trends Q4 2024",
-      date: "2024-11-28",
-      type: "Quarterly Report",
-      category: "Cyber",
-      severity: "Critical",
-      description: "In-depth analysis of state-sponsored cyber activities and defensive recommendations",
-      pages: 45,
-      classification: "Confidential"
-    },
-    {
-      title: "Supply Chain Disruption Forecast",
-      date: "2024-11-25",
-      type: "Analysis",
-      category: "Economic",
-      severity: "Medium",
-      description: "Predictive analysis of potential supply chain vulnerabilities through 2025",
-      pages: 32,
-      classification: "Internal"
-    },
-    {
-      title: "Geopolitical Risk Assessment - Asia Pacific",
-      date: "2024-11-20",
-      type: "Regional Brief",
-      category: "Political",
-      severity: "High",
-      description: "Strategic assessment of political tensions and military movements in the Asia Pacific region",
-      pages: 18,
-      classification: "Restricted"
-    },
-    {
-      title: "Critical Infrastructure Vulnerabilities",
-      date: "2024-11-15",
-      type: "Technical Report",
-      category: "Infrastructure",
-      severity: "Critical",
-      description: "Assessment of vulnerabilities in power grids, water systems, and transportation networks",
-      pages: 67,
-      classification: "Confidential"
-    },
-    {
-      title: "Emerging Technology Threats",
-      date: "2024-11-10",
-      type: "Technology Brief",
-      category: "Technology",
-      severity: "Medium",
-      description: "Analysis of AI, quantum computing, and IoT security implications",
-      pages: 29,
-      classification: "Internal"
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching reports:', error);
+        toast({
+          title: "Error loading reports",
+          description: "Failed to load reports. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        setReports(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -106,15 +74,14 @@ const Reports = () => {
       description: `Opening: ${report.title}`,
     });
     
-    // Track view analytics
+    // Update download count
     try {
-      await supabase.rpc('update_dashboard_analytics', {
-        p_user_id: 'system', // Use system ID for public reports
-        p_action: 'report_viewed',
-        p_category: report.category
-      });
+      await supabase
+        .from('reports')
+        .update({ download_count: (report.download_count || 0) + 1 })
+        .eq('id', report.id);
     } catch (error) {
-      console.error('Error tracking report view:', error);
+      console.error('Error updating view count:', error);
     }
   };
 
@@ -124,29 +91,31 @@ const Reports = () => {
       description: `Preparing download for: ${report.title}`,
     });
     
-    // Track download analytics
+    // Update download count
     try {
-      await supabase.rpc('update_dashboard_analytics', {
-        p_user_id: 'system',
-        p_action: 'report_downloaded',
-        p_category: report.category
-      });
+      await supabase
+        .from('reports')
+        .update({ download_count: (report.download_count || 0) + 1 })
+        .eq('id', report.id);
+        
+      // Refresh reports to show updated count
+      fetchReports();
     } catch (error) {
-      console.error('Error tracking report download:', error);
+      console.error('Error updating download count:', error);
     }
   };
 
   const filteredReports = useMemo(() => {
     return reports.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           report.description.toLowerCase().includes(searchQuery.toLowerCase());
+                           report.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || report.category.toLowerCase() === categoryFilter;
       const matchesSeverity = severityFilter === 'all' || report.severity.toLowerCase() === severityFilter;
       
       // Time filter logic
       let matchesTime = true;
       if (timeFilter !== 'all') {
-        const reportDate = new Date(report.date);
+        const reportDate = new Date(report.created_at);
         const now = new Date();
         switch (timeFilter) {
           case 'week':
@@ -239,17 +208,19 @@ const Reports = () => {
                 <CardTitle className="text-sm text-starlink-grey-light">Total Reports</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-starlink-blue">156</div>
-                <p className="text-xs text-starlink-grey-light">+12 this week</p>
+                <div className="text-2xl font-bold text-starlink-blue">{reports.length}</div>
+                <p className="text-xs text-starlink-grey-light">Available reports</p>
               </CardContent>
             </Card>
             <Card className="glass-panel border-starlink-grey/30">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-starlink-grey-light">Critical Alerts</CardTitle>
+                <CardTitle className="text-sm text-starlink-grey-light">Critical Reports</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-400">8</div>
-                <p className="text-xs text-starlink-grey-light">+3 from last week</p>
+                <div className="text-2xl font-bold text-red-400">
+                  {reports.filter(r => r.severity === 'Critical').length}
+                </div>
+                <p className="text-xs text-starlink-grey-light">High priority</p>
               </CardContent>
             </Card>
             <Card className="glass-panel border-starlink-grey/30">
@@ -274,7 +245,21 @@ const Reports = () => {
 
           {/* Reports List */}
           <div className="space-y-4">
-            {filteredReports.map((report, index) => (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-starlink-blue mx-auto"></div>
+              <p className="mt-4 text-starlink-grey-light">Loading reports...</p>
+            </div>
+          ) : filteredReports.length === 0 ? (
+            <Card className="glass-panel border-starlink-grey/30">
+              <CardContent className="p-8 text-center">
+                <FileText className="w-12 h-12 text-starlink-grey mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-starlink-white mb-2">No reports found</h3>
+                <p className="text-starlink-grey-light">Try adjusting your filters or search criteria.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredReports.map((report, index) => (
               <Card key={index} className="glass-panel border-starlink-grey/30 hover:border-starlink-blue/50 transition-colors">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -289,13 +274,10 @@ const Reports = () => {
                       <div className="flex items-center space-x-4 text-sm text-starlink-grey-light">
                         <span className="flex items-center">
                           <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(report.date).toLocaleDateString()}
+                          {new Date(report.created_at).toLocaleDateString()}
                         </span>
-                        <span>{report.type}</span>
-                        <span>{report.pages} pages</span>
-                        <span className={getClassificationColor(report.classification)}>
-                          {report.classification}
-                        </span>
+                        <span>{report.time_period}</span>
+                        <span>{report.download_count || 0} downloads</span>
                       </div>
                     </div>
                     <div className="flex space-x-2">
@@ -323,7 +305,8 @@ const Reports = () => {
                   <p className="text-starlink-grey-light">{report.description}</p>
                 </CardContent>
               </Card>
-            ))}
+            ))
+          )}
           </div>
 
           {/* Load More */}
