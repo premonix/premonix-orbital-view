@@ -1,59 +1,80 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Star } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import WaitlistForm from "@/components/WaitlistForm";
 
 interface SubscriptionPlan {
   id: string;
   name: string;
+  price: string;
+  period: string;
   description: string;
-  price_monthly: number;
-  price_yearly: number;
-  features: any;
-  max_users: number | null;
-  max_organizations: number | null;
-  is_active: boolean;
+  features: string[];
+  popular: boolean;
 }
 
 export const SubscriptionPlans = () => {
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
-  const { user, createCheckoutSession, openCustomerPortal } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  const fetchPlans = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .eq('is_active', true)
-        .order('price_monthly', { ascending: true });
-
-      if (error) throw error;
-      setPlans((data || []).map(plan => ({
-        ...plan,
-        features: Array.isArray(plan.features) ? plan.features : []
-      })));
-    } catch (error) {
-      console.error('Error fetching plans:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load subscription plans",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  // Static pricing that matches homepage
+  const plans: SubscriptionPlan[] = [
+    {
+      id: "personal",
+      name: "Personal",
+      price: "£290",
+      period: "per year",
+      description: "Perfect for individuals and families seeking personal preparedness",
+      features: [
+        "Global threat map access",
+        "Personal alert system",
+        "Basic resilience toolkit",
+        "Mobile app access",
+        "Email support"
+      ],
+      popular: false
+    },
+    {
+      id: "business-pro",
+      name: "Business Pro",
+      price: "£2,995",
+      period: "per year",
+      description: "Ideal for SMEs and growing businesses with up to 50 employees",
+      features: [
+        "Everything in Personal",
+        "Business continuity templates",
+        "Team collaboration tools",
+        "Sector-specific intelligence",
+        "Priority support",
+        "Custom alert filters",
+        "Basic DisruptionOS features"
+      ],
+      popular: true
+    },
+    {
+      id: "enterprise",
+      name: "Enterprise",
+      price: "£9,750",
+      period: "per year",
+      description: "Comprehensive solution for large organizations (£5M+ revenue)",
+      features: [
+        "Everything in Business Pro",
+        "Advanced analytics dashboard",
+        "API access & integrations",
+        "Custom threat modeling",
+        "Dedicated account manager",
+        "White-label options",
+        "24/7 phone support",
+        "Full DisruptionOS suite"
+      ],
+      popular: false
     }
-  };
+  ];
 
   const handleSubscribe = async (planId: string) => {
     if (!user) {
@@ -67,13 +88,11 @@ export const SubscriptionPlans = () => {
 
     setCheckoutLoading(planId);
     try {
-      const { url, error } = await createCheckoutSession(planId);
-      if (error) {
-        throw new Error(error);
-      }
-      if (url) {
-        window.open(url, '_blank');
-      }
+      // For now, we'll show a toast that this feature is coming soon
+      toast({
+        title: "Coming Soon",
+        description: "Subscription checkout is currently in development. Join our waitlist to be notified when it's available!",
+      });
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
       toast({
@@ -86,151 +105,86 @@ export const SubscriptionPlans = () => {
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const { url, error } = await openCustomerPortal();
-      if (error) {
-        throw new Error(error);
-      }
-      if (url) {
-        window.open(url, '_blank');
-      }
-    } catch (error: any) {
-      console.error('Error opening customer portal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to open customer portal",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return `$${(price / 100).toFixed(0)}`;
-  };
-
   const isCurrentPlan = (planName: string) => {
     return user?.subscription?.plan?.toLowerCase() === planName.toLowerCase();
   };
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="h-32 bg-muted/50" />
-            <CardContent className="h-48 bg-muted/30" />
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold text-foreground">Choose Your Plan</h2>
+        <h2 className="text-3xl font-bold">Simple, Transparent Pricing</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Select the perfect plan for your organization's threat intelligence needs.
-          All plans include our core threat detection and monitoring capabilities.
+          Choose the plan that fits your security needs and budget. DisruptionOS features included in Pro and Enterprise tiers.
+          All plans include a 14-day free trial.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <Card 
             key={plan.id} 
             className={`relative ${
-              plan.name === 'Pro' ? 'border-primary shadow-lg scale-105' : 'border-muted'
+              plan.popular ? 'border-primary/50 ring-2 ring-primary/30' : 'border-muted'
             }`}
           >
-            {plan.name === 'Pro' && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground px-3 py-1">
+            {plan.popular && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground px-4 py-1">
                   <Star className="w-3 h-3 mr-1" />
                   Most Popular
                 </Badge>
               </div>
             )}
 
-            <CardHeader className="text-center pb-8">
-              <CardTitle className="text-2xl font-bold text-foreground">
-                {plan.name}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
+              <div className="mb-4">
+                <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                <span className="text-muted-foreground ml-2">{plan.period}</span>
+              </div>
+              <CardDescription>
                 {plan.description}
               </CardDescription>
-              <div className="pt-4">
-                <div className="text-4xl font-bold text-foreground">
-                  {formatPrice(plan.price_monthly)}
-                  <span className="text-lg font-normal text-muted-foreground">/month</span>
-                </div>
-                {plan.price_yearly > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    or {formatPrice(plan.price_yearly)}/year (save 17%)
-                  </div>
-                )}
-              </div>
             </CardHeader>
 
             <CardContent className="space-y-6">
               <ul className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-foreground text-sm">{feature}</span>
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-center space-x-3">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              {plan.max_users && (
-                <div className="pt-2 border-t border-muted">
-                  <p className="text-sm text-muted-foreground">
-                    Up to {plan.max_users} users
-                  </p>
-                  {plan.max_organizations && (
-                    <p className="text-sm text-muted-foreground">
-                      Up to {plan.max_organizations} organizations
-                    </p>
-                  )}
-                </div>
-              )}
-
               {isCurrentPlan(plan.name) ? (
-                <div className="space-y-2">
-                  <Badge className="w-full justify-center bg-primary/10 text-primary border-primary">
-                    Current Plan
-                  </Badge>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleManageSubscription}
-                  >
-                    Manage Subscription
-                  </Button>
-                </div>
+                <Badge className="w-full justify-center bg-primary/10 text-primary border-primary">
+                  Current Plan
+                </Badge>
               ) : (
-                <Button 
-                  className="w-full" 
-                  variant={plan.name === 'Pro' ? 'default' : 'outline'}
-                  onClick={() => handleSubscribe(plan.id)}
-                  disabled={checkoutLoading === plan.id}
-                >
-                  {checkoutLoading === plan.id ? "Loading..." : `Subscribe to ${plan.name}`}
-                </Button>
+                <WaitlistForm variant="modal">
+                  <Button 
+                    className={`w-full ${
+                      plan.popular 
+                        ? 'bg-primary hover:bg-primary/90' 
+                        : 'bg-secondary hover:bg-secondary/90'
+                    }`}
+                    disabled={checkoutLoading === plan.id}
+                  >
+                    {checkoutLoading === plan.id ? "Loading..." : "Join Waitlist"}
+                  </Button>
+                </WaitlistForm>
               )}
             </CardContent>
           </Card>
         ))}
       </div>
-
-      {user?.subscription && (
-        <div className="text-center pt-8">
-          <Button variant="ghost" onClick={handleManageSubscription}>
-            Manage Billing & Subscription
-          </Button>
-        </div>
-      )}
+      
+      <div className="text-center mt-12">
+        <p className="text-muted-foreground mb-4">
+          All plans will include a 14-day free trial. No credit card required.
+        </p>
+      </div>
     </div>
   );
 };
