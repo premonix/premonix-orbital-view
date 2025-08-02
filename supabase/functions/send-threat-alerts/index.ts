@@ -101,7 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
       : `⚠️ ${alerts.length} New Threat Alert${alerts.length > 1 ? 's' : ''} - PREMONIX`;
 
     const emailResponse = await resend.emails.send({
-      from: 'PREMONIX Alerts <alerts@resend.dev>',
+      from: 'PREMONIX Alerts <platform@premonix.io>',
       to: ['platform@premonix.io'], // Test email override
       subject: `[TEST] ${subject} - Original: ${recipientEmail}`,
       html,
