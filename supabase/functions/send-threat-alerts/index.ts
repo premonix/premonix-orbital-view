@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: 'PREMONIX Alerts <platform@premonix.io>',
-      to: ['platform@premonix.io'], // Test email override
+      to: ['leonedwardhardwick22+premonix@gmail.com'], // Test email override
       subject: `[TEST] ${subject} - Original: ${recipientEmail}`,
       html,
     });
