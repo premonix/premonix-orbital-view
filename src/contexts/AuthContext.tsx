@@ -37,19 +37,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       
       
-      // Parallel fetch profile and role for better performance
-      const [profileResult, roleResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', supabaseUser.id)
-          .single(),
-        supabase
-          .rpc('get_user_role', { user_id: supabaseUser.id })
-      ]);
-
-      const { data: profile, error: profileError } = profileResult;
-      const { data: roleData, error: roleError } = roleResult;
+      // Fetch profile and role with individual error handling
+      console.log('Fetching profile for user ID:', supabaseUser.id);
+      
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
@@ -57,6 +52,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       console.log('Profile fetched successfully:', profile);
+
+      const { data: roleData, error: roleError } = await supabase
+        .rpc('get_user_role', { user_id: supabaseUser.id });
+
       console.log('Role fetched:', roleData, roleError ? 'Error:' + roleError : '');
 
       // Convert legacy roles to new role structure
