@@ -52,10 +52,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log('Profile fetched:', profile);
 
       // Fetch user role
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .rpc('get_user_role', { user_id: supabaseUser.id });
 
-      console.log('Role fetched:', roleData);
+      console.log('Role fetched:', roleData, 'Error:', roleError);
+      
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+      }
 
       const role: UserRole = roleData || 'registered';
       const permissions = rolePermissions[role];
