@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabsContent } from '@/components/ui/tabs';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { ThreatOverviewWidget } from '@/components/dashboard/ThreatOverviewWidget';
 import { RecentAlertsWidget } from '@/components/dashboard/RecentAlertsWidget';
 import { ThreatMapWidget } from '@/components/dashboard/ThreatMapWidget';
@@ -15,8 +16,10 @@ import { ResilienceWidget } from '@/components/dashboard/ResilienceWidget';
 import { ResilienceToolkitWidget } from '@/components/dashboard/ResilienceToolkitWidget';
 import { DecisionSupportWidget } from '@/components/dashboard/DecisionSupportWidget';
 import { EmailPreferencesWidget } from '@/components/dashboard/EmailPreferencesWidget';
-import { Settings, LayoutGrid, Bell, BarChart3, Map, AlertTriangle, Shield, Brain } from 'lucide-react';
+import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
+import { Settings, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useDashboardNavigation } from '@/hooks/useNavigation';
 
 interface DashboardPreferences {
   id: string;
@@ -34,7 +37,7 @@ const UserDashboard = () => {
   const [userAlerts, setUserAlerts] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const { activeTab, setActiveTab } = useDashboardNavigation('overview');
 
   useEffect(() => {
     if (user && user.id) {
@@ -233,197 +236,188 @@ const UserDashboard = () => {
   const threatSummary = getThreatSummary();
   const unreadAlerts = userAlerts.filter(alert => !alert.is_read).length;
 
+  const unreadCounts = {
+    alerts: unreadAlerts,
+  };
+
   return (
-    <div className="min-h-screen bg-starlink-dark text-starlink-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-starlink-white">Dashboard</h1>
-            <p className="text-starlink-grey-light mt-2">
-              Welcome back! Here's your personalized threat intelligence overview.
-            </p>
-          </div>
-          <div className="flex space-x-4">
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-            {unreadAlerts > 0 && (
-              <Button variant="outline" size="sm" className="relative">
-                <Bell className="w-4 h-4 mr-2" />
-                Alerts
-                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs">
-                  {unreadAlerts}
-                </Badge>
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-starlink-grey-light">Threats (24h)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-starlink-white">{threatSummary.last24h}</div>
-              <div className="flex space-x-2 mt-2">
-                <Badge variant="destructive" className="text-xs">
-                  {(threatSummary.bySeverity.critical || 0) + (threatSummary.bySeverity.high || 0)} High+
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {threatSummary.bySeverity.medium || 0} Medium
-                </Badge>
+    <div className="min-h-screen bg-background">
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <DashboardSidebar 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab} 
+            unreadCounts={unreadCounts}
+          />
+          
+          <SidebarInset className="flex-1">
+            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+              <SidebarTrigger className="-ml-1" />
+              <div className="flex items-center space-x-4 ml-auto">
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+                {unreadAlerts > 0 && (
+                  <Button variant="outline" size="sm" className="relative">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Alerts
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs">
+                      {unreadAlerts}
+                    </Badge>
+                  </Button>
+                )}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-starlink-grey-light">Active Alerts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-starlink-white">{userAlerts.length}</div>
-              <div className="text-sm text-starlink-grey-light mt-2">
-                {unreadAlerts} unread
+            </header>
+            
+            <div className="flex-1 p-6">
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold">Dashboard</h1>
+                <p className="text-muted-foreground mt-2">
+                  Welcome back! Here's your personalized threat intelligence overview.
+                </p>
               </div>
-            </CardContent>
-          </Card>
 
-          <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-starlink-grey-light">Top Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-bold text-starlink-white">
-                {Object.entries(threatSummary.byCategory).sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'None'}
-              </div>
-              <div className="text-sm text-starlink-grey-light mt-2">
-                {String(Object.entries(threatSummary.byCategory).sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[1] || 0)} signals
-              </div>
-            </CardContent>
-          </Card>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Threats (24h)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{threatSummary.last24h}</div>
+                    <div className="flex space-x-2 mt-2">
+                      <Badge variant="destructive" className="text-xs">
+                        {(threatSummary.bySeverity.critical || 0) + (threatSummary.bySeverity.high || 0)} High+
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {threatSummary.bySeverity.medium || 0} Medium
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
 
-          <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-starlink-grey-light">Risk Level</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-bold text-yellow-400">
-                {threatSummary.bySeverity.critical > 0 ? 'CRITICAL' : 
-                 threatSummary.bySeverity.high > 0 ? 'HIGH' : 
-                 threatSummary.bySeverity.medium > 0 ? 'MEDIUM' : 'LOW'}
-              </div>
-              <div className="text-sm text-starlink-grey-light mt-2">
-                Based on recent threats
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Active Alerts</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{userAlerts.length}</div>
+                    <div className="text-sm text-muted-foreground mt-2">
+                      {unreadAlerts} unread
+                    </div>
+                  </CardContent>
+                </Card>
 
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-starlink-dark-secondary">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
-              <LayoutGrid className="w-4 h-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="threats" className="flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4" />
-              <span>Threats</span>
-            </TabsTrigger>
-            <TabsTrigger value="resilience" className="flex items-center space-x-2">
-              <Shield className="w-4 h-4" />
-              <span>Resilience</span>
-            </TabsTrigger>
-            <TabsTrigger value="decision" className="flex items-center space-x-2">
-              <Brain className="w-4 h-4" />
-              <span>Decision</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="alerts" className="flex items-center space-x-2">
-              <Bell className="w-4 h-4" />
-              <span>Alerts {unreadAlerts > 0 && `(${unreadAlerts})`}</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </TabsTrigger>
-          </TabsList>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Top Category</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-lg font-bold">
+                      {Object.entries(threatSummary.byCategory).sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'None'}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-2">
+                      {String(Object.entries(threatSummary.byCategory).sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[1] || 0)} signals
+                    </div>
+                  </CardContent>
+                </Card>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ThreatOverviewWidget 
-                threatSignals={threatSignals} 
-                userId={user.id}
-              />
-              <RecentAlertsWidget 
-                alerts={userAlerts.slice(0, 5)} 
-                onMarkAsRead={markAlertAsRead}
-              />
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Risk Level</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-lg font-bold text-amber-500">
+                      {threatSummary.bySeverity.critical > 0 ? 'CRITICAL' : 
+                       threatSummary.bySeverity.high > 0 ? 'HIGH' : 
+                       threatSummary.bySeverity.medium > 0 ? 'MEDIUM' : 'LOW'}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-2">
+                      Based on recent threats
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Main Content */}
+              <div className="space-y-6">
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <ThreatOverviewWidget 
+                        threatSignals={threatSignals} 
+                        userId={user.id}
+                      />
+                      <RecentAlertsWidget 
+                        alerts={userAlerts.slice(0, 5)} 
+                        onMarkAsRead={markAlertAsRead}
+                      />
+                    </div>
+                    <ThreatMapWidget 
+                      threatSignals={threatSignals}
+                      userPreferences={preferences?.location_preferences}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'threats' && (
+                  <ThreatMapWidget 
+                    threatSignals={threatSignals}
+                    userPreferences={preferences?.location_preferences}
+                    showFilters={true}
+                  />
+                )}
+
+                {activeTab === 'resilience' && (
+                  <div className="space-y-6">
+                    <ResilienceWidget 
+                      userProfile={preferences}
+                      threatSignals={threatSignals || []}
+                      userId={user?.id || ''}
+                    />
+                    <ResilienceToolkitWidget
+                      userProfile={null}
+                      threatSignals={threatSignals || []}
+                      userId={user?.id || ''}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'decision' && (
+                  <DecisionSupportWidget 
+                    threatSignals={threatSignals || []}
+                    userAlerts={userAlerts || []}
+                    analytics={analytics || []}
+                    userId={user?.id || ''}
+                  />
+                )}
+
+                {activeTab === 'analytics' && (
+                  <AnalyticsWidget 
+                    analytics={analytics || []}
+                    threatSignals={threatSignals || []}
+                    userId={user?.id || ''}
+                  />
+                )}
+
+                {activeTab === 'alerts' && (
+                  <AlertsPanel 
+                    alerts={userAlerts}
+                    onMarkAsRead={markAlertAsRead}
+                    preferences={preferences?.alert_preferences}
+                  />
+                )}
+
+                {activeTab === 'settings' && (
+                  <EmailPreferencesWidget userId={user?.id || ''} />
+                )}
+              </div>
             </div>
-            <ThreatMapWidget 
-              threatSignals={threatSignals}
-              userPreferences={preferences?.location_preferences}
-            />
-          </TabsContent>
-
-          <TabsContent value="threats" className="space-y-6">
-            <ThreatMapWidget 
-              threatSignals={threatSignals}
-              userPreferences={preferences?.location_preferences}
-              showFilters={true}
-            />
-          </TabsContent>
-
-          <TabsContent value="resilience" className="space-y-6">
-            <ResilienceWidget 
-              userProfile={preferences}
-              threatSignals={threatSignals || []}
-              userId={user?.id || ''}
-            />
-            <ResilienceToolkitWidget
-              userProfile={null}
-              threatSignals={threatSignals || []}
-              userId={user?.id || ''}
-            />
-          </TabsContent>
-
-          <TabsContent value="decision" className="space-y-6">
-            <DecisionSupportWidget 
-              threatSignals={threatSignals || []}
-              userAlerts={userAlerts || []}
-              analytics={analytics || []}
-              userId={user?.id || ''}
-            />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <AnalyticsWidget 
-              analytics={analytics || []}
-              threatSignals={threatSignals || []}
-              userId={user?.id || ''}
-            />
-          </TabsContent>
-
-          <TabsContent value="alerts" className="space-y-6">
-            <AlertsPanel 
-              alerts={userAlerts}
-              onMarkAsRead={markAlertAsRead}
-              preferences={preferences?.alert_preferences}
-            />
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-6">
-            <EmailPreferencesWidget userId={user?.id || ''} />
-          </TabsContent>
-        </Tabs>
-      </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
     </div>
   );
 };

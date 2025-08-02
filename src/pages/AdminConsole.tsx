@@ -1,23 +1,16 @@
 
-import { useState } from 'react';
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  Building, 
-  Shield, 
-  CreditCard, 
-  FileText, 
-  Beaker, 
-  BarChart,
-  Activity,
-  Lock
-} from "lucide-react";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { Lock } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import PermissionGate from '@/components/auth/PermissionGate';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminBreadcrumbs } from '@/components/admin/AdminBreadcrumbs';
+import { useDashboardNavigation } from '@/hooks/useNavigation';
+import { adminTabs } from '@/constants/adminTabs';
 import AdminUsersPanel from '@/components/admin/AdminUsersPanel';
 import AdminOrgsPanel from '@/components/admin/AdminOrgsPanel';
 import AdminRolesPanel from '@/components/admin/AdminRolesPanel';
@@ -29,34 +22,35 @@ import SystemMonitoringPanel from '@/components/admin/SystemMonitoringPanel';
 
 const AdminConsole = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('monitoring');
+  const { activeTab, setActiveTab } = useDashboardNavigation('monitoring');
 
-  const adminTabs = [
-    { id: 'monitoring', label: 'Monitoring', icon: <Activity className="w-4 h-4" />, component: SystemMonitoringPanel },
-    { id: 'users', label: 'Users', icon: <Users className="w-4 h-4" />, component: AdminUsersPanel },
-    { id: 'organizations', label: 'Organizations', icon: <Building className="w-4 h-4" />, component: AdminOrgsPanel },
-    { id: 'roles', label: 'Roles', icon: <Shield className="w-4 h-4" />, component: AdminRolesPanel },
-    { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" />, component: AdminBillingPanel },
-    { id: 'audit', label: 'Audit Trail', icon: <FileText className="w-4 h-4" />, component: AdminAuditPanel },
-    { id: 'beta', label: 'Beta Access', icon: <Beaker className="w-4 h-4" />, component: AdminBetaPanel },
-    { id: 'analytics', label: 'Analytics', icon: <BarChart className="w-4 h-4" />, component: AdminAnalyticsPanel }
-  ];
+  const componentMap = {
+    users: AdminUsersPanel,
+    organizations: AdminOrgsPanel,
+    roles: AdminRolesPanel,
+    billing: AdminBillingPanel,
+    audit: AdminAuditPanel,
+    beta: AdminBetaPanel,
+    analytics: AdminAnalyticsPanel,
+    monitoring: SystemMonitoringPanel,
+  };
 
-  const ActiveComponent = adminTabs.find(tab => tab.id === activeTab)?.component || AdminUsersPanel;
+  const ActiveComponent = componentMap[activeTab as keyof typeof componentMap] || SystemMonitoringPanel;
+  const currentTab = adminTabs.find(tab => tab.id === activeTab);
 
   return (
-    <div className="min-h-screen bg-starlink-dark text-starlink-white">
+    <div className="min-h-screen bg-background">
       <Navigation />
       
-      <div className="pt-20 pb-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <PermissionGate 
-            permission="admin_console_access" 
-            requiredRole="enterprise_admin"
-            fallback={
-              <Card className="glass-panel border-red-500/50">
+      <main className="pt-20">
+        <PermissionGate 
+          permission="admin_console_access" 
+          requiredRole="enterprise_admin"
+          fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <Card className="border-destructive/50">
                 <CardHeader>
-                  <CardTitle className="text-red-400 flex items-center">
+                  <CardTitle className="text-destructive flex items-center">
                     <Lock className="w-6 h-6 mr-2" />
                     Access Denied
                   </CardTitle>
@@ -65,55 +59,54 @@ const AdminConsole = () => {
                   </CardDescription>
                 </CardHeader>
               </Card>
-            }
-          >
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-4xl font-bold mb-2">
-                    Admin <span className="text-starlink-blue">Console</span>
-                  </h1>
-                  <p className="text-starlink-grey-light">
-                    Internal platform management and administration
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Badge className="bg-red-600 text-white">
-                    INTERNAL ONLY
-                  </Badge>
-                  <Badge className="bg-starlink-blue text-starlink-dark">
-                    {user?.role?.toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
             </div>
+          }
+        >
+          <SidebarProvider>
+            <div className="flex min-h-screen w-full">
+              <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+              
+              <SidebarInset className="flex-1">
+                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+                  <SidebarTrigger className="-ml-1" />
+                  <AdminBreadcrumbs activeTab={activeTab} />
+                </header>
+                
+                <div className="flex-1 p-6">
+                  {/* Header */}
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h1 className="text-3xl font-bold flex items-center space-x-3">
+                          {currentTab && <currentTab.icon className="w-8 h-8" />}
+                          <span>{currentTab?.label || 'Admin Console'}</span>
+                        </h1>
+                        <p className="text-muted-foreground mt-2">
+                          {currentTab?.description || 'System administration and management'}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Badge variant="destructive">
+                          INTERNAL ONLY
+                        </Badge>
+                        <Badge variant="secondary">
+                          {user?.role?.toUpperCase() || 'ADMIN'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Admin Console Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="glass-panel border-starlink-grey/30 w-full grid grid-cols-8">
-                {adminTabs.map((tab) => (
-                  <TabsTrigger 
-                    key={tab.id} 
-                    value={tab.id}
-                    className="flex items-center space-x-2 text-xs sm:text-sm"
-                  >
-                    {tab.icon}
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {adminTabs.map((tab) => (
-                <TabsContent key={tab.id} value={tab.id}>
-                  <tab.component />
-                </TabsContent>
-              ))}
-            </Tabs>
-          </PermissionGate>
-        </div>
-      </div>
-
+                  {/* Active Component */}
+                  <div className="space-y-6">
+                    <ActiveComponent />
+                  </div>
+                </div>
+              </SidebarInset>
+            </div>
+          </SidebarProvider>
+        </PermissionGate>
+      </main>
+      
       <Footer />
     </div>
   );

@@ -1,167 +1,70 @@
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import LoginModal from '@/components/auth/LoginModal';
-import RegisterModal from '@/components/auth/RegisterModal';
-import UserMenu from '@/components/auth/UserMenu';
+import { mainNavItems, aboutNavItems } from '@/constants/navigation';
+import { MobileNavigation } from '@/components/navigation/MobileNavigation';
+import { NavigationDropdown } from '@/components/navigation/NavigationDropdown';
+import { AuthSection } from '@/components/navigation/AuthSection';
+import { useActiveRoute, useNavigationState } from '@/hooks/useNavigation';
 
 const Navigation = () => {
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { isAuthenticated } = useAuth();
-  const location = useLocation();
+  const { isActiveRoute } = useActiveRoute();
+  const { hoveredItem, mobileMenuOpen, handleMouseEnter, handleMouseLeave, toggleMobileMenu, closeMobileMenu } = useNavigationState();
 
-  const navItems = [
-    { label: 'Dashboard', href: '/dashboard', authRequired: true },
-    { label: 'Threat Map', href: '/threat-map' },
-    { label: 'Risk by Sector', href: '/risk-by-sector' },
-    { label: 'Resilience Toolkit', href: '/resilience-toolkit' },
-    { label: 'Reports', href: '/reports' },
-    { label: 'DisruptionOS', href: '/disruption-os' }
-  ];
-
-  const aboutItems = [
-    { label: 'About', href: '/about' },
-    { label: 'Data Sources', href: '/data-sources' },
-    { label: 'Contact', href: '/contact' }
-  ];
-
-  const handleSwitchToRegister = () => {
-    setShowLoginModal(false);
-    setShowRegisterModal(true);
-  };
-
-  const handleSwitchToLogin = () => {
-    setShowRegisterModal(false);
-    setShowLoginModal(true);
-  };
-
-  const isActiveRoute = (href: string) => {
-    if (href === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(href);
-  };
-
-  const isAboutActive = () => {
-    return location.pathname === '/about' || location.pathname === '/data-sources' || location.pathname === '/contact';
-  };
+  const visibleNavItems = mainNavItems.filter(
+    item => !item.authRequired || isAuthenticated
+  );
 
   return (
-    <>
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-starlink-grey/20">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-starlink-blue rounded-sm flex items-center justify-center">
-              <span className="text-starlink-dark font-bold text-lg">P</span>
-            </div>
-            <span className="text-xl font-semibold tracking-tight">PREMONIX</span>
-          </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-lg">P</span>
+          </div>
+          <span className="text-xl font-semibold tracking-tight">PREMONIX</span>
+        </Link>
 
-          {/* Navigation Items */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems
-              .filter((item) => !(item as any).authRequired || isAuthenticated)
-              .map((item) => (
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-8">
+          {visibleNavItems.map((item) => {
+            const Icon = item.icon;
+            return (
               <Link
                 key={item.label}
                 to={item.href}
-                className={`relative transition-colors duration-200 ${
+                className={`relative flex items-center space-x-1 transition-colors duration-200 ${
                   isActiveRoute(item.href) 
-                    ? 'text-starlink-white' 
-                    : 'text-starlink-grey-light hover:text-starlink-white'
+                    ? 'text-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
-                onMouseEnter={() => setHoveredItem(item.label)}
-                onMouseLeave={() => setHoveredItem(null)}
+                onMouseEnter={() => handleMouseEnter(item.label)}
+                onMouseLeave={handleMouseLeave}
               >
-                {item.label}
+                {Icon && <Icon className="w-4 h-4" />}
+                <span>{item.label}</span>
                 {(hoveredItem === item.label || isActiveRoute(item.href)) && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-pulse" />
                 )}
               </Link>
-            ))}
-            
-            {/* About Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={`relative flex items-center space-x-1 transition-colors duration-200 ${
-                    isAboutActive() 
-                      ? 'text-starlink-white' 
-                      : 'text-starlink-grey-light hover:text-starlink-white'
-                  }`}
-                  onMouseEnter={() => setHoveredItem('About')}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <span>About</span>
-                  <ChevronDown className="w-4 h-4" />
-                  {(hoveredItem === 'About' || isAboutActive()) && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-starlink-blue animate-pulse" />
-                  )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-starlink-dark border-starlink-grey/30">
-                {aboutItems.map((item) => (
-                  <DropdownMenuItem key={item.label} asChild>
-                    <Link
-                      to={item.href}
-                      className="text-starlink-grey-light hover:text-starlink-white cursor-pointer"
-                    >
-                      {item.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Auth Section */}
-          <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="text-starlink-grey-light hover:text-starlink-white"
-                  onClick={() => setShowLoginModal(true)}
-                >
-                  Log In
-                </Button>
-                <Button 
-                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
-                  onClick={() => setShowRegisterModal(true)}
-                >
-                  Create Account
-                </Button>
-              </>
-            )}
-          </div>
+            );
+          })}
+          
+          {/* About Dropdown */}
+          <NavigationDropdown label="About" items={aboutNavItems} />
         </div>
-      </nav>
 
-      {/* Auth Modals */}
-      <LoginModal
-        open={showLoginModal}
-        onOpenChange={setShowLoginModal}
-        onSwitchToRegister={handleSwitchToRegister}
-      />
-      <RegisterModal
-        open={showRegisterModal}
-        onOpenChange={setShowRegisterModal}
-        onSwitchToLogin={handleSwitchToLogin}
-      />
-    </>
+        {/* Mobile Navigation & Auth Section */}
+        <div className="flex items-center space-x-4">
+          <MobileNavigation 
+            open={mobileMenuOpen} 
+            onOpenChange={toggleMobileMenu} 
+          />
+          <AuthSection />
+        </div>
+      </div>
+    </nav>
   );
 };
 
