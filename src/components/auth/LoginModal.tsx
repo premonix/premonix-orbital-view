@@ -47,11 +47,7 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
         onOpenChange(false);
         setEmail('');
         setPassword('');
-        
-        // Wait a bit for auth state to update, then navigate
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 100);
+        navigate('/dashboard');
       }
     } catch (error) {
       toast({

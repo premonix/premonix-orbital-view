@@ -116,36 +116,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Set up auth state listener with debouncing to prevent loops
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!isMounted) return;
         
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
-          console.log('User found in session, fetching profile...');
-          const userProfile = await fetchUserProfile(session.user);
-          console.log('User profile result:', userProfile);
+          console.log('User found in session, setting basic auth state');
+          setAuthState({
+            user: {
+              id: session.user.id,
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || '',
+              role: 'guest',
+              permissions: []
+            },
+            isAuthenticated: true,
+            isLoading: false
+          });
           
-          if (!isMounted) return;
-          
-          if (userProfile) {
-            console.log('Setting authenticated user state:', userProfile);
-            setAuthState({
-              user: userProfile,
-              isAuthenticated: true,
-              isLoading: false
-            });
-          } else {
-            console.log('Profile fetch failed, setting as null');
-            setAuthState({
-              user: null,
-              isAuthenticated: false,
-              isLoading: false
-            });
-          }
+          // Defer profile fetch to avoid blocking auth state
+          setTimeout(() => {
+            if (isMounted) {
+              fetchUserProfile(session.user).then(userProfile => {
+                if (isMounted && userProfile) {
+                  setAuthState(prev => ({
+                    ...prev,
+                    user: userProfile
+                  }));
+                }
+              });
+            }
+          }, 0);
         } else {
           console.log('No user in session, clearing auth state');
-          if (!isMounted) return;
           setAuthState({
             user: null,
             isAuthenticated: false,
