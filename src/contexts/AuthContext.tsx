@@ -123,55 +123,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     
-    
-    // Set up auth state listener
+    // Set up auth state listener with debouncing to prevent loops
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.email);
         
         if (session?.user) {
           console.log('User found in session, fetching profile...');
-          // User is authenticated, fetch their profile
           const userProfile = await fetchUserProfile(session.user);
           console.log('User profile result:', userProfile);
+          
+          if (!isMounted) return;
+          
           if (userProfile) {
-            console.log('Setting user state:', userProfile);
+            console.log('Setting authenticated user state:', userProfile);
             setAuthState({
               user: userProfile,
               isAuthenticated: true,
               isLoading: false
             });
           } else {
-            // Profile fetch failed, set as guest
+            console.log('Profile fetch failed, setting as null');
             setAuthState({
-              user: {
-                id: 'guest',
-                role: 'guest',
-                permissions: rolePermissions.guest,
-                subscription: {
-                  plan: 'guest',
-                  tier: 'personal',
-                  features: rolePermissions.guest
-                }
-              },
+              user: null,
               isAuthenticated: false,
               isLoading: false
             });
           }
         } else {
-          // No user, set as guest
+          console.log('No user in session, clearing auth state');
+          if (!isMounted) return;
           setAuthState({
-            user: {
-              id: 'guest',
-              role: 'guest',
-              permissions: rolePermissions.guest,
-              subscription: {
-                plan: 'guest',
-                tier: 'personal',
-                features: rolePermissions.guest
-              }
-            },
+            user: null,
             isAuthenticated: false,
             isLoading: false
           });
@@ -179,53 +166,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      
-      if (session?.user) {
-        fetchUserProfile(session.user).then(userProfile => {
-          if (userProfile) {
-            setAuthState({
-              user: userProfile,
-              isAuthenticated: true,
-              isLoading: false
-            });
-          } else {
-            setAuthState({
-              user: {
-                id: 'guest',
-                role: 'guest',
-                permissions: rolePermissions.guest,
-                subscription: {
-                  plan: 'guest',
-                  tier: 'personal',
-                  features: rolePermissions.guest
-                }
-              },
-              isAuthenticated: false,
-              isLoading: false
-            });
-          }
-        });
-      } else {
-        setAuthState({
-          user: {
-            id: 'guest',
-            role: 'guest',
-            permissions: rolePermissions.guest,
-            subscription: {
-              plan: 'guest',
-              tier: 'personal',
-              features: rolePermissions.guest
-            }
-          },
-          isAuthenticated: false,
-          isLoading: false
-        });
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
