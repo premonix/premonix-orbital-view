@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
-import { User, Building, LogOut } from 'lucide-react';
+import { User, Building, LogOut, CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const UserMenu = () => {
   const { user, isAuthenticated, logout, upgradeRole } = useAuth();
@@ -92,6 +93,14 @@ const UserMenu = () => {
         <DropdownMenuItem className="text-starlink-white">
           Alert Preferences
         </DropdownMenuItem>
+        
+        <Link to="/subscription">
+          <DropdownMenuItem className="text-starlink-white flex items-center space-x-2">
+            <CreditCard className="w-4 h-4" />
+            <span>Subscription & Billing</span>
+          </DropdownMenuItem>
+        </Link>
+        
         <DropdownMenuSeparator />
         
         {user?.role === 'individual' && (

@@ -8,6 +8,7 @@ import {
   Info,
   Database,
   Mail,
+  CreditCard,
   LucideIcon
 } from 'lucide-react';
 
@@ -53,6 +54,12 @@ export const navGroups: NavGroup[] = [
         label: 'Dashboard', 
         href: '/dashboard', 
         icon: LayoutGrid,
+        authRequired: true 
+      },
+      { 
+        label: 'Subscription', 
+        href: '/subscription',
+        icon: CreditCard,
         authRequired: true 
       },
       { 

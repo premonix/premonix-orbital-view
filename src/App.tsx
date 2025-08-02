@@ -19,6 +19,7 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdminConsole from "./pages/AdminConsole";
+import Subscription from "./pages/Subscription";
 import OrganizationOnboarding from "./pages/OrganizationOnboarding";
 import OnboardingDemo from "./pages/OnboardingDemo";
 import SoWhat from "./pages/SoWhat";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/admin" element={<AdminConsole />} />
+            <Route path="/subscription" element={<Subscription />} />
             <Route path="/onboarding" element={<OrganizationOnboarding />} />
             <Route path="/onboarding-demo" element={<OnboardingDemo />} />
             <Route path="/sowhat" element={<SoWhat />} />

@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Shield, Bell, Brain, Users, Building, Home, Briefcase, CheckCircle, Zap } from "lucide-react";
+import { Globe, Shield, Bell, Brain, Users, Building, Home, Briefcase, CheckCircle, Zap, CreditCard, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import GlobalThreatIntelligence from "@/components/isometric/GlobalThreatIntelligence";
 import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
@@ -371,6 +371,46 @@ const Homepage = () => {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Subscription CTA Section */}
+      <section className="py-20 px-6 bg-gradient-to-br from-starlink-blue/10 via-starlink-slate/5 to-starlink-blue/5">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <Badge className="bg-starlink-blue/20 text-starlink-blue border-starlink-blue/30 px-4 py-2">
+            <Star className="w-4 h-4 mr-2" />
+            Premium Intelligence Available Now
+          </Badge>
+          
+          <h2 className="text-4xl lg:text-5xl font-bold text-starlink-white">
+            Upgrade Your Threat Intelligence
+          </h2>
+          
+          <p className="text-xl text-starlink-grey-light max-w-3xl mx-auto">
+            Get advanced features, real-time alerts, and comprehensive threat analysis with PREMONIX subscriptions.
+            Protect what matters most with enterprise-grade intelligence.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <Link to="/subscription">
+              <Button size="lg" className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-3">
+                <CreditCard className="w-5 h-5 mr-2" />
+                View Subscription Plans
+              </Button>
+            </Link>
+            
+            {!isAuthenticated && (
+              <Link to="/onboarding">
+                <Button variant="outline" size="lg" className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light px-8 py-3">
+                  Start Free Assessment
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          <p className="text-sm text-starlink-grey-light">
+            Free tier available • 14-day trial • Cancel anytime
+          </p>
         </div>
       </section>
 
