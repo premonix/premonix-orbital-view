@@ -1,4 +1,5 @@
 
+import { useState, useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,9 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Search, Filter, Calendar, FileText, TrendingUp } from "lucide-react";
+import { Download, Search, Filter, Calendar, FileText, TrendingUp, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Reports = () => {
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [severityFilter, setSeverityFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('all');
+
   const reports = [
     {
       title: "Global Threat Intelligence Summary",
@@ -91,6 +100,74 @@ const Reports = () => {
     }
   };
 
+  const handleViewReport = async (report: any) => {
+    toast({
+      title: "Opening Report",
+      description: `Opening: ${report.title}`,
+    });
+    
+    // Track view analytics
+    try {
+      await supabase.rpc('update_dashboard_analytics', {
+        p_user_id: 'system', // Use system ID for public reports
+        p_action: 'report_viewed',
+        p_category: report.category
+      });
+    } catch (error) {
+      console.error('Error tracking report view:', error);
+    }
+  };
+
+  const handleDownloadReport = async (report: any) => {
+    toast({
+      title: "Downloading Report",
+      description: `Preparing download for: ${report.title}`,
+    });
+    
+    // Track download analytics
+    try {
+      await supabase.rpc('update_dashboard_analytics', {
+        p_user_id: 'system',
+        p_action: 'report_downloaded',
+        p_category: report.category
+      });
+    } catch (error) {
+      console.error('Error tracking report download:', error);
+    }
+  };
+
+  const filteredReports = useMemo(() => {
+    return reports.filter(report => {
+      const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           report.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || report.category.toLowerCase() === categoryFilter;
+      const matchesSeverity = severityFilter === 'all' || report.severity.toLowerCase() === severityFilter;
+      
+      // Time filter logic
+      let matchesTime = true;
+      if (timeFilter !== 'all') {
+        const reportDate = new Date(report.date);
+        const now = new Date();
+        switch (timeFilter) {
+          case 'week':
+            matchesTime = (now.getTime() - reportDate.getTime()) <= 7 * 24 * 60 * 60 * 1000;
+            break;
+          case 'month':
+            matchesTime = (now.getTime() - reportDate.getTime()) <= 30 * 24 * 60 * 60 * 1000;
+            break;
+          case 'quarter':
+            matchesTime = (now.getTime() - reportDate.getTime()) <= 90 * 24 * 60 * 60 * 1000;
+            break;
+          case 'year':
+            matchesTime = (now.getTime() - reportDate.getTime()) <= 365 * 24 * 60 * 60 * 1000;
+            break;
+        }
+      }
+
+      return matchesSearch && matchesCategory && matchesSeverity && matchesTime;
+    });
+  }, [searchQuery, categoryFilter, severityFilter, timeFilter]);
+
   return (
     <div className="min-h-screen bg-starlink-dark text-starlink-white">
       <Navigation />
@@ -112,10 +189,12 @@ const Reports = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-starlink-grey w-4 h-4" />
                 <Input 
                   placeholder="Search reports..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                 />
               </div>
-              <Select>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
@@ -127,7 +206,7 @@ const Reports = () => {
                   <SelectItem value="political">Political</SelectItem>
                 </SelectContent>
               </Select>
-              <Select>
+              <Select value={severityFilter} onValueChange={setSeverityFilter}>
                 <SelectTrigger className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white">
                   <SelectValue placeholder="Severity" />
                 </SelectTrigger>
@@ -138,11 +217,12 @@ const Reports = () => {
                   <SelectItem value="medium">Medium</SelectItem>
                 </SelectContent>
               </Select>
-              <Select>
+              <Select value={timeFilter} onValueChange={setTimeFilter}>
                 <SelectTrigger className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white">
                   <SelectValue placeholder="Time Period" />
                 </SelectTrigger>
                 <SelectContent className="bg-starlink-slate border-starlink-grey/30">
+                  <SelectItem value="all">All Time</SelectItem>
                   <SelectItem value="week">Last Week</SelectItem>
                   <SelectItem value="month">Last Month</SelectItem>
                   <SelectItem value="quarter">Last Quarter</SelectItem>
@@ -194,7 +274,7 @@ const Reports = () => {
 
           {/* Reports List */}
           <div className="space-y-4">
-            {reports.map((report, index) => (
+            {filteredReports.map((report, index) => (
               <Card key={index} className="glass-panel border-starlink-grey/30 hover:border-starlink-blue/50 transition-colors">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -222,12 +302,15 @@ const Reports = () => {
                       <Button 
                         size="sm" 
                         variant="outline" 
+                        onClick={() => handleViewReport(report)}
                         className="border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light"
                       >
+                        <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
                       <Button 
                         size="sm" 
+                        onClick={() => handleDownloadReport(report)}
                         className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark"
                       >
                         <Download className="w-4 h-4 mr-2" />

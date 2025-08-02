@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +9,64 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, Clock, MessageSquare, Users, Shield, Zap } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    organization: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-contact-form', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent successfully!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        organization: '',
+        subject: '',
+        message: ''
+      });
+
+    } catch (error: any) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Error sending message",
+        description: "Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const contactMethods = [
     {
       icon: Mail,
@@ -130,22 +187,28 @@ const Contact = () => {
           
           <Card className="glass-panel border-starlink-grey/30">
             <CardContent className="p-8">
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="firstName" className="text-starlink-white">First Name</Label>
                     <Input 
                       id="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
                       className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                       placeholder="Enter your first name"
+                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="lastName" className="text-starlink-white">Last Name</Label>
                     <Input 
                       id="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
                       className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                       placeholder="Enter your last name"
+                      required
                     />
                   </div>
                 </div>
@@ -155,8 +218,11 @@ const Contact = () => {
                   <Input 
                     id="email"
                     type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                     placeholder="Enter your email address"
+                    required
                   />
                 </div>
                 
@@ -164,6 +230,8 @@ const Contact = () => {
                   <Label htmlFor="organization" className="text-starlink-white">Organization (Optional)</Label>
                   <Input 
                     id="organization"
+                    value={formData.organization}
+                    onChange={handleInputChange}
                     className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                     placeholder="Enter your organization name"
                   />
@@ -173,8 +241,11 @@ const Contact = () => {
                   <Label htmlFor="subject" className="text-starlink-white">Subject</Label>
                   <Input 
                     id="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
                     className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                     placeholder="What can we help you with?"
+                    required
                   />
                 </div>
                 
@@ -183,13 +254,20 @@ const Contact = () => {
                   <Textarea 
                     id="message"
                     rows={6}
+                    value={formData.message}
+                    onChange={handleInputChange}
                     className="bg-starlink-slate/20 border-starlink-grey/30 text-starlink-white"
                     placeholder="Tell us more about your inquiry..."
+                    required
                   />
                 </div>
                 
-                <Button className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </CardContent>
