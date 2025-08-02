@@ -48,8 +48,10 @@ const LoginModal = ({ open, onOpenChange, onSwitchToRegister }: LoginModalProps)
         setEmail('');
         setPassword('');
         
-        // Immediate redirect to dashboard after successful login
-        navigate('/dashboard');
+        // Wait a bit for auth state to update, then navigate
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 100);
       }
     } catch (error) {
       toast({
