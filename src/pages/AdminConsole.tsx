@@ -4,7 +4,9 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
-import { Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Lock, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import PermissionGate from '@/components/auth/PermissionGate';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -70,6 +72,14 @@ const AdminConsole = () => {
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
                   <SidebarTrigger className="-ml-1" />
                   <AdminBreadcrumbs activeTab={activeTab} />
+                  <div className="ml-auto">
+                    <Link to="/dashboard">
+                      <Button variant="outline" size="sm">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to User Dashboard
+                      </Button>
+                    </Link>
+                  </div>
                 </header>
                 
                 <div className="flex-1 p-6">
