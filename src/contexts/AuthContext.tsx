@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+
   useEffect(() => {
     let isMounted = true;
     
