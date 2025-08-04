@@ -29,6 +29,9 @@ import { PersonalizedThreatWidget } from '@/components/dashboard/PersonalizedThr
 import { EnhancedRealTimeStream } from '@/components/dashboard/EnhancedRealTimeStream';
 import { AIReportGenerator } from '@/components/dashboard/AIReportGenerator';
 import { FullDisruptionOSDashboard } from '@/components/dashboard/FullDisruptionOSDashboard';
+import { OpsLensWidget } from '@/components/dashboard/OpsLensWidget';
+import { SignalGraphWidget } from '@/components/dashboard/SignalGraphWidget';
+import { EnhancedBriefingWidget } from '@/components/dashboard/EnhancedBriefingWidget';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
 import { useRealTime, RealTimeStatus } from '@/contexts/RealTimeContext';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
@@ -455,7 +458,20 @@ const UserDashboard = () => {
                 )}
 
                 {activeTab === 'disruption-os' && (
-                  <FullDisruptionOSDashboard userId={user.id} />
+                  <div className="space-y-6">
+                    <FullDisruptionOSDashboard userId={user.id} />
+                    
+                    {/* Enhanced DisruptionOS Modules */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <OpsLensWidget userId={user.id} />
+                      <SignalGraphWidget userId={user.id} />
+                    </div>
+                    
+                    <EnhancedBriefingWidget 
+                      userId={user.id}
+                      threatSignals={threatSignals}
+                    />
+                  </div>
                 )}
 
                 {activeTab === 'threats' && (
@@ -492,6 +508,11 @@ const UserDashboard = () => {
 
                 {activeTab === 'analytics' && (
                   <div className="space-y-6">
+                    <EnhancedBriefingWidget 
+                      userId={user?.id || ''}
+                      threatSignals={threatSignals}
+                    />
+                    <SignalGraphWidget userId={user?.id || ''} />
                     <AIReportGenerator threatSignals={threatSignals} />
                     <AnalyticsWidget 
                       analytics={analytics || []}

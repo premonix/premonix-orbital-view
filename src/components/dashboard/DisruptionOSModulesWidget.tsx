@@ -144,10 +144,16 @@ export const DisruptionOSModulesWidget = ({ userId }: DisruptionOSModulesWidgetP
           <p className="text-sm text-muted-foreground">
             Enterprise features powered by DisruptionOS™
           </p>
-          <Button variant="outline" size="sm">
-            <Eye className="w-4 h-4 mr-2" />
-            View Full Suite
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm">
+              <Eye className="w-4 h-4 mr-2" />
+              View Full Suite
+            </Button>
+            <Button size="sm">
+              <Play className="w-4 h-4 mr-2" />
+              Launch Modules
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
