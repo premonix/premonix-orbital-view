@@ -4,6 +4,9 @@ import { ThreatSignal } from '@/types/threat';
 import { supabase } from '@/integrations/supabase/client';
 import MapControls from '@/components/MapControls';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Calendar, MapPin, Shield, AlertTriangle, Clock } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const MapLibreThreatMap = () => {
@@ -12,6 +15,7 @@ const MapLibreThreatMap = () => {
   const [viewMode, setViewMode] = useState<'2d' | 'globe'>('2d');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedThreat, setSelectedThreat] = useState<ThreatSignal | null>(null);
 
   useEffect(() => {
     const fetchThreatSignals = async () => {
@@ -110,7 +114,8 @@ const MapLibreThreatMap = () => {
             anchor="center"
           >
             <div 
-              className="relative group cursor-pointer"
+              className="relative group cursor-pointer hover:scale-110 transition-transform"
+              onClick={() => setSelectedThreat(signal)}
               style={{
                 width: '12px',
                 height: '12px',
@@ -236,6 +241,142 @@ const MapLibreThreatMap = () => {
           }
         }
       `}</style>
+
+      {/* Threat Details Dialog */}
+      <Dialog open={!!selectedThreat} onOpenChange={() => setSelectedThreat(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" style={{ color: selectedThreat ? getSeverityColor(selectedThreat.severity) : undefined }} />
+              {selectedThreat?.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedThreat && (
+            <div className="space-y-6">
+              {/* Threat Overview */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Severity</span>
+                  </div>
+                  <Badge 
+                    variant="outline"
+                    className="capitalize"
+                    style={{ 
+                      borderColor: getSeverityColor(selectedThreat.severity),
+                      color: getSeverityColor(selectedThreat.severity)
+                    }}
+                  >
+                    {selectedThreat.severity}
+                  </Badge>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Location</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedThreat.location.region}, {selectedThreat.location.country}
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Timestamp</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedThreat.timestamp.toLocaleDateString()} {selectedThreat.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Category</span>
+                  </div>
+                  <Badge variant="secondary">
+                    {selectedThreat.category}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Description */}
+              {selectedThreat.description && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Description</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {selectedThreat.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Metrics */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Confidence Level</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-secondary rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full" 
+                        style={{ width: `${selectedThreat.confidence}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-muted-foreground">{selectedThreat.confidence}%</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Escalation Potential</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-secondary rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full" 
+                        style={{ 
+                          width: `${selectedThreat.escalationPotential}%`,
+                          backgroundColor: selectedThreat.escalationPotential > 70 ? '#dc2626' : 
+                                         selectedThreat.escalationPotential > 40 ? '#ea580c' : '#16a34a'
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-muted-foreground">{selectedThreat.escalationPotential}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tags */}
+              {selectedThreat.tags && selectedThreat.tags.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedThreat.tags.map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Source */}
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Source</h4>
+                <p className="text-sm text-muted-foreground">{selectedThreat.source}</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setSelectedThreat(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
