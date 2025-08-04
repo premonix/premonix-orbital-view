@@ -233,14 +233,17 @@ async function fetchNewsAPI() {
   }
 
   try {
-    console.log('Making NewsAPI request with key:', newsApiKey.substring(0, 8) + '...')
+    console.log('Making NewsAPI request...')
+    
+    // Use a simpler query that's less likely to trigger rate limits
+    const fromDate = new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0]
+    const query = 'security OR cyber OR attack OR threat'
     
     const response = await fetch(
-      `https://newsapi.org/v2/everything?q=(military OR conflict OR war OR threat OR attack OR missile OR drone OR cyber OR security)&sortBy=publishedAt&language=en&pageSize=50&from=${new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0]}`,
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&language=en&pageSize=30&from=${fromDate}`,
       {
         headers: {
-          'X-API-Key': newsApiKey.trim(),
-          'User-Agent': 'ThreatIntelligence/1.0'
+          'X-API-Key': newsApiKey.trim()
         },
         signal: AbortSignal.timeout(30000) // 30 second timeout
       }
@@ -248,11 +251,25 @@ async function fetchNewsAPI() {
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('NewsAPI error response:', errorText)
-      throw new Error(`NewsAPI error: ${response.status} ${response.statusText} - ${errorText}`)
+      console.error('NewsAPI error response:', response.status, response.statusText, errorText)
+      
+      // Log specific error details for debugging
+      if (response.status === 401) {
+        console.error('NewsAPI authentication failed - check API key')
+      } else if (response.status === 429) {
+        console.error('NewsAPI rate limit exceeded')
+      }
+      
+      throw new Error(`NewsAPI error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
+    
+    if (data.status === 'error') {
+      console.error('NewsAPI returned error:', data.message)
+      throw new Error(`NewsAPI error: ${data.message}`)
+    }
+    
     console.log(`NewsAPI returned ${data.articles?.length || 0} articles`)
     return processNewsData(data.articles || [])
   } catch (error) {
@@ -634,39 +651,66 @@ function getRegionFromCountry(country: string) {
 async function fetchVirusTotal() {
   const virusTotalApiKey = Deno.env.get('VIRUSTOTAL_API_KEY')
   if (!virusTotalApiKey) {
-    console.log('VirusTotal API key not found, skipping cyber threat data')
-    return []
+    console.log('VirusTotal API key not found, using simulated cyber threat data')
+    return generateCyberThreatSignals()
   }
 
   try {
-    console.log('Fetching VirusTotal threat intelligence...')
+    console.log('Fetching real VirusTotal threat intelligence...')
     
     const signals = []
     
-    // Fetch recent malicious files from VirusTotal v3 API
-    const response = await fetch(
-      'https://www.virustotal.com/api/v3/intelligence/search?query=type:file fs:2024-01-01+ positives:5+ tag:trojan',
-      {
-        headers: {
-          'x-apikey': virusTotalApiKey.trim(),
-          'Accept': 'application/json'
-        },
-        signal: AbortSignal.timeout(30000)
-      }
-    )
+    // Try multiple VirusTotal v3 API endpoints
+    const endpoints = [
+      // Recent malicious files
+      'https://www.virustotal.com/api/v3/intelligence/search?query=type:file fs:2025-01-01+ positives:5+',
+      // Recent malicious URLs
+      'https://www.virustotal.com/api/v3/intelligence/search?query=type:url positives:3+ ls:24h',
+      // Recent domains with malicious detections
+      'https://www.virustotal.com/api/v3/intelligence/search?query=type:domain positives:2+ ls:48h'
+    ]
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying VirusTotal endpoint: ${endpoint.split('?')[0]}`)
+        
+        const response = await fetch(endpoint, {
+          headers: {
+            'x-apikey': virusTotalApiKey.trim(),
+            'Accept': 'application/json'
+          },
+          signal: AbortSignal.timeout(15000) // Shorter timeout per request
+        })
 
-    if (response.ok) {
-      const data = await response.json()
-      console.log(`VirusTotal returned ${data.data?.length || 0} threat intelligence items`)
-      
-      if (data.data && Array.isArray(data.data)) {
-        // Process real VirusTotal data
-        const processedSignals = data.data.slice(0, 10).map(item => processVirusTotalData(item))
-        signals.push(...processedSignals.filter(Boolean))
+        if (response.ok) {
+          const data = await response.json()
+          console.log(`VirusTotal endpoint returned ${data.data?.length || 0} items`)
+          
+          if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+            // Process real VirusTotal data
+            const processedSignals = data.data.slice(0, 5).map(item => processVirusTotalData(item))
+            signals.push(...processedSignals.filter(Boolean))
+            break // Success, use this data
+          }
+        } else if (response.status === 401) {
+          console.error('VirusTotal API authentication failed - check API key')
+          break // Don't try other endpoints if auth fails
+        } else if (response.status === 429) {
+          console.log('VirusTotal API quota exceeded, trying next endpoint...')
+          continue // Try next endpoint
+        } else {
+          console.log(`VirusTotal endpoint error: ${response.status}, trying next...`)
+          continue
+        }
+      } catch (endpointError) {
+        console.log(`VirusTotal endpoint failed: ${endpointError.message}, trying next...`)
+        continue
       }
-    } else {
-      console.log('VirusTotal API quota exceeded or error, using simulated data')
-      // Fallback to simulated data if API quota exceeded
+    }
+    
+    // If no real data was obtained, use simulated data
+    if (signals.length === 0) {
+      console.log('No real VirusTotal data available, using simulated cyber threats')
       const cyberThreats = generateCyberThreatSignals()
       signals.push(...cyberThreats)
     }
@@ -676,7 +720,6 @@ async function fetchVirusTotal() {
     
   } catch (error) {
     console.error('VirusTotal fetch error, falling back to simulated data:', error)
-    // Fallback to simulated data on error
     return generateCyberThreatSignals()
   }
 }
