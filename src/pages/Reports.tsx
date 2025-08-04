@@ -109,8 +109,8 @@ const Reports = () => {
     return reports.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            report.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || report.category.toLowerCase() === categoryFilter;
-      const matchesSeverity = severityFilter === 'all' || report.severity.toLowerCase() === severityFilter;
+      const matchesCategory = categoryFilter === 'all' || report.category === categoryFilter;
+      const matchesSeverity = severityFilter === 'all' || report.severity === severityFilter;
       
       // Time filter logic
       let matchesTime = true;
