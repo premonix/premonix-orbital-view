@@ -111,12 +111,12 @@ const WorldMap = () => {
           </svg>
         </div>
 
-        {/* World Map Outline with Recognizable Continents */}
-        <div className="absolute inset-0 opacity-60">
+        {/* World Map with Actual Continent Shapes */}
+        <div className="absolute inset-0 opacity-80">
           <svg viewBox="0 0 1000 500" className="w-full h-full">
             <defs>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <filter id="continentGlow">
+                <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
                 <feMerge> 
                   <feMergeNode in="coloredBlur"/>
                   <feMergeNode in="SourceGraphic"/>
@@ -124,94 +124,111 @@ const WorldMap = () => {
               </filter>
             </defs>
             
-            {/* North America */}
+            {/* North America - Recognizable shape */}
             <path
-              d="M50 150 Q70 120 100 130 L140 140 Q180 145 200 140 L240 150 Q280 160 300 155 L320 165"
-              stroke="#64748b"
-              strokeWidth="3"
-              fill="rgba(100, 116, 139, 0.1)"
-              filter="url(#glow)"
-            />
-            <path
-              d="M80 180 Q120 170 160 180 L200 190 Q240 195 280 190"
-              stroke="#64748b"
+              d="M80 120 L100 100 L140 95 L180 105 L220 110 L250 120 L280 140 L300 160 L290 180 L270 200 L240 210 L200 205 L160 190 L120 170 L90 150 Z"
+              stroke="#94a3b8"
               strokeWidth="2"
-              fill="rgba(100, 116, 139, 0.05)"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
             />
             
-            {/* South America */}
+            {/* South America - Distinctive elongated shape */}
             <path
-              d="M200 220 Q220 210 240 220 L260 240 Q280 280 270 320 L260 360 Q250 380 240 400"
-              stroke="#64748b"
-              strokeWidth="3"
-              fill="rgba(100, 116, 139, 0.1)"
-              filter="url(#glow)"
-            />
-            
-            {/* Europe */}
-            <path
-              d="M400 120 Q420 110 440 115 L460 120 Q480 125 500 120 L520 130"
-              stroke="#64748b"
+              d="M220 230 L240 220 L260 235 L270 260 L275 290 L270 320 L265 350 L255 380 L245 400 L235 410 L225 405 L220 380 L215 350 L210 320 L205 290 L210 260 L215 240 Z"
+              stroke="#94a3b8"
               strokeWidth="2"
-              fill="rgba(100, 116, 139, 0.1)"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
             />
             
-            {/* Africa */}
+            {/* Europe - Small but distinct */}
             <path
-              d="M420 180 Q440 170 460 180 L480 200 Q500 240 490 280 L480 320 Q470 360 460 380"
-              stroke="#64748b"
-              strokeWidth="3"
-              fill="rgba(100, 116, 139, 0.1)"
-              filter="url(#glow)"
-            />
-            
-            {/* Asia */}
-            <path
-              d="M520 120 Q560 110 600 120 L640 130 Q680 135 720 130 L760 140 Q800 145 840 140"
-              stroke="#64748b"
-              strokeWidth="3"
-              fill="rgba(100, 116, 139, 0.1)"
-              filter="url(#glow)"
-            />
-            <path
-              d="M540 160 Q580 150 620 160 L660 170 Q700 175 740 170 L780 180"
-              stroke="#64748b"
+              d="M420 110 L440 105 L460 110 L480 115 L500 120 L510 130 L505 140 L490 145 L470 140 L450 135 L430 130 L415 125 Z"
+              stroke="#94a3b8"
               strokeWidth="2"
-              fill="rgba(100, 116, 139, 0.05)"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
             />
             
-            {/* Australia */}
+            {/* Africa - Characteristic shape */}
             <path
-              d="M720 320 Q740 315 760 320 L780 325 Q800 330 820 325"
-              stroke="#64748b"
+              d="M430 160 L450 155 L470 160 L485 175 L495 200 L500 230 L495 260 L485 290 L475 320 L465 350 L450 370 L435 375 L425 365 L420 340 L415 310 L410 280 L415 250 L420 220 L425 190 L430 170 Z"
+              stroke="#94a3b8"
               strokeWidth="2"
-              fill="rgba(100, 116, 139, 0.1)"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
             />
             
-            {/* Coastlines for better definition */}
+            {/* Asia - Large landmass */}
             <path
-              d="M50 100 Q200 80 400 100 Q600 90 800 100 Q900 110 950 120"
-              stroke="#475569"
+              d="M520 100 L580 95 L640 100 L700 105 L760 110 L820 115 L850 130 L860 150 L855 170 L840 185 L800 190 L750 185 L700 180 L650 175 L600 170 L550 165 L520 150 L510 130 Z"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
+            />
+            
+            {/* China/Eastern Asia - Additional detail */}
+            <path
+              d="M700 200 L740 195 L780 200 L810 210 L820 225 L815 240 L800 245 L770 240 L740 235 L710 230 L695 220 Z"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
+            />
+            
+            {/* Australia - Distinct island shape */}
+            <path
+              d="M720 330 L760 325 L800 330 L830 340 L840 355 L835 365 L820 370 L780 365 L740 360 L720 350 Z"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              fill="rgba(148, 163, 184, 0.15)"
+              filter="url(#continentGlow)"
+            />
+            
+            {/* Greenland */}
+            <path
+              d="M320 80 L340 75 L355 80 L365 90 L360 105 L350 110 L335 105 L325 95 Z"
+              stroke="#94a3b8"
               strokeWidth="1"
-              fill="none"
-              className="opacity-50"
-            />
-            <path
-              d="M100 400 Q300 420 500 400 Q700 390 900 400"
-              stroke="#475569"
-              strokeWidth="1"
-              fill="none"
-              className="opacity-50"
+              fill="rgba(148, 163, 184, 0.1)"
             />
             
-            {/* Country Labels */}
-            <text x="150" y="170" fill="#64748b" fontSize="12" className="opacity-70">USA</text>
-            <text x="250" y="300" fill="#64748b" fontSize="12" className="opacity-70">Brazil</text>
-            <text x="450" y="140" fill="#64748b" fontSize="12" className="opacity-70">Europe</text>
-            <text x="470" y="250" fill="#64748b" fontSize="12" className="opacity-70">Africa</text>
-            <text x="600" y="160" fill="#64748b" fontSize="12" className="opacity-70">Russia</text>
-            <text x="720" y="180" fill="#64748b" fontSize="12" className="opacity-70">China</text>
-            <text x="770" y="340" fill="#64748b" fontSize="12" className="opacity-70">Australia</text>
+            {/* Madagascar */}
+            <path
+              d="M520 320 L525 315 L530 325 L528 340 L525 350 L520 345 Z"
+              stroke="#94a3b8"
+              strokeWidth="1"
+              fill="rgba(148, 163, 184, 0.1)"
+            />
+            
+            {/* Japan */}
+            <path
+              d="M820 190 L830 185 L835 195 L840 205 L835 215 L825 210 L820 200 Z"
+              stroke="#94a3b8"
+              strokeWidth="1"
+              fill="rgba(148, 163, 184, 0.1)"
+            />
+            
+            {/* UK/British Isles */}
+            <path
+              d="M400 130 L410 125 L415 135 L412 145 L405 140 Z"
+              stroke="#94a3b8"
+              strokeWidth="1"
+              fill="rgba(148, 163, 184, 0.1)"
+            />
+            
+            {/* Ocean/Water boundaries */}
+            <circle cx="500" cy="250" r="200" fill="none" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1" strokeDasharray="5,5" opacity="0.3"/>
+            
+            {/* Continent Labels */}
+            <text x="180" y="160" fill="#cbd5e1" fontSize="14" fontWeight="bold" textAnchor="middle">NORTH AMERICA</text>
+            <text x="240" y="320" fill="#cbd5e1" fontSize="12" fontWeight="bold" textAnchor="middle">SOUTH AMERICA</text>
+            <text x="460" y="135" fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">EUROPE</text>
+            <text x="460" y="270" fill="#cbd5e1" fontSize="12" fontWeight="bold" textAnchor="middle">AFRICA</text>
+            <text x="680" y="150" fill="#cbd5e1" fontSize="14" fontWeight="bold" textAnchor="middle">ASIA</text>
+            <text x="780" y="350" fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">AUSTRALIA</text>
           </svg>
         </div>
 
@@ -241,22 +258,6 @@ const WorldMap = () => {
           })}
         </div>
 
-        {/* Map Status - Update the message */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-          <div className="bg-starlink-slate-dark/95 backdrop-blur border border-starlink-blue/30 rounded-lg p-6 max-w-md text-center">
-            <MapPin className="w-8 h-8 text-starlink-blue mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-starlink-white mb-2">
-              World Threat Map
-            </h3>
-            <p className="text-sm text-starlink-grey-light mb-4">
-              Displaying {filteredSignals.length} real-time threat signals across the globe.
-              Interactive features available with full map integration.
-            </p>
-            <div className="text-xs text-starlink-blue">
-              Live threat intelligence • Real-time updates
-            </div>
-          </div>
-        </div>
 
         {/* Enhanced Status Bar */}
         <div className="absolute bottom-4 lg:bottom-6 left-4 lg:left-auto lg:right-6 z-40 glass-panel rounded-lg px-3 lg:px-4 py-2">
