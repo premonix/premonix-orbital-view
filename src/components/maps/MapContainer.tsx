@@ -2,10 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ThreatSignal, ThreatZone } from '@/types/threat';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 
 interface MapContainerProps {
   threatSignals?: ThreatSignal[];
@@ -39,28 +35,24 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
-  // Initialize map with token from Supabase secrets
+  // Initialize map with hardcoded token for now (will be replaced with secret)
   useEffect(() => {
     if (!mapContainer.current) return;
 
     const initializeMap = async () => {
       try {
-        console.log('Fetching Mapbox token...');
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        // Try to get the token from environment first
+        const tokenFromEnv = 'MAPBOX_TOKEN' in window ? (window as any).MAPBOX_TOKEN : null;
         
-        if (error) {
-          console.error('Error fetching Mapbox token:', error);
+        if (tokenFromEnv) {
+          mapboxgl.accessToken = tokenFromEnv;
+        } else {
+          // For now, show an informative error instead of failing silently
+          setMapError('Mapbox token not found. Please configure MAPBOX_TOKEN.');
           return;
         }
-
-        if (!data?.token) {
-          console.error('No Mapbox token received');
-          return;
-        }
-
-        console.log('Mapbox token received, initializing map...');
-        mapboxgl.accessToken = data.token;
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
@@ -90,10 +82,12 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
         map.current.on('error', (e) => {
           console.error('Map error:', e);
+          setMapError('Failed to load map. Please check Mapbox token configuration.');
         });
 
       } catch (error) {
         console.error('Failed to initialize map:', error);
+        setMapError('Map initialization failed');
       }
     };
 
@@ -113,7 +107,15 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
       // Remove existing sources and layers
       if (map.current.getSource('threat-signals')) {
-        map.current.removeLayer('threat-signals-layer');
+        if (map.current.getLayer('threat-signals-layer')) {
+          map.current.removeLayer('threat-signals-layer');
+        }
+        if (map.current.getLayer('threat-signals-clusters')) {
+          map.current.removeLayer('threat-signals-clusters');
+        }
+        if (map.current.getLayer('threat-signals-cluster-count')) {
+          map.current.removeLayer('threat-signals-cluster-count');
+        }
         map.current.removeSource('threat-signals');
       }
 
@@ -247,6 +249,27 @@ const MapContainer: React.FC<MapContainerProps> = ({
       map.current.on('load', addThreatSignals);
     }
   }, [threatSignals, onSignalClick, isMapReady]);
+
+  if (mapError) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="absolute inset-0 bg-starlink-dark flex items-center justify-center z-10">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="text-red-400 text-lg font-semibold mb-2">
+              Map Loading Error
+            </div>
+            <div className="text-starlink-grey-light text-sm mb-4">
+              {mapError}
+            </div>
+            <div className="text-xs text-starlink-grey">
+              Please refresh the page or contact support if the issue persists.
+            </div>
+          </div>
+        </div>
+        <div ref={mapContainer} className={`w-full h-full ${className}`} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
