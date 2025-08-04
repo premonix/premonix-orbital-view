@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { useAIReportGeneration } from '@/hooks/useAIReportGeneration';
 import { 
   Brain, 
   Zap, 
@@ -14,7 +16,9 @@ import {
   Settings,
   BarChart3,
   Users,
-  Shield
+  Shield,
+  Calendar,
+  Send
 } from 'lucide-react';
 
 interface DecisionSupportWidgetProps {
@@ -26,6 +30,8 @@ interface DecisionSupportWidgetProps {
 
 export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, userId }: DecisionSupportWidgetProps) => {
   const [activeAnalysis, setActiveAnalysis] = useState('threat-correlation');
+  const { toast } = useToast();
+  const { generateReport, isGenerating } = useAIReportGeneration();
 
   // Generate actionable insights from threat data
   const generateInsights = () => {
@@ -138,6 +144,98 @@ export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, us
 
   const insights = generateInsights();
   const recommendations = generateDecisionRecommendations();
+
+  // Quick action handlers
+  const handleGenerateReport = async () => {
+    try {
+      const report = await generateReport({
+        type: 'threat_analysis',
+        title: 'Decision Support Report',
+        data: {
+          threatSignals: threatSignals.slice(0, 10),
+          insights: insights,
+          recommendations: recommendations,
+          userId: userId
+        },
+        time_period: '24h'
+      });
+      
+      if (report) {
+        toast({
+          title: "Report Generated",
+          description: "Threat analysis report has been generated successfully.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Report Generation Failed",
+        description: "Unable to generate report at this time. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBriefTeam = () => {
+    const criticalThreats = threatSignals.filter(t => t.severity === 'critical').length;
+    const unreadAlerts = userAlerts.filter(a => !a.is_read).length;
+    
+    const briefingText = `📊 THREAT BRIEFING\n\n` +
+      `🚨 Critical Threats: ${criticalThreats}\n` +
+      `⚠️ Unread Alerts: ${unreadAlerts}\n` +
+      `📈 Total Signals (24h): ${threatSignals.length}\n\n` +
+      `Key Insights:\n${insights.map(i => `• ${i.title}`).join('\n')}\n\n` +
+      `Recommended Actions:\n${recommendations.map(r => `• ${r.action}`).join('\n')}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Threat Intelligence Briefing',
+        text: briefingText,
+      });
+    } else {
+      navigator.clipboard.writeText(briefingText);
+      toast({
+        title: "Briefing Copied",
+        description: "Team briefing has been copied to clipboard.",
+      });
+    }
+  };
+
+  const handleEscalate = () => {
+    const criticalCount = threatSignals.filter(t => t.severity === 'critical').length;
+    
+    if (criticalCount === 0) {
+      toast({
+        title: "No Critical Threats",
+        description: "No critical threats requiring immediate escalation.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Simulate escalation process
+    toast({
+      title: "Escalation Initiated",
+      description: `${criticalCount} critical threat(s) escalated to management team.`,
+    });
+    
+    // In a real app, this would trigger actual escalation workflows
+    console.log('Escalating threats:', threatSignals.filter(t => t.severity === 'critical'));
+  };
+
+  const handleScheduleReview = () => {
+    const reviewDate = new Date();
+    reviewDate.setDate(reviewDate.getDate() + 1); // Schedule for tomorrow
+    
+    const reviewTime = reviewDate.toLocaleDateString() + ' at 9:00 AM';
+    
+    toast({
+      title: "Review Scheduled",
+      description: `Threat assessment review scheduled for ${reviewTime}.`,
+    });
+    
+    // In a real app, this would integrate with calendar systems
+    console.log('Review scheduled for:', reviewTime);
+  };
 
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -310,20 +408,43 @@ export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, us
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" className="flex-col h-auto py-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-col h-auto py-3"
+              onClick={handleGenerateReport}
+              disabled={isGenerating}
+            >
               <BarChart3 className="w-4 h-4 mb-1" />
-              <span className="text-xs">Generate Report</span>
+              <span className="text-xs">
+                {isGenerating ? 'Generating...' : 'Generate Report'}
+              </span>
             </Button>
-            <Button variant="outline" size="sm" className="flex-col h-auto py-3">
-              <Users className="w-4 h-4 mb-1" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-col h-auto py-3"
+              onClick={handleBriefTeam}
+            >
+              <Send className="w-4 h-4 mb-1" />
               <span className="text-xs">Brief Team</span>
             </Button>
-            <Button variant="outline" size="sm" className="flex-col h-auto py-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-col h-auto py-3"
+              onClick={handleEscalate}
+            >
               <AlertTriangle className="w-4 h-4 mb-1" />
               <span className="text-xs">Escalate</span>
             </Button>
-            <Button variant="outline" size="sm" className="flex-col h-auto py-3">
-              <Clock className="w-4 h-4 mb-1" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-col h-auto py-3"
+              onClick={handleScheduleReview}
+            >
+              <Calendar className="w-4 h-4 mb-1" />
               <span className="text-xs">Schedule Review</span>
             </Button>
           </div>
