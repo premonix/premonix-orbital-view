@@ -33,6 +33,9 @@ import {
   Clock
 } from "lucide-react";
 import { DSSAssessment } from './DSSAssessment';
+import { OpsLensWidget } from './OpsLensWidget';
+import { SignalGraphWidget } from './SignalGraphWidget';
+import { EnhancedBriefingWidget } from './EnhancedBriefingWidget';
 
 interface FullDisruptionOSDashboardProps {
   userId: string;
@@ -403,12 +406,66 @@ export const FullDisruptionOSDashboard = ({ userId }: FullDisruptionOSDashboardP
     </div>
   );
 
+  const renderOpsLensDashboard = () => (
+    <div className="space-y-6">
+      <OpsLensWidget userId={userId} />
+    </div>
+  );
+
+  const renderSignalGraphDashboard = () => (
+    <div className="space-y-6">
+      <SignalGraphWidget userId={userId} />
+    </div>
+  );
+
+  const renderBriefingsDashboard = () => (
+    <div className="space-y-6">
+      <EnhancedBriefingWidget userId={userId} />
+    </div>
+  );
+
+  const renderFutureSimDashboard = () => (
+    <Card>
+      <CardContent className="p-12 text-center">
+        <div className="space-y-4">
+          <div className="w-16 h-16 mx-auto bg-purple-500/20 rounded-lg flex items-center justify-center">
+            <Brain className="w-8 h-8 text-purple-500" />
+          </div>
+          <h3 className="text-xl font-semibold">Future Sim™ - Strategic Scenario Engine</h3>
+          <p className="text-muted-foreground">Advanced scenario modeling and strategic simulation capabilities are in development.</p>
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto mt-6">
+            <div className="p-3 border rounded">
+              <h4 className="font-semibold text-sm">Scenario Builder</h4>
+              <p className="text-xs text-muted-foreground">Create custom scenarios</p>
+            </div>
+            <div className="p-3 border rounded">
+              <h4 className="font-semibold text-sm">Impact Modeling</h4>
+              <p className="text-xs text-muted-foreground">Simulate outcomes</p>
+            </div>
+          </div>
+          <Button>
+            <Play className="w-4 h-4 mr-2" />
+            Request Early Access
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   const renderModuleDashboard = () => {
     switch (activeModule) {
       case 'control':
         return renderControlDashboard();
       case 'risklens':
         return renderRiskLensDashboard();
+      case 'opslens':
+        return renderOpsLensDashboard();
+      case 'signalgraph':
+        return renderSignalGraphDashboard();
+      case 'briefings':
+        return renderBriefingsDashboard();
+      case 'futuresim':
+        return renderFutureSimDashboard();
       default:
         return (
           <Card>
