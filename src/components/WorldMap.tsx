@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Zap } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
+import { supabase } from '@/integrations/supabase/client';
 
 const WorldMap = () => {
   const { isAuthenticated, upgradeRole } = useAuth();
@@ -24,8 +25,38 @@ const WorldMap = () => {
     // Load threat signals
     const loadThreatData = async () => {
       try {
-        const signals = await RealThreatService.getLatestSignals(100);
-        setThreatSignals(signals);
+        const { data: rawSignals, error } = await supabase
+          .from('threat_signals')
+          .select('*')
+          .order('timestamp', { ascending: false })
+          .limit(100);
+
+        if (error) {
+          console.error('Database error:', error);
+          return;
+        }
+
+        // Transform database signals to match ThreatSignal interface
+        const transformedSignals: ThreatSignal[] = (rawSignals || []).map(signal => ({
+          id: signal.id,
+          timestamp: new Date(signal.timestamp),
+          location: {
+            lat: Number(signal.latitude),
+            lng: Number(signal.longitude),
+            country: signal.country || '',
+            region: signal.region || ''
+          },
+          category: signal.category as any,
+          severity: signal.severity as any,
+          confidence: signal.confidence || 0,
+          source: signal.source_name || '',
+          title: signal.title || '',
+          description: signal.summary || '',
+          tags: signal.tags || [],
+          escalationPotential: signal.escalation_potential || 0
+        }));
+
+        setThreatSignals(transformedSignals);
       } catch (error) {
         console.error('Failed to load threat signals:', error);
       }

@@ -46,19 +46,21 @@ const MapContainer: React.FC<MapContainerProps> = ({
 
     const initializeMap = async () => {
       try {
-        // Try to get Mapbox token from Supabase secrets
+        console.log('Fetching Mapbox token...');
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
-        let token = null;
-        if (data?.token) {
-          token = data.token;
-        } else {
-          // Fallback: prompt user for token
-          console.log('No Mapbox token found in secrets');
+        if (error) {
+          console.error('Error fetching Mapbox token:', error);
           return;
         }
 
-        mapboxgl.accessToken = token;
+        if (!data?.token) {
+          console.error('No Mapbox token received');
+          return;
+        }
+
+        console.log('Mapbox token received, initializing map...');
+        mapboxgl.accessToken = data.token;
 
         map.current = new mapboxgl.Map({
           container: mapContainer.current!,
@@ -68,7 +70,6 @@ const MapContainer: React.FC<MapContainerProps> = ({
           pitch,
           bearing,
           interactive,
-          projection: 'globe' as any,
           antialias: true
         });
 
@@ -83,11 +84,16 @@ const MapContainer: React.FC<MapContainerProps> = ({
         }
 
         map.current.on('load', () => {
+          console.log('Map loaded successfully');
           setIsMapReady(true);
         });
+
+        map.current.on('error', (e) => {
+          console.error('Map error:', e);
+        });
+
       } catch (error) {
         console.error('Failed to initialize map:', error);
-        // Show fallback message
       }
     };
 
@@ -111,7 +117,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
         map.current.removeSource('threat-signals');
       }
 
-      // Add threat signals source
+      // Add threat signals source  
       const geojsonData = {
         type: 'FeatureCollection' as const,
         features: threatSignals.map(signal => ({
@@ -242,27 +248,21 @@ const MapContainer: React.FC<MapContainerProps> = ({
     }
   }, [threatSignals, onSignalClick, isMapReady]);
 
-  if (!isMapReady) {
-    return (
-      <div className={`relative ${className}`}>
+  return (
+    <div className="relative">
+      <div ref={mapContainer} className={`w-full h-full ${className}`} />
+      {!isMapReady && (
         <div className="absolute inset-0 bg-starlink-dark flex items-center justify-center z-10">
           <div className="text-center">
             <div className="text-starlink-blue text-lg font-semibold mb-2">
               Loading Interactive Map...
             </div>
             <div className="text-starlink-grey-light text-sm">
-              Initializing Mapbox GL
+              Please wait while we initialize the map
             </div>
           </div>
         </div>
-        <div ref={mapContainer} className={`w-full h-full ${className}`} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative">
-      <div ref={mapContainer} className={`w-full h-full ${className}`} />
+      )}
     </div>
   );
 };
