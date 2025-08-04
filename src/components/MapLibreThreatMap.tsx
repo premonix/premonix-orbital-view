@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Map, { Layer, Source, Marker } from 'react-map-gl/maplibre';
 import { ThreatSignal } from '@/types/threat';
-import { supabase } from '@/integrations/supabase/client';
+import { RealThreatService } from '@/services/realThreatService';
 import MapControls from '@/components/MapControls';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Shield, AlertTriangle, Clock } from 'lucide-react';
+import { Calendar, MapPin, Shield, AlertTriangle, Clock, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const MapLibreThreatMap = () => {
@@ -16,46 +16,52 @@ const MapLibreThreatMap = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedThreat, setSelectedThreat] = useState<ThreatSignal | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const loadSignals = async () => {
+    try {
+      setLoading(true);
+      const signals = await RealThreatService.getLatestSignals(100);
+      setThreatSignals(signals);
+      setLastUpdated(new Date());
+      setIsConnected(true);
+    } catch (error) {
+      console.error('Error loading threat signals:', error);
+      setIsConnected(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setIsRefreshing(true);
+      const refreshResult = await RealThreatService.refreshThreatData();
+      if (refreshResult.success) {
+        await loadSignals();
+      } else {
+        console.error('Refresh failed:', refreshResult.error);
+      }
+    } catch (error) {
+      console.error('Error refreshing threat data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchThreatSignals = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('threat_signals')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100);
+    loadSignals();
 
-        if (error) throw error;
+    // Set up real-time subscription
+    const unsubscribe = RealThreatService.subscribeToSignals((newSignals) => {
+      setThreatSignals(newSignals);
+      setLastUpdated(new Date());
+      setIsConnected(true);
+    });
 
-        const signals: ThreatSignal[] = data?.map((signal: any) => ({
-          id: signal.id,
-          timestamp: new Date(signal.created_at),
-          location: {
-            lat: signal.latitude,
-            lng: signal.longitude,
-            country: signal.country || 'Unknown',
-            region: signal.region || 'Unknown'
-          },
-          category: signal.category,
-          severity: signal.severity,
-          confidence: signal.confidence || 80,
-          source: signal.source || 'Intelligence Network',
-          title: signal.title,
-          description: signal.description,
-          tags: signal.tags || [],
-          escalationPotential: signal.escalation_potential || 50
-        })) || [];
-
-        setThreatSignals(signals);
-      } catch (error) {
-        console.error('Error fetching threat signals:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchThreatSignals();
+    return unsubscribe;
   }, []);
 
   const filteredSignals = threatSignals.filter(signal => {
@@ -91,6 +97,38 @@ const MapLibreThreatMap = () => {
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
         />
+      </div>
+
+      {/* Real-time Status & Refresh Controls */}
+      <div className="absolute top-6 right-6 z-10">
+        <div className="bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <Wifi className="w-4 h-4 text-green-500" />
+            ) : (
+              <WifiOff className="w-4 h-4 text-red-500" />
+            )}
+            <span className="text-xs text-muted-foreground">
+              {isConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
+          
+          {lastUpdated && (
+            <div className="text-xs text-muted-foreground">
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </div>
+          )}
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-8 px-2"
+          >
+            <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
 
       {/* Map Container */}
