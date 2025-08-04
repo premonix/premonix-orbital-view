@@ -169,10 +169,14 @@ const Reports = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-starlink-slate border-starlink-grey/30">
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="global">Global</SelectItem>
                   <SelectItem value="cyber">Cyber</SelectItem>
+                  <SelectItem value="military">Military</SelectItem>
                   <SelectItem value="economic">Economic</SelectItem>
                   <SelectItem value="political">Political</SelectItem>
+                  <SelectItem value="global">Global</SelectItem>
+                  <SelectItem value="executive">Executive</SelectItem>
+                  <SelectItem value="analytics">Analytics</SelectItem>
+                  <SelectItem value="threat_analysis">Threat Analysis</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={severityFilter} onValueChange={setSeverityFilter}>
