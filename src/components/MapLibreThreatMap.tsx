@@ -98,7 +98,7 @@ const MapLibreThreatMap = () => {
           pitch: viewMode === 'globe' ? 45 : 0
         }}
         style={{ width: '100%', height: '100%' }}
-        mapStyle="https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json"
+        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
         projection={viewMode === 'globe' ? 'globe' : 'mercator'}
       >
         {/* Threat Signals as Markers */}
@@ -126,48 +126,49 @@ const MapLibreThreatMap = () => {
         ))}
 
         {/* Heatmap Layer for Threat Density */}
-        <Source
-          id="threat-heatmap"
-          type="geojson"
-          data={{
-            type: 'FeatureCollection',
-            features: filteredSignals.map(signal => ({
-              type: 'Feature',
-              properties: {
-                severity: signal.severity,
-                weight: signal.severity === 'critical' ? 4 : 
-                       signal.severity === 'high' ? 3 :
-                       signal.severity === 'medium' ? 2 : 1
-              },
-              geometry: {
-                type: 'Point',
-                coordinates: [signal.location.lng, signal.location.lat]
-              }
-            }))
-          }}
-        >
-          <Layer
-            id="threat-heat"
-            type="heatmap"
-            paint={{
-              'heatmap-weight': ['get', 'weight'],
-              'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
-              'heatmap-color': [
-                'interpolate',
-                ['linear'],
-                ['heatmap-density'],
-                0, 'rgba(0, 0, 255, 0)',
-                0.1, 'rgba(0, 255, 255, 0.5)',
-                0.3, 'rgba(0, 255, 0, 0.7)',
-                0.5, 'rgba(255, 255, 0, 0.8)',
-                0.7, 'rgba(255, 165, 0, 0.9)',
-                1, 'rgba(255, 0, 0, 1)'
-              ],
-              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
-              'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0]
+        {filteredSignals.length > 0 && (
+          <Source
+            id="threat-heatmap"
+            type="geojson"
+            data={{
+              type: 'FeatureCollection',
+              features: filteredSignals.map(signal => ({
+                type: 'Feature',
+                properties: {
+                  weight: signal.severity === 'critical' ? 4 : 
+                         signal.severity === 'high' ? 3 :
+                         signal.severity === 'medium' ? 2 : 1
+                },
+                geometry: {
+                  type: 'Point',
+                  coordinates: [signal.location.lng, signal.location.lat]
+                }
+              }))
             }}
-          />
-        </Source>
+          >
+            <Layer
+              id="threat-heat"
+              type="heatmap"
+              paint={{
+                'heatmap-weight': ['get', 'weight'],
+                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
+                'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0, 'rgba(0, 0, 255, 0)',
+                  0.1, 'rgba(0, 255, 255, 0.5)',
+                  0.3, 'rgba(0, 255, 0, 0.7)',
+                  0.5, 'rgba(255, 255, 0, 0.8)',
+                  0.7, 'rgba(255, 165, 0, 0.9)',
+                  1, 'rgba(255, 0, 0, 1)'
+                ],
+                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
+                'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0]
+              }}
+            />
+          </Source>
+        )}
       </Map>
 
       {/* Status Bar */}
