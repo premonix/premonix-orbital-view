@@ -1,6 +1,6 @@
 
 import Navigation from "@/components/Navigation";
-import WorldMap from "@/components/WorldMap";
+import MapLibreThreatMap from "@/components/MapLibreThreatMap";
 import ThreatIndicator from "@/components/ThreatIndicator";
 import Footer from "@/components/Footer";
 import ThreatFeed from "@/components/ThreatFeed";
@@ -17,8 +17,8 @@ const ThreatMap = () => {
       
       {/* Main Content */}
       <div className="relative">
-        {/* World Map Background */}
-        <WorldMap />
+        {/* MapLibre Threat Map */}
+        <MapLibreThreatMap />
         
         {/* Live Threat Indicator */}
         <ThreatIndicator />
