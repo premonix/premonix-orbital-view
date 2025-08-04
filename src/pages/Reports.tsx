@@ -30,6 +30,7 @@ const Reports = () => {
   }, []);
 
   const fetchReports = async () => {
+    console.log('🔍 Fetching reports...');
     try {
       const { data, error } = await supabase
         .from('reports')
@@ -37,18 +38,22 @@ const Reports = () => {
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
+      console.log('📊 Reports query result:', { data, error });
+      console.log('📊 Number of reports fetched:', data?.length || 0);
+
       if (error) {
-        console.error('Error fetching reports:', error);
+        console.error('❌ Error fetching reports:', error);
         toast({
           title: "Error loading reports",
           description: "Failed to load reports. Please try again.",
           variant: "destructive",
         });
       } else {
+        console.log('✅ Reports data:', data);
         setReports(data || []);
       }
     } catch (error) {
-      console.error('Error fetching reports:', error);
+      console.error('❌ Exception fetching reports:', error);
     } finally {
       setLoading(false);
     }
@@ -112,11 +117,26 @@ const Reports = () => {
   };
 
   const filteredReports = useMemo(() => {
-    return reports.filter(report => {
+    console.log('🔍 Filtering reports...');
+    console.log('📊 Total reports to filter:', reports.length);
+    console.log('🔎 Search query:', searchQuery);
+    console.log('📂 Category filter:', categoryFilter);
+    console.log('⚠️ Severity filter:', severityFilter);
+    console.log('📅 Time filter:', timeFilter);
+    
+    const filtered = reports.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            report.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || report.category === categoryFilter;
       const matchesSeverity = severityFilter === 'all' || report.severity === severityFilter;
+      
+      console.log(`📋 Report "${report.title}":`, {
+        category: report.category,
+        severity: report.severity,
+        matchesSearch,
+        matchesCategory,
+        matchesSeverity
+      });
       
       // Time filter logic
       let matchesTime = true;
@@ -139,9 +159,14 @@ const Reports = () => {
         }
       }
 
-      return matchesSearch && matchesCategory && matchesSeverity && matchesTime;
+      const passes = matchesSearch && matchesCategory && matchesSeverity && matchesTime;
+      console.log(`✅ Report "${report.title}" passes filter:`, passes);
+      return passes;
     });
-  }, [searchQuery, categoryFilter, severityFilter, timeFilter]);
+    
+    console.log('📊 Filtered reports count:', filtered.length);
+    return filtered;
+  }, [reports, searchQuery, categoryFilter, severityFilter, timeFilter]);
 
   return (
     <div className="min-h-screen bg-starlink-dark text-starlink-white">
