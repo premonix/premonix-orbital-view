@@ -834,8 +834,8 @@ function processVirusTotalData(vtItem: any) {
     
     return {
       timestamp: new Date(attributes.first_submission_date * 1000).toISOString(),
-      latitude: 40.7128 + (Math.random() - 0.5) * 20, // Random global distribution
-      longitude: -74.0060 + (Math.random() - 0.5) * 40,
+      latitude: parseFloat((40.7128 + (Math.random() - 0.5) * 20).toFixed(8)), // Random global distribution
+      longitude: parseFloat((-74.0060 + (Math.random() - 0.5) * 40).toFixed(8)),
       threat_score: calculateCyberThreatScore('malware', severity),
       confidence: Math.round(Math.min(95, Math.max(70, 80 + (totalDetections * 2)))),
       escalation_potential: calculateCyberEscalationPotential('malware', severity),

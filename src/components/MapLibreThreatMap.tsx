@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Shield, AlertTriangle, Clock, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { getSeverityColorHex } from '@/lib/threatColors';
+import { supabase } from '@/integrations/supabase/client';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const MapLibreThreatMap = () => {
@@ -55,14 +56,54 @@ const MapLibreThreatMap = () => {
   useEffect(() => {
     loadSignals();
 
-    // Set up real-time subscription
-    const unsubscribe = RealThreatService.subscribeToSignals((newSignals) => {
-      setThreatSignals(newSignals);
-      setLastUpdated(new Date());
-      setIsConnected(true);
-    });
+    // Set up real-time subscription for new threat signals
+    const channel = supabase
+      .channel('threat-signals-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'threat_signals'
+        },
+        (payload) => {
+          console.log('New threat signal received:', payload.new);
+          // Add the new signal to the existing signals
+          setThreatSignals(prev => [payload.new as ThreatSignal, ...prev]);
+          setLastUpdated(new Date());
+          setIsConnected(true);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'threat_signals'
+        },
+        (payload) => {
+          console.log('Threat signal updated:', payload.new);
+          // Update the existing signal
+          setThreatSignals(prev => 
+            prev.map(signal => 
+              signal.id === payload.new.id ? payload.new as ThreatSignal : signal
+            )
+          );
+          setLastUpdated(new Date());
+        }
+      )
+      .subscribe();
 
-    return unsubscribe;
+    // Set up periodic refresh (every 5 minutes)
+    const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing threat data...');
+      handleRefresh();
+    }, 5 * 60 * 1000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   const filteredSignals = threatSignals.filter(signal => {
