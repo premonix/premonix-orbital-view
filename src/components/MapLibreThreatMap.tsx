@@ -23,7 +23,7 @@ const MapLibreThreatMap = () => {
   const loadSignals = async () => {
     try {
       setLoading(true);
-      const signals = await RealThreatService.getLatestSignals(100);
+      const signals = await RealThreatService.getLatestSignals(500);
       setThreatSignals(signals);
       setLastUpdated(new Date());
       setIsConnected(true);

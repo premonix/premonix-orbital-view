@@ -34,7 +34,7 @@ export class RealThreatService {
     }
   }
 
-  static async getLatestSignals(limit: number = 20): Promise<ThreatSignal[]> {
+  static async getLatestSignals(limit: number = 100): Promise<ThreatSignal[]> {
     try {
       // Check cache first
       const now = Date.now();
@@ -181,7 +181,7 @@ export class RealThreatService {
   }
 
   private static getFallbackSignals(limit: number): ThreatSignal[] {
-    // Fallback mock data when database is empty or unavailable
+    // Enhanced fallback mock data with more diverse global signals
     const fallbackSignals: ThreatSignal[] = [
       {
         id: 'fallback-1',
@@ -221,6 +221,123 @@ export class RealThreatService {
         description: 'Digital infrastructure security concerns raised',
         tags: ['cyber', 'security', 'digital', 'infrastructure'],
         escalationPotential: 45
+      },
+      {
+        id: 'fallback-4',
+        timestamp: new Date(Date.now() - 10800000),
+        location: { lat: 55.7558, lng: 37.6176, country: 'Russia', region: 'Eastern Europe' },
+        category: 'Diplomatic',
+        severity: 'medium',
+        confidence: 82,
+        source: 'Diplomatic Intelligence',
+        title: 'Trade Negotiations Stalled',
+        description: 'Economic sanctions discussions reach impasse',
+        tags: ['diplomatic', 'sanctions', 'trade', 'negotiations'],
+        escalationPotential: 55
+      },
+      {
+        id: 'fallback-5',
+        timestamp: new Date(Date.now() - 14400000),
+        location: { lat: 35.6762, lng: 139.6503, country: 'Japan', region: 'Asia-Pacific' },
+        category: 'Economic',
+        severity: 'low',
+        confidence: 73,
+        source: 'Economic Monitor',
+        title: 'Supply Chain Disruption Alert',
+        description: 'Semiconductor manufacturing delays reported',
+        tags: ['economic', 'supply-chain', 'semiconductors', 'manufacturing'],
+        escalationPotential: 30
+      },
+      {
+        id: 'fallback-6',
+        timestamp: new Date(Date.now() - 18000000),
+        location: { lat: 52.5200, lng: 13.4050, country: 'Germany', region: 'Western Europe' },
+        category: 'Cyber',
+        severity: 'high',
+        confidence: 88,
+        source: 'Cyber Threat Intelligence',
+        title: 'Critical Infrastructure Targeted',
+        description: 'Advanced persistent threat detected in energy sector',
+        tags: ['cyber', 'apt', 'infrastructure', 'energy'],
+        escalationPotential: 70
+      },
+      {
+        id: 'fallback-7',
+        timestamp: new Date(Date.now() - 21600000),
+        location: { lat: 40.7128, lng: -74.0060, country: 'United States', region: 'North America' },
+        category: 'Economic',
+        severity: 'medium',
+        confidence: 79,
+        source: 'Financial Intelligence',
+        title: 'Market Volatility Spike',
+        description: 'Unusual trading patterns detected in financial markets',
+        tags: ['economic', 'finance', 'markets', 'volatility'],
+        escalationPotential: 45
+      },
+      {
+        id: 'fallback-8',
+        timestamp: new Date(Date.now() - 25200000),
+        location: { lat: 31.2304, lng: 121.4737, country: 'China', region: 'Asia-Pacific' },
+        category: 'Supply Chain',
+        severity: 'medium',
+        confidence: 76,
+        source: 'Supply Chain Monitor',
+        title: 'Port Operations Delayed',
+        description: 'Major shipping delays affecting global trade routes',
+        tags: ['supply-chain', 'shipping', 'ports', 'logistics'],
+        escalationPotential: 40
+      },
+      {
+        id: 'fallback-9',
+        timestamp: new Date(Date.now() - 28800000),
+        location: { lat: 51.5074, lng: -0.1278, country: 'United Kingdom', region: 'Western Europe' },
+        category: 'Unrest',
+        severity: 'low',
+        confidence: 71,
+        source: 'Social Monitor',
+        title: 'Peaceful Demonstration Planned',
+        description: 'Large-scale but peaceful protests scheduled',
+        tags: ['unrest', 'protest', 'peaceful', 'social'],
+        escalationPotential: 25
+      },
+      {
+        id: 'fallback-10',
+        timestamp: new Date(Date.now() - 32400000),
+        location: { lat: 28.6139, lng: 77.2090, country: 'India', region: 'South Asia' },
+        category: 'Military',
+        severity: 'medium',
+        confidence: 84,
+        source: 'Regional Intelligence',
+        title: 'Border Security Enhancement',
+        description: 'Military deployments reported near disputed territories',
+        tags: ['military', 'border', 'security', 'deployment'],
+        escalationPotential: 60
+      },
+      {
+        id: 'fallback-11',
+        timestamp: new Date(Date.now() - 36000000),
+        location: { lat: -33.8688, lng: 151.2093, country: 'Australia', region: 'Oceania' },
+        category: 'Cyber',
+        severity: 'low',
+        confidence: 69,
+        source: 'Cyber Watch',
+        title: 'Data Breach Investigation',
+        description: 'Government agencies investigating potential data exposure',
+        tags: ['cyber', 'data-breach', 'investigation', 'government'],
+        escalationPotential: 35
+      },
+      {
+        id: 'fallback-12',
+        timestamp: new Date(Date.now() - 39600000),
+        location: { lat: 19.4326, lng: -99.1332, country: 'Mexico', region: 'North America' },
+        category: 'Economic',
+        severity: 'medium',
+        confidence: 77,
+        source: 'Economic Analysis',
+        title: 'Currency Fluctuation Alert',
+        description: 'Significant peso volatility following policy announcements',
+        tags: ['economic', 'currency', 'policy', 'volatility'],
+        escalationPotential: 50
       }
     ];
 
