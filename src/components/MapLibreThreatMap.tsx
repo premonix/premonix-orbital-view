@@ -9,7 +9,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const MapLibreThreatMap = () => {
   const [threatSignals, setThreatSignals] = useState<ThreatSignal[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [viewMode, setViewMode] = useState<'2d' | 'globe'>('globe');
+  const [viewMode, setViewMode] = useState<'2d' | 'globe'>('2d');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
