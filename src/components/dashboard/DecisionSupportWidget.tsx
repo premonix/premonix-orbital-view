@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAIReportGeneration } from '@/hooks/useAIReportGeneration';
 import { 
@@ -30,6 +31,12 @@ interface DecisionSupportWidgetProps {
 
 export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, userId }: DecisionSupportWidgetProps) => {
   const [activeAnalysis, setActiveAnalysis] = useState('threat-correlation');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState<{
+    title: string;
+    description: string;
+    content: React.ReactNode;
+  } | null>(null);
   const { toast } = useToast();
   const { generateReport, isGenerating } = useAIReportGeneration();
 
@@ -161,17 +168,43 @@ export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, us
       });
       
       if (report) {
-        toast({
-          title: "Report Generated",
-          description: "Threat analysis report has been generated successfully.",
+        setModalContent({
+          title: "Report Generated Successfully",
+          description: "AI-powered threat analysis report has been completed",
+          content: (
+            <div className="space-y-4">
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <h4 className="font-semibold text-green-400 mb-2">Report Summary</h4>
+                <div className="space-y-2 text-sm">
+                  <div>• {threatSignals.length} threat signals analyzed</div>
+                  <div>• {insights.length} key insights identified</div>
+                  <div>• {recommendations.length} recommendations generated</div>
+                  <div>• Report generated successfully</div>
+                </div>
+              </div>
+              <div className="p-4 bg-starlink-dark-secondary/50 rounded-lg">
+                <h4 className="font-semibold mb-2">Report Generated</h4>
+                <p className="text-sm text-starlink-grey-light">Your threat analysis report has been successfully generated and is available for download.</p>
+              </div>
+            </div>
+          )
         });
+        setModalOpen(true);
       }
     } catch (error) {
-      toast({
+      setModalContent({
         title: "Report Generation Failed",
-        description: "Unable to generate report at this time. Please try again.",
-        variant: "destructive",
+        description: "Unable to generate the threat analysis report",
+        content: (
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <div className="text-red-400">
+              <h4 className="font-semibold mb-2">Error Details</h4>
+              <p className="text-sm">The AI report generation service is currently unavailable. Please try again in a few minutes or contact support if the issue persists.</p>
+            </div>
+          </div>
+        )
       });
+      setModalOpen(true);
     }
   };
 
@@ -186,55 +219,149 @@ export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, us
       `Key Insights:\n${insights.map(i => `• ${i.title}`).join('\n')}\n\n` +
       `Recommended Actions:\n${recommendations.map(r => `• ${r.action}`).join('\n')}`;
 
-    if (navigator.share) {
-      navigator.share({
-        title: 'Threat Intelligence Briefing',
-        text: briefingText,
-      });
-    } else {
-      navigator.clipboard.writeText(briefingText);
-      toast({
-        title: "Briefing Copied",
-        description: "Team briefing has been copied to clipboard.",
-      });
-    }
+    setModalContent({
+      title: "Team Briefing Generated",
+      description: "Current threat intelligence summary ready for distribution",
+      content: (
+        <div className="space-y-4">
+          <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <h4 className="font-semibold text-blue-400 mb-2">Briefing Summary</h4>
+            <div className="space-y-2 text-sm">
+              <div>• {criticalThreats} critical threats detected</div>
+              <div>• {unreadAlerts} unread alerts pending</div>
+              <div>• {threatSignals.length} total signals in 24h</div>
+              <div>• {insights.length} insights generated</div>
+            </div>
+          </div>
+          <div className="p-4 bg-starlink-dark-secondary/50 rounded-lg">
+            <h4 className="font-semibold mb-2">Briefing Content</h4>
+            <pre className="text-xs text-starlink-grey-light whitespace-pre-wrap font-mono bg-black/20 p-3 rounded">
+              {briefingText}
+            </pre>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(briefingText);
+                toast({ title: "Copied to clipboard" });
+              }}
+            >
+              Copy to Clipboard
+            </Button>
+            {navigator.share && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => navigator.share({
+                  title: 'Threat Intelligence Briefing',
+                  text: briefingText,
+                })}
+              >
+                Share
+              </Button>
+            )}
+          </div>
+        </div>
+      )
+    });
+    setModalOpen(true);
   };
 
   const handleEscalate = () => {
     const criticalCount = threatSignals.filter(t => t.severity === 'critical').length;
+    const criticalThreats = threatSignals.filter(t => t.severity === 'critical');
     
     if (criticalCount === 0) {
-      toast({
+      setModalContent({
         title: "No Critical Threats",
-        description: "No critical threats requiring immediate escalation.",
-        variant: "destructive",
+        description: "No threats require immediate escalation at this time",
+        content: (
+          <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <div className="text-green-400">
+              <h4 className="font-semibold mb-2">All Clear</h4>
+              <p className="text-sm">Current threat landscape does not require escalation. Continue monitoring for any changes in threat severity.</p>
+            </div>
+          </div>
+        )
       });
+      setModalOpen(true);
       return;
     }
 
-    // Simulate escalation process
-    toast({
+    setModalContent({
       title: "Escalation Initiated",
-      description: `${criticalCount} critical threat(s) escalated to management team.`,
+      description: `${criticalCount} critical threat(s) escalated to management team`,
+      content: (
+        <div className="space-y-4">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <h4 className="font-semibold text-red-400 mb-2">Escalation Details</h4>
+            <div className="space-y-2 text-sm">
+              <div>• {criticalCount} critical threats identified</div>
+              <div>• Management team notified</div>
+              <div>• Escalation timestamp: {new Date().toLocaleString()}</div>
+              <div>• Follow-up required within 1 hour</div>
+            </div>
+          </div>
+          <div className="p-4 bg-starlink-dark-secondary/50 rounded-lg">
+            <h4 className="font-semibold mb-2">Critical Threats</h4>
+            <div className="space-y-2">
+              {criticalThreats.slice(0, 5).map((threat, index) => (
+                <div key={index} className="text-xs p-2 bg-black/20 rounded">
+                  <div className="font-medium">{threat.title || 'Critical Threat'}</div>
+                  <div className="text-starlink-grey-light">{threat.country} • {threat.category}</div>
+                </div>
+              ))}
+              {criticalThreats.length > 5 && (
+                <div className="text-xs text-starlink-grey">
+                  +{criticalThreats.length - 5} more threats
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )
     });
-    
-    // In a real app, this would trigger actual escalation workflows
-    console.log('Escalating threats:', threatSignals.filter(t => t.severity === 'critical'));
+    setModalOpen(true);
   };
 
   const handleScheduleReview = () => {
     const reviewDate = new Date();
-    reviewDate.setDate(reviewDate.getDate() + 1); // Schedule for tomorrow
-    
+    reviewDate.setDate(reviewDate.getDate() + 1);
     const reviewTime = reviewDate.toLocaleDateString() + ' at 9:00 AM';
     
-    toast({
+    setModalContent({
       title: "Review Scheduled",
-      description: `Threat assessment review scheduled for ${reviewTime}.`,
+      description: "Threat assessment review has been scheduled",
+      content: (
+        <div className="space-y-4">
+          <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <h4 className="font-semibold text-blue-400 mb-2">Review Details</h4>
+            <div className="space-y-2 text-sm">
+              <div>• Date: {reviewTime}</div>
+              <div>• Duration: 1 hour</div>
+              <div>• Attendees: Security team + stakeholders</div>
+              <div>• Agenda: Threat landscape assessment</div>
+            </div>
+          </div>
+          <div className="p-4 bg-starlink-dark-secondary/50 rounded-lg">
+            <h4 className="font-semibold mb-2">Review Topics</h4>
+            <div className="text-sm space-y-1">
+              <div>• Current threat trends and patterns</div>
+              <div>• Effectiveness of security measures</div>
+              <div>• Resource allocation and priorities</div>
+              <div>• Strategic recommendations</div>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="w-full">
+            <Calendar className="w-4 h-4 mr-2" />
+            Add to Calendar
+          </Button>
+        </div>
+      )
     });
-    
-    // In a real app, this would integrate with calendar systems
-    console.log('Review scheduled for:', reviewTime);
+    setModalOpen(true);
   };
 
   const getInsightIcon = (type: string) => {
@@ -450,6 +577,17 @@ export const DecisionSupportWidget = ({ threatSignals, userAlerts, analytics, us
           </div>
         </CardContent>
       </Card>
+
+      {/* Output Modal */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{modalContent?.title}</DialogTitle>
+            <DialogDescription>{modalContent?.description}</DialogDescription>
+          </DialogHeader>
+          {modalContent?.content}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
