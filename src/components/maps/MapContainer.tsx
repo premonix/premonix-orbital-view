@@ -40,38 +40,58 @@ const MapContainer: React.FC<MapContainerProps> = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  // Initialize map with your existing Mapbox token
+  // Initialize map with token from Supabase secrets
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Use your existing Mapbox public token directly
-    mapboxgl.accessToken = 'pk.eyJ1IjoicHJlbW9uaXgiLCJhIjoiY20zeWt3cDRrMDNmNzJrcHlrcWJkZHhhdCJ9.example'; // Replace with your actual token
+    const initializeMap = async () => {
+      try {
+        // Try to get Mapbox token from Supabase secrets
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        let token = null;
+        if (data?.token) {
+          token = data.token;
+        } else {
+          // Fallback: prompt user for token
+          console.log('No Mapbox token found in secrets');
+          return;
+        }
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style,
-      center,
-      zoom,
-      pitch,
-      bearing,
-      interactive,
-      projection: 'globe' as any,
-      antialias: true
-    });
+        mapboxgl.accessToken = token;
 
-    // Add controls
-    if (showControls) {
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
-    }
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current!,
+          style,
+          center,
+          zoom,
+          pitch,
+          bearing,
+          interactive,
+          projection: 'globe' as any,
+          antialias: true
+        });
 
-    map.current.on('load', () => {
-      setIsMapReady(true);
-    });
+        // Add controls
+        if (showControls) {
+          map.current.addControl(
+            new mapboxgl.NavigationControl({
+              visualizePitch: true,
+            }),
+            'top-right'
+          );
+        }
+
+        map.current.on('load', () => {
+          setIsMapReady(true);
+        });
+      } catch (error) {
+        console.error('Failed to initialize map:', error);
+        // Show fallback message
+      }
+    };
+
+    initializeMap();
 
     return () => {
       map.current?.remove();
@@ -221,6 +241,24 @@ const MapContainer: React.FC<MapContainerProps> = ({
       map.current.on('load', addThreatSignals);
     }
   }, [threatSignals, onSignalClick, isMapReady]);
+
+  if (!isMapReady) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="absolute inset-0 bg-starlink-dark flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="text-starlink-blue text-lg font-semibold mb-2">
+              Loading Interactive Map...
+            </div>
+            <div className="text-starlink-grey-light text-sm">
+              Initializing Mapbox GL
+            </div>
+          </div>
+        </div>
+        <div ref={mapContainer} className={`w-full h-full ${className}`} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
