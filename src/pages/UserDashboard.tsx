@@ -467,7 +467,6 @@ const UserDashboard = () => {
                   <ThreatMapWidget 
                     threatSignals={threatSignals}
                     userPreferences={preferences?.location_preferences}
-                    showFilters={true}
                   />
                 )}
 
