@@ -460,17 +460,6 @@ const UserDashboard = () => {
                 {activeTab === 'disruption-os' && (
                   <div className="space-y-6">
                     <FullDisruptionOSDashboard userId={user.id} />
-                    
-                    {/* Enhanced DisruptionOS Modules */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <OpsLensWidget userId={user.id} />
-                      <SignalGraphWidget userId={user.id} />
-                    </div>
-                    
-                    <EnhancedBriefingWidget 
-                      userId={user.id}
-                      threatSignals={threatSignals}
-                    />
                   </div>
                 )}
 
