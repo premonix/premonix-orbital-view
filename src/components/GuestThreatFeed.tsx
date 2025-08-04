@@ -5,6 +5,7 @@ import { ChevronUp, ChevronDown, MapPin, Lock, Zap } from 'lucide-react';
 import { RealThreatService } from '@/services/realThreatService';
 import { ThreatSignal } from '@/types/threat';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSeverityColorTailwind, getCategoryColor } from '@/lib/threatColors';
 
 interface GuestThreatFeedProps {
   // No props needed for now
@@ -12,25 +13,8 @@ interface GuestThreatFeedProps {
 
 const categories = ['Military', 'Cyber', 'Economic', 'Political'];
 
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'Military': return 'text-red-400';
-    case 'Cyber': return 'text-purple-400';
-    case 'Economic': return 'text-green-400';
-    case 'Political': return 'text-blue-400';
-    default: return 'text-gray-400';
-  }
-};
-
-const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'critical': return 'bg-red-500';
-    case 'high': return 'bg-orange-500';
-    case 'medium': return 'bg-yellow-500';
-    case 'low': return 'bg-blue-500';
-    default: return 'bg-gray-500';
-  }
-};
+// Use centralized color utilities for consistency
+const getSeverityColor = getSeverityColorTailwind;
 
 const formatTimeAgo = (timestamp: string) => {
   const date = new Date(timestamp);

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Shield, AlertTriangle, Clock, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { getSeverityColorHex } from '@/lib/threatColors';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const MapLibreThreatMap = () => {
@@ -69,15 +70,8 @@ const MapLibreThreatMap = () => {
     return activeFilters.includes(signal.category);
   });
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return '#dc2626';
-      case 'high': return '#ea580c';
-      case 'medium': return '#d97706';
-      case 'low': return '#16a34a';
-      default: return '#6b7280';
-    }
-  };
+  // Use centralized color system for consistency
+  const getSeverityColor = getSeverityColorHex;
 
   const threatCategories = ['Military', 'Cyber', 'Diplomatic', 'Economic', 'Supply Chain', 'Unrest'];
   const severityLevels = ['critical', 'high', 'medium', 'low'];
