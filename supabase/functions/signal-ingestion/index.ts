@@ -31,19 +31,31 @@ serve(async (req) => {
 
     console.log('Starting threat signal ingestion...')
 
-    // Fetch from multiple sources with retry logic
-    const [newsData, gdeltData] = await Promise.all([
+    // Fetch from multiple sources with retry logic and improved error handling
+    const results = await Promise.allSettled([
       fetchWithRetry(() => fetchNewsAPI(), 'NewsAPI'),
       fetchWithRetry(() => fetchGDELT(), 'GDELT')
     ])
 
+    // Extract data from successful results
+    const newsData = results[0].status === 'fulfilled' ? results[0].value : []
+    const gdeltData = results[1].status === 'fulfilled' ? results[1].value : []
+
     console.log(`Fetched ${newsData.length} news signals and ${gdeltData.length} GDELT signals`)
 
-    // Validate and combine all signals
+    // Validate and combine all signals - allow partial success
     const validatedSignals = validateSignals([...newsData, ...gdeltData])
     
     if (validatedSignals.length === 0) {
-      throw new Error('No valid signals to process')
+      // Log which sources failed
+      const failures = results.map((result, i) => ({
+        source: i === 0 ? 'NewsAPI' : 'GDELT',
+        failed: result.status === 'rejected',
+        error: result.status === 'rejected' ? result.reason?.message : null
+      })).filter(r => r.failed)
+      
+      console.log('All sources failed:', failures)
+      throw new Error(`No valid signals to process. Failed sources: ${failures.map(f => f.source).join(', ')}`)
     }
     
     // Insert signals into database with conflict handling
@@ -134,6 +146,7 @@ async function fetchWithRetry<T>(fetchFn: () => Promise<T>, source: string): Pro
   }
   
   console.error(`${source} failed after ${MAX_RETRIES} attempts, returning empty array`)
+  console.error(`Final error from ${source}:`, lastError?.message)
   return [] as T
 }
 
@@ -279,33 +292,45 @@ function processNewsData(articles: any[]) {
 }
 
 function processGDELTData(articles: any[]) {
+  if (!Array.isArray(articles)) {
+    console.warn('GDELT articles is not an array:', articles)
+    return []
+  }
+
   return articles
-    .filter(article => article.title && article.seendate && article.url)
+    .filter(article => article && article.title && article.seendate && article.url)
     .map(article => {
       try {
         const location = extractLocationFromGDELT(article)
         const category = categorizeGDELTContent(article)
         const severity = calculateGDELTSeverity(article)
         
+        const timestamp = formatGDELTDate(article.seendate)
+        
         return {
-          timestamp: formatGDELTDate(article.seendate),
+          timestamp,
           latitude: location.lat,
           longitude: location.lng,
           threat_score: calculateThreatScore(category, severity),
           confidence: Math.min(95, Math.max(60, 85 + Math.random() * 10)), // 65-95 range
           escalation_potential: calculateGDELTEscalation(article),
-          source_name: 'GDELT',
+          source_name: 'GDELT Global Events',
           source_url: article.url,
           tags: extractGDELTTags(article),
           country: location.country,
           region: location.region,
           category: category,
           severity: severity,
-          title: article.title.substring(0, 500), // Ensure title length
-          summary: article.title.substring(0, 1000) // GDELT doesn't always have descriptions
+          title: String(article.title).substring(0, 500), // Ensure title length
+          summary: String(article.title).substring(0, 1000) // GDELT doesn't always have descriptions
         }
       } catch (error) {
-        console.error('Error processing GDELT article:', error, article)
+        console.error('Error processing GDELT article:', error)
+        console.error('Problematic article data:', {
+          title: article.title,
+          seendate: article.seendate,
+          url: article.url
+        })
         return null
       }
     })
@@ -362,19 +387,63 @@ function extractLocationFromGDELT(article: any) {
 }
 
 function formatGDELTDate(dateStr: string) {
-  // GDELT date format: YYYYMMDDHHMMSS
-  if (dateStr.length >= 14) {
-    const year = dateStr.substr(0, 4)
-    const month = dateStr.substr(4, 2)
-    const day = dateStr.substr(6, 2)
-    const hour = dateStr.substr(8, 2)
-    const minute = dateStr.substr(10, 2)
-    const second = dateStr.substr(12, 2)
+  try {
+    // Handle multiple GDELT date formats
+    if (!dateStr) {
+      return new Date().toISOString()
+    }
+
+    // Format 1: ISO-like format with T separator (20250804T120000Z)
+    if (dateStr.includes('T') && dateStr.endsWith('Z')) {
+      const cleanDate = dateStr.replace('T', '').replace('Z', '')
+      if (cleanDate.length >= 14) {
+        const year = cleanDate.substr(0, 4)
+        const month = cleanDate.substr(4, 2)
+        const day = cleanDate.substr(6, 2)
+        const hour = cleanDate.substr(8, 2)
+        const minute = cleanDate.substr(10, 2)
+        const second = cleanDate.substr(12, 2)
+        
+        const formattedDate = `${year}-${month}-${day}T${hour}:${minute}:${second}Z`
+        const date = new Date(formattedDate)
+        
+        if (!isNaN(date.getTime())) {
+          return date.toISOString()
+        }
+      }
+    }
     
-    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`).toISOString()
+    // Format 2: Plain YYYYMMDDHHMMSS format
+    if (dateStr.length >= 14 && /^\d{14}/.test(dateStr)) {
+      const year = dateStr.substr(0, 4)
+      const month = dateStr.substr(4, 2)
+      const day = dateStr.substr(6, 2)
+      const hour = dateStr.substr(8, 2)
+      const minute = dateStr.substr(10, 2)
+      const second = dateStr.substr(12, 2)
+      
+      const formattedDate = `${year}-${month}-${day}T${hour}:${minute}:${second}Z`
+      const date = new Date(formattedDate)
+      
+      if (!isNaN(date.getTime())) {
+        return date.toISOString()
+      }
+    }
+    
+    // Format 3: Try direct parsing as fallback
+    const directDate = new Date(dateStr)
+    if (!isNaN(directDate.getTime())) {
+      return directDate.toISOString()
+    }
+    
+    // If all parsing fails, use current time
+    console.warn(`Could not parse GDELT date: ${dateStr}, using current time`)
+    return new Date().toISOString()
+    
+  } catch (error) {
+    console.warn(`Error parsing GDELT date: ${dateStr}`, error)
+    return new Date().toISOString()
   }
-  
-  return new Date().toISOString()
 }
 
 function categorizeContent(text: string) {
