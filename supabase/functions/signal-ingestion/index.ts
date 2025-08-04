@@ -71,6 +71,23 @@ serve(async (req) => {
       throw error
     }
 
+    // Trigger real-time broadcast for new signals
+    if (validatedSignals.length > 0) {
+      try {
+        console.log('Broadcasting new threat signals via realtime...')
+        await supabaseClient.functions.invoke('enhanced-realtime-stream', {
+          body: { 
+            type: 'new_threats',
+            threats: validatedSignals.slice(0, 10), // Send first 10 for broadcast
+            source: 'signal-ingestion'
+          }
+        })
+      } catch (broadcastError) {
+        console.warn('Failed to broadcast realtime update:', broadcastError)
+        // Don't fail the whole pipeline if broadcast fails
+      }
+    }
+
     const executionTime = Date.now() - startTime
     
     // Log successful completion
@@ -213,21 +230,27 @@ async function fetchNewsAPI() {
   }
 
   try {
+    console.log('Making NewsAPI request with key:', newsApiKey.substring(0, 8) + '...')
+    
     const response = await fetch(
-      `https://newsapi.org/v2/everything?q=(military OR conflict OR war OR threat OR attack OR missile OR drone OR cyber OR security)&sortBy=publishedAt&language=en&pageSize=50`,
+      `https://newsapi.org/v2/everything?q=(military OR conflict OR war OR threat OR attack OR missile OR drone OR cyber OR security)&sortBy=publishedAt&language=en&pageSize=50&from=${new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0]}`,
       {
         headers: {
-          'X-API-Key': newsApiKey
+          'X-API-Key': newsApiKey.trim(),
+          'User-Agent': 'ThreatIntelligence/1.0'
         },
         signal: AbortSignal.timeout(30000) // 30 second timeout
       }
     )
 
     if (!response.ok) {
-      throw new Error(`NewsAPI error: ${response.status} ${response.statusText}`)
+      const errorText = await response.text()
+      console.error('NewsAPI error response:', errorText)
+      throw new Error(`NewsAPI error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
     const data = await response.json()
+    console.log(`NewsAPI returned ${data.articles?.length || 0} articles`)
     return processNewsData(data.articles || [])
   } catch (error) {
     console.error('NewsAPI fetch error:', error)
