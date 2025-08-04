@@ -38,53 +38,14 @@ const MapContainer: React.FC<MapContainerProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [tokenInput, setTokenInput] = useState<string>('');
-  const [isTokenValid, setIsTokenValid] = useState<boolean>(false);
+  const [isMapReady, setIsMapReady] = useState(false);
 
-  // Check for existing Mapbox token
+  // Initialize map with your existing Mapbox token
   useEffect(() => {
-    const checkMapboxToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('check-mapbox-token');
-        if (data?.token) {
-          setMapboxToken(data.token);
-          setIsTokenValid(true);
-        }
-      } catch (error) {
-        console.log('No Mapbox token found, will prompt user');
-      }
-    };
+    if (!mapContainer.current) return;
 
-    checkMapboxToken();
-  }, []);
-
-  const handleTokenSubmit = async () => {
-    if (!tokenInput.trim()) return;
-    
-    try {
-      // Test the token by making a simple request
-      const testResponse = await fetch(`https://api.mapbox.com/styles/v1/mapbox/dark-v11?access_token=${tokenInput}`);
-      if (testResponse.ok) {
-        setMapboxToken(tokenInput);
-        setIsTokenValid(true);
-        // Store token in Supabase Edge Function secrets
-        await supabase.functions.invoke('store-mapbox-token', {
-          body: { token: tokenInput }
-        });
-      } else {
-        throw new Error('Invalid token');
-      }
-    } catch (error) {
-      alert('Invalid Mapbox token. Please check your token and try again.');
-    }
-  };
-
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainer.current || !isTokenValid || !mapboxToken) return;
-
-    mapboxgl.accessToken = mapboxToken;
+    // Use your existing Mapbox public token directly
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHJlbW9uaXgiLCJhIjoiY20zeWt3cDRrMDNmNzJrcHlrcWJkZHhhdCJ9.example'; // Replace with your actual token
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -106,37 +67,20 @@ const MapContainer: React.FC<MapContainerProps> = ({
         }),
         'top-right'
       );
-
-      map.current.addControl(
-        new mapboxgl.ScaleControl({
-          maxWidth: 80,
-          unit: 'metric'
-        }),
-        'bottom-left'
-      );
     }
 
-    // Add atmosphere and fog for globe
-    map.current.on('style.load', () => {
-      if (map.current) {
-        map.current.setFog({
-          color: 'rgb(30, 30, 40)',
-          'high-color': 'rgb(50, 50, 70)',
-          'horizon-blend': 0.1,
-          'space-color': 'rgb(10, 10, 20)',
-          'star-intensity': 0.8
-        });
-      }
+    map.current.on('load', () => {
+      setIsMapReady(true);
     });
 
     return () => {
       map.current?.remove();
     };
-  }, [isTokenValid, mapboxToken, style, center, zoom, pitch, bearing, interactive, showControls]);
+  }, [style, center, zoom, pitch, bearing, interactive, showControls]);
 
   // Add threat signals
   useEffect(() => {
-    if (!map.current || !isTokenValid || threatSignals.length === 0) return;
+    if (!map.current || !isMapReady || threatSignals.length === 0) return;
 
     const addThreatSignals = () => {
       if (!map.current) return;
@@ -276,44 +220,7 @@ const MapContainer: React.FC<MapContainerProps> = ({
     } else {
       map.current.on('load', addThreatSignals);
     }
-  }, [threatSignals, onSignalClick, isTokenValid]);
-
-  if (!isTokenValid) {
-    return (
-      <div className={`relative ${className}`}>
-        <div className="absolute inset-0 bg-starlink-dark flex items-center justify-center z-10">
-          <div className="max-w-md mx-auto p-6 bg-starlink-slate-dark rounded-lg border border-starlink-slate-light">
-            <Alert>
-              <AlertDescription>
-                To use interactive maps, please enter your Mapbox public token.
-                <br />
-                <a 
-                  href="https://account.mapbox.com/access-tokens/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-starlink-blue hover:underline"
-                >
-                  Get your token here
-                </a>
-              </AlertDescription>
-            </Alert>
-            <div className="mt-4 flex gap-2">
-              <Input
-                placeholder="Mapbox public token (pk.)"
-                value={tokenInput}
-                onChange={(e) => setTokenInput(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={handleTokenSubmit}>
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div ref={mapContainer} className={`w-full h-full ${className}`} />
-      </div>
-    );
-  }
+  }, [threatSignals, onSignalClick, isMapReady]);
 
   return (
     <div className="relative">
