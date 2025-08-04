@@ -10,15 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Download, Search, Filter, Calendar, FileText, TrendingUp, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ReportViewer } from "@/components/reports/ReportViewer";
+import { useReportDownload } from "@/hooks/useReportDownload";
 
 const Reports = () => {
   const { toast } = useToast();
+  const { downloadReport } = useReportDownload();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('all');
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [isReportViewerOpen, setIsReportViewerOpen] = useState(false);
 
   useEffect(() => {
     fetchReports();
@@ -69,40 +74,41 @@ const Reports = () => {
   };
 
   const handleViewReport = async (report: any) => {
-    toast({
-      title: "Opening Report",
-      description: `Opening: ${report.title}`,
-    });
+    setSelectedReport(report);
+    setIsReportViewerOpen(true);
     
-    // Update download count
+    // Update view count
     try {
       await supabase
         .from('reports')
         .update({ download_count: (report.download_count || 0) + 1 })
         .eq('id', report.id);
+      fetchReports(); // Refresh to show updated count
     } catch (error) {
       console.error('Error updating view count:', error);
     }
   };
 
   const handleDownloadReport = async (report: any) => {
-    toast({
-      title: "Downloading Report",
-      description: `Preparing download for: ${report.title}`,
-    });
+    const success = await downloadReport(report);
     
-    // Update download count
-    try {
-      await supabase
-        .from('reports')
-        .update({ download_count: (report.download_count || 0) + 1 })
-        .eq('id', report.id);
-        
-      // Refresh reports to show updated count
-      fetchReports();
-    } catch (error) {
-      console.error('Error updating download count:', error);
+    if (success) {
+      // Update download count
+      try {
+        await supabase
+          .from('reports')
+          .update({ download_count: (report.download_count || 0) + 1 })
+          .eq('id', report.id);
+        fetchReports(); // Refresh to show updated count
+      } catch (error) {
+        console.error('Error updating download count:', error);
+      }
     }
+  };
+
+  const handleCloseReportViewer = () => {
+    setIsReportViewerOpen(false);
+    setSelectedReport(null);
   };
 
   const filteredReports = useMemo(() => {
@@ -326,6 +332,13 @@ const Reports = () => {
       </div>
 
       <Footer />
+      
+      <ReportViewer
+        report={selectedReport}
+        isOpen={isReportViewerOpen}
+        onClose={handleCloseReportViewer}
+        onDownload={handleDownloadReport}
+      />
     </div>
   );
 };
