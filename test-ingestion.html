@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Signal Ingestion</title>
+</head>
+<body>
+    <h1>Testing Signal Ingestion</h1>
+    <button onclick="triggerIngestion()">Trigger Manual Ingestion</button>
+    <div id="result"></div>
+
+    <script>
+        async function triggerIngestion() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Triggering ingestion...';
+            
+            try {
+                const response = await fetch('https://eydehwbjzpanyzzshgyd.supabase.co/functions/v1/trigger-ingestion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ manual_trigger: true })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
