@@ -275,7 +275,7 @@ const CreateAccountForm = ({
     }
 
     return (
-      <div className={`space-y-3 ${className}`}>
+      <form onSubmit={handleSubmit} className={`space-y-3 ${className}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <Input
             type="text"
@@ -307,25 +307,25 @@ const CreateAccountForm = ({
             required
             minLength={12}
           />
-          <Button 
-            onClick={handleSubmit}
-            disabled={isLoading || !name || !email || !password || password !== confirmPassword}
-            className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark whitespace-nowrap"
-          >
-            {isLoading ? 'Creating...' : 'Create Account'}
-          </Button>
+          <Input
+            type="password"
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+            disabled={isLoading}
+            required
+            minLength={12}
+          />
         </div>
-        <Input
-          type="password"
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+        <Button 
+          type="submit"
           disabled={isLoading}
-          required
-          minLength={12}
-        />
-      </div>
+          className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark"
+        >
+          {isLoading ? 'Creating...' : 'Create Account'}
+        </Button>
+      </form>
     );
   }
 
