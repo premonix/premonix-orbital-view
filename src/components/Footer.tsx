@@ -116,10 +116,6 @@ const Footer = () => {
                     <span>contact@premonix.io</span>
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                    <Phone className="w-4 h-4 text-primary" />
-                    <span>+1 (555) 123-4567</span>
-                  </div>
-                  <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span>Pontyclun, Mid Glamorgan, UK</span>
                   </div>

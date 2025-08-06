@@ -82,13 +82,6 @@ const Contact = () => {
       availability: "24/7 response within 4 hours"
     },
     {
-      icon: Phone,
-      title: "Emergency Hotline",
-      description: "Critical threat alerts and incidents",
-      contact: "+1 (555) 123-4567",
-      availability: "24/7 immediate response"
-    },
-    {
       icon: Users,
       title: "Enterprise Sales",
       description: "Custom solutions and partnerships",
