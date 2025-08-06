@@ -116,9 +116,9 @@ const Contact = () => {
       focus: "Technology & Engineering"
     },
     {
-      location: "London, UK",
-      address: "30 St Mary Axe, Floor 25\nLondon EC3A 8BF, UK",
-      focus: "European Operations"
+      location: "Pontyclun, UK",
+      address: "Unit 12 Green Park\nCoedcae Lane Industrial Estate\nPontyclun, Mid Glamorgan, UK CF72 9GP",
+      focus: "European Operations & Headquarters"
     }
   ];
 

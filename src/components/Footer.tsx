@@ -121,7 +121,7 @@ const Footer = () => {
                   </div>
                   <div className="flex items-center space-x-3 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4 text-primary" />
-                    <span>Global Operations</span>
+                    <span>Pontyclun, Mid Glamorgan, UK</span>
                   </div>
                 </div>
               </div>
@@ -157,12 +157,12 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="border-t border-border bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
-                <span>© 2024 PREMONIX. All rights reserved.</span>
-                <span className="hidden md:block">•</span>
-                <span>A subsidiary of Cardiff Giant Holdings Limited</span>
-              </div>
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-muted-foreground">
+                  <span>© 2024 PREMONIX. All rights reserved.</span>
+                  <span className="hidden md:block">•</span>
+                  <span>A wholly owned subsidiary of Cardiff Giant Holdings Limited</span>
+                </div>
               
               <div className="flex items-center space-x-6 text-sm">
                 <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">

@@ -80,6 +80,20 @@ const Privacy = () => {
                 </p>
               </section>
 
+              <section>
+                <h2 className="text-2xl font-semibold text-starlink-white mb-4">Company Information</h2>
+                <p className="mb-4">
+                  PREMONIX is a wholly owned subsidiary of Cardiff Giant Holdings Limited.
+                </p>
+                <div className="text-starlink-grey-light">
+                  <p><strong>Cardiff Giant Holdings Limited</strong></p>
+                  <p>Unit 12 Green Park</p>
+                  <p>Coedcae Lane Industrial Estate</p>
+                  <p>Pontyclun, Mid Glamorgan</p>
+                  <p>United Kingdom, CF72 9GP</p>
+                </div>
+              </section>
+
               <div className="mt-8 pt-6 border-t border-starlink-grey/20">
                 <p className="text-sm text-starlink-grey">
                   Last updated: {new Date().toLocaleDateString()}
