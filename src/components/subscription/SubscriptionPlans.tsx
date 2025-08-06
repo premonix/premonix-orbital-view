@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Star } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
-import WaitlistForm from "@/components/WaitlistForm";
+import CreateAccountForm from "@/components/CreateAccountForm";
 
 interface SubscriptionPlan {
   id: string;
@@ -25,19 +25,19 @@ export const SubscriptionPlans = () => {
   // Static pricing that matches homepage
   const plans: SubscriptionPlan[] = [
     {
-      id: "personal",
-      name: "Personal",
-      price: "£290",
-      period: "per year",
-      description: "Perfect for individuals and families seeking personal preparedness",
+      id: "individual",
+      name: "Individual",
+      price: "Free",
+      period: "always",
+      description: "Perfect for individuals seeking personal threat awareness",
       features: [
         "Global threat map access",
-        "Personal alert system",
-        "Basic resilience toolkit",
+        "Basic alert system",
+        "Limited resilience toolkit",
         "Mobile app access",
-        "Email support"
+        "Community support"
       ],
-      popular: false
+      popular: true
     },
     {
       id: "business-pro",
@@ -46,7 +46,7 @@ export const SubscriptionPlans = () => {
       period: "per year",
       description: "Ideal for SMEs and growing businesses with up to 50 employees",
       features: [
-        "Everything in Personal",
+        "Everything in Individual",
         "Business continuity templates",
         "Team collaboration tools",
         "Sector-specific intelligence",
@@ -54,7 +54,7 @@ export const SubscriptionPlans = () => {
         "Custom alert filters",
         "Basic DisruptionOS features"
       ],
-      popular: true
+      popular: false
     },
     {
       id: "enterprise",
@@ -77,6 +77,16 @@ export const SubscriptionPlans = () => {
   ];
 
   const handleSubscribe = async (planId: string) => {
+    // For Individual plan, just redirect to create account
+    if (planId === 'individual') {
+      toast({
+        title: "Account Required",
+        description: "Please create an account to start your Individual plan subscription.",
+        variant: "default",
+      });
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -88,10 +98,10 @@ export const SubscriptionPlans = () => {
 
     setCheckoutLoading(planId);
     try {
-      // For now, we'll show a toast that this feature is coming soon
+      // For paid plans, we'll show a toast that this feature is coming soon
       toast({
         title: "Coming Soon",
-        description: "Subscription checkout is currently in development. Join our waitlist to be notified when it's available!",
+        description: "Paid subscription checkout is currently in development. Please contact sales for paid plans.",
       });
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
@@ -162,7 +172,7 @@ export const SubscriptionPlans = () => {
                   Current Plan
                 </Badge>
               ) : (
-                <WaitlistForm variant="modal">
+                <CreateAccountForm variant="modal">
                   <Button 
                     className={`w-full ${
                       plan.popular 
@@ -171,9 +181,9 @@ export const SubscriptionPlans = () => {
                     }`}
                     disabled={checkoutLoading === plan.id}
                   >
-                    {checkoutLoading === plan.id ? "Loading..." : "Join Waitlist"}
+                    {checkoutLoading === plan.id ? "Loading..." : plan.id === 'individual' ? "Create Account" : "Get Started"}
                   </Button>
-                </WaitlistForm>
+                </CreateAccountForm>
               )}
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Globe, Bell } from "lucide-react";
-import WaitlistForm from "./WaitlistForm";
+import CreateAccountForm from "./CreateAccountForm";
 
 const HeroPanel = () => {
   return (
@@ -20,26 +20,26 @@ const HeroPanel = () => {
         </div>
 
         <div className="space-y-2 lg:space-y-3">
-          <WaitlistForm variant="modal">
+          <CreateAccountForm variant="modal">
             <Button 
               size="lg" 
               className="w-full bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold flex items-center space-x-2 group text-sm lg:text-base"
             >
               <Globe className="w-4 h-4 lg:w-5 lg:h-5 group-hover:animate-spin" />
-              <span>Join Waitlist</span>
+              <span>Create Account</span>
             </Button>
-          </WaitlistForm>
+          </CreateAccountForm>
           
-          <WaitlistForm variant="modal">
+          <CreateAccountForm variant="modal">
             <Button 
               size="lg" 
               variant="outline" 
               className="w-full glass-panel border-starlink-grey/40 text-starlink-white hover:bg-starlink-slate-light flex items-center space-x-2 text-sm lg:text-base"
             >
               <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span>Get Notified</span>
+              <span>Start Free</span>
             </Button>
-          </WaitlistForm>
+          </CreateAccountForm>
         </div>
 
         {/* Stats */}
@@ -53,8 +53,8 @@ const HeroPanel = () => {
             <div className="text-xs text-starlink-grey-light">Data Sources</div>
           </div>
           <div className="text-center">
-            <div className="text-lg lg:text-xl font-bold text-starlink-red">Coming Soon</div>
-            <div className="text-xs text-starlink-grey-light">Launch</div>
+            <div className="text-lg lg:text-xl font-bold text-starlink-green">Live</div>
+            <div className="text-xs text-starlink-grey-light">Platform</div>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
 import CustomAlertSystem from "@/components/isometric/CustomAlertSystem";
 import ResilienceToolkit from "@/components/isometric/ResilienceToolkit";
 import HeroThreatMap from "@/components/isometric/HeroThreatMap";
-import WaitlistForm from "@/components/WaitlistForm";
+import CreateAccountForm from "@/components/CreateAccountForm";
 import GuestDashboardPreview from "@/components/GuestDashboardPreview";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -154,15 +154,15 @@ const Homepage = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                <WaitlistForm variant="modal">
+                <CreateAccountForm variant="modal">
                   <Button 
                     size="lg" 
                     className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4 text-lg"
                   >
                     <Globe className="w-5 h-5 mr-2" />
-                    Join Waitlist
+                    Create Account
                   </Button>
-                </WaitlistForm>
+                </CreateAccountForm>
                 
                 <Button 
                   size="lg" 
@@ -178,9 +178,9 @@ const Homepage = () => {
               </div>
             </div>
 
-            {/* Right side - Waitlist Form */}
+            {/* Right side - Create Account Form */}
             <div className="relative">
-              <WaitlistForm />
+              <CreateAccountForm />
             </div>
           </div>
           
@@ -247,7 +247,7 @@ const Homepage = () => {
                   Transform from reactive threat monitoring to proactive disruption preparedness with strategic scenario simulation, 
                   sensitivity scoring, and automated governance briefings.
                 </p>
-                <WaitlistForm variant="inline" className="max-w-md mx-auto" />
+                <CreateAccountForm variant="inline" className="max-w-md mx-auto" />
               </CardContent>
             </Card>
           </div>
@@ -341,7 +341,7 @@ const Homepage = () => {
                     ))}
                   </ul>
                   
-                  <WaitlistForm variant="modal">
+                  <CreateAccountForm variant="modal">
                     <Button 
                       className={`w-full ${
                         plan.popular 
@@ -349,9 +349,9 @@ const Homepage = () => {
                           : 'bg-starlink-slate-light hover:bg-starlink-slate text-starlink-white'
                       }`}
                     >
-                      Join Waitlist
+                      Create Account
                     </Button>
-                  </WaitlistForm>
+                  </CreateAccountForm>
                 </CardContent>
               </Card>
             ))}
@@ -424,14 +424,14 @@ const Homepage = () => {
             Join thousands of individuals and organizations preparing for tomorrow's threats with PREMONIX.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <WaitlistForm variant="modal">
+            <CreateAccountForm variant="modal">
               <Button 
                 size="lg" 
                 className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8 py-4"
               >
-                Join Waitlist
+                Create Account
               </Button>
-            </WaitlistForm>
+            </CreateAccountForm>
             <Button 
               size="lg" 
               variant="outline" 

@@ -344,8 +344,8 @@ const DisruptionOS = () => {
                         className="bg-starlink-orange hover:bg-starlink-orange/80 text-white font-semibold"
                         onClick={() => {
                           toast({
-                            title: "Pro Trial Coming Soon!",
-                            description: "Pro trial access will be available at launch. Join our waitlist to be notified.",
+                            title: "Create Account",
+                            description: "Create an account to access Pro trial features and enhanced functionality.",
                           });
                         }}
                       >
