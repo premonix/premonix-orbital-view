@@ -150,6 +150,24 @@ const CreateAccountForm = ({
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* DEBUG: Simple test input */}
+        <div style={{ padding: '20px', backgroundColor: 'red', color: 'white' }}>
+          <input 
+            type="text" 
+            value="TEST INPUT - Can you see this text?" 
+            style={{
+              width: '100%',
+              height: '50px',
+              backgroundColor: 'yellow',
+              color: 'black',
+              fontSize: '16px',
+              border: '3px solid red',
+              padding: '10px'
+            }}
+            readOnly
+          />
+        </div>
+        
         <div className="space-y-3">
           <div>
             <Label htmlFor="name" className="text-starlink-grey-light">Full Name *</Label>
