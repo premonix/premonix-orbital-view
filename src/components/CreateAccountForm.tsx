@@ -365,6 +365,11 @@ const CreateAccountForm = ({
           </p>
         </div>
         
+        {/* DEBUG: Add a test to see if this renders */}
+        <div style={{ backgroundColor: 'green', color: 'white', padding: '10px', marginBottom: '10px' }}>
+          DEFAULT CARD FORM - Can you see this green box?
+        </div>
+        
         <FormContent />
       </CardContent>
     </Card>
