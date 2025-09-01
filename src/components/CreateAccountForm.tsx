@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import StableInput from "./StableInput";
 
 interface CreateAccountFormProps {
   variant?: 'default' | 'inline' | 'modal';
@@ -189,14 +190,15 @@ const CreateAccountForm = ({
         <div className="space-y-3">
           <div>
             <Label htmlFor="name" className="text-starlink-grey-light">Full Name *</Label>
-            <input
-              key="name-input"
+            <StableInput
               id="name"
               type="text"
               placeholder="Enter your full name"
               value={name}
-              onChange={handleNameChange}
-              style={inputStyle}
+              onChange={(value) => {
+                console.log('Name changed:', value);
+                setName(value);
+              }}
               disabled={isLoading}
               required
             />
@@ -204,14 +206,15 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="email" className="text-starlink-grey-light">Email Address *</Label>
-            <input
-              key="email-input"
+            <StableInput
               id="email"
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={handleEmailChange}
-              style={inputStyle}
+              onChange={(value) => {
+                console.log('Email changed:', value);
+                setEmail(value);
+              }}
               disabled={isLoading}
               required
             />
@@ -219,28 +222,24 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="companyName" className="text-starlink-grey-light">Company Name (Optional)</Label>
-            <input
-              key="company-input"
+            <StableInput
               id="companyName"
               type="text"
               placeholder="Enter your company name"
               value={companyName}
-              onChange={handleCompanyChange}
-              style={inputStyle}
+              onChange={setCompanyName}
               disabled={isLoading}
             />
           </div>
 
           <div>
             <Label htmlFor="password" className="text-starlink-grey-light">Password *</Label>
-            <input
-              key="password-input"
+            <StableInput
               id="password"
               type="password"
               placeholder="Enter a secure password (min 12 characters)"
               value={password}
-              onChange={handlePasswordChange}
-              style={inputStyle}
+              onChange={setPassword}
               disabled={isLoading}
               required
               minLength={12}
@@ -249,14 +248,12 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="confirmPassword" className="text-starlink-grey-light">Confirm Password *</Label>
-            <input
-              key="confirm-password-input"
+            <StableInput
               id="confirmPassword"
               type="password"
               placeholder="Confirm your password"
               value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-              style={inputStyle}
+              onChange={setConfirmPassword}
               disabled={isLoading}
               required
               minLength={12}
