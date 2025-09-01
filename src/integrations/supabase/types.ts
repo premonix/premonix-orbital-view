@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -894,11 +894,11 @@ export type Database = {
       }
       calculate_initial_dss_score: {
         Args: {
+          employee_count?: number
           org_sector: Database["public"]["Enums"]["organization_sector"]
           org_size: Database["public"]["Enums"]["organization_size"]
-          supply_complexity: number
           primary_region: Database["public"]["Enums"]["geographic_region"]
-          employee_count?: number
+          supply_complexity: number
         }
         Returns: number
       }
@@ -911,7 +911,7 @@ export type Database = {
         Returns: string
       }
       update_dashboard_analytics: {
-        Args: { p_user_id: string; p_action: string; p_category?: string }
+        Args: { p_action: string; p_category?: string; p_user_id: string }
         Returns: undefined
       }
       validate_email: {
