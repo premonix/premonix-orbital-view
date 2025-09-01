@@ -153,7 +153,7 @@ const CreateAccountForm = ({
         <div className="space-y-3">
           <div>
             <Label htmlFor="name" className="text-starlink-grey-light">Full Name *</Label>
-            <Input
+            <input
               id="name"
               type="text"
               placeholder="Enter your full name"
@@ -162,7 +162,17 @@ const CreateAccountForm = ({
                 console.log('Name field changed:', e.target.value);
                 setName(e.target.value);
               }}
-              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+              style={{
+                width: '100%',
+                height: '40px',
+                padding: '8px 12px',
+                backgroundColor: '#2a2a2a',
+                color: '#ffffff',
+                border: '1px solid rgba(100, 116, 139, 0.4)',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
               disabled={isLoading}
               required
             />
@@ -170,7 +180,7 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="email" className="text-starlink-grey-light">Email Address *</Label>
-            <Input
+            <input
               id="email"
               type="email"
               placeholder="Enter your email address"
@@ -179,7 +189,17 @@ const CreateAccountForm = ({
                 console.log('Email field changed:', e.target.value);
                 setEmail(e.target.value);
               }}
-              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+              style={{
+                width: '100%',
+                height: '40px',
+                padding: '8px 12px',
+                backgroundColor: '#2a2a2a',
+                color: '#ffffff',
+                border: '1px solid rgba(100, 116, 139, 0.4)',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
               disabled={isLoading}
               required
             />
@@ -187,13 +207,23 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="companyName" className="text-starlink-grey-light">Company Name (Optional)</Label>
-            <Input
+            <input
               id="companyName"
               type="text"
               placeholder="Enter your company name"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+              style={{
+                width: '100%',
+                height: '40px',
+                padding: '8px 12px',
+                backgroundColor: '#2a2a2a',
+                color: '#ffffff',
+                border: '1px solid rgba(100, 116, 139, 0.4)',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none'
+              }}
               disabled={isLoading}
             />
           </div>
