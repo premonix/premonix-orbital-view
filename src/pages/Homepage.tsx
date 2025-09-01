@@ -10,6 +10,7 @@ import AIPoweredPredictions from "@/components/isometric/AIPoweredPredictions";
 import CustomAlertSystem from "@/components/isometric/CustomAlertSystem";
 import ResilienceToolkit from "@/components/isometric/ResilienceToolkit";
 import HeroThreatMap from "@/components/isometric/HeroThreatMap";
+import HeroGlobe from "@/components/HeroGlobe";
 import CreateAccountForm from "@/components/CreateAccountForm";
 import GuestDashboardPreview from "@/components/GuestDashboardPreview";
 import { useAuth } from "@/contexts/AuthContext";
@@ -178,6 +179,10 @@ const Homepage = () => {
               </div>
             </div>
 
+            {/* Right side - Interactive Globe */}
+            <div className="relative flex justify-center">
+              <HeroGlobe />
+            </div>
           </div>
           
           {/* Stats */}
