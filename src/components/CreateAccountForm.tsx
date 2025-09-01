@@ -374,19 +374,17 @@ const CreateAccountForm = ({
   }
 
   return (
-    <Card className={`glass-panel border-starlink-grey/30 ${className}`}>
-      <CardContent className="pt-6">
-        <div className="text-center mb-6">
-          <UserPlus className="w-8 h-8 text-starlink-blue mx-auto mb-3" />
-          <h3 className="text-xl font-semibold text-starlink-white mb-2">Create Your Account</h3>
-          <p className="text-starlink-grey-light text-sm">
-            Start with our Individual plan and get access to global threat intelligence
-          </p>
-        </div>
-        
-        <FormContent />
-      </CardContent>
-    </Card>
+    <div className={`glass-panel border-starlink-grey/30 rounded-lg p-6 ${className}`}>
+      <div className="text-center mb-6">
+        <UserPlus className="w-8 h-8 text-starlink-blue mx-auto mb-3" />
+        <h3 className="text-xl font-semibold text-starlink-white mb-2">Create Your Account</h3>
+        <p className="text-starlink-grey-light text-sm">
+          Start with our Individual plan and get access to global threat intelligence
+        </p>
+      </div>
+      
+      <FormContent />
+    </div>
   );
 };
 
