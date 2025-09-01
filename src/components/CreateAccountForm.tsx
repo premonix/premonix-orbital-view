@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -146,6 +146,29 @@ const CreateAccountForm = ({
     boxSizing: 'border-box' as const
   };
 
+  // Memoized handlers to prevent re-renders that cause focus loss
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Name field changed:', e.target.value);
+    setName(e.target.value);
+  }, []);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Email field changed:', e.target.value);
+    setEmail(e.target.value);
+  }, []);
+
+  const handleCompanyChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCompanyName(e.target.value);
+  }, []);
+
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
+
+  const handleConfirmPasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+  }, []);
+
   const FormContent = () => {
     if (isSubmitted) {
       return (
@@ -167,14 +190,12 @@ const CreateAccountForm = ({
           <div>
             <Label htmlFor="name" className="text-starlink-grey-light">Full Name *</Label>
             <input
+              key="name-input"
               id="name"
               type="text"
               placeholder="Enter your full name"
               value={name}
-              onChange={(e) => {
-                console.log('Name field changed:', e.target.value);
-                setName(e.target.value);
-              }}
+              onChange={handleNameChange}
               style={inputStyle}
               disabled={isLoading}
               required
@@ -184,14 +205,12 @@ const CreateAccountForm = ({
           <div>
             <Label htmlFor="email" className="text-starlink-grey-light">Email Address *</Label>
             <input
+              key="email-input"
               id="email"
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={(e) => {
-                console.log('Email field changed:', e.target.value);
-                setEmail(e.target.value);
-              }}
+              onChange={handleEmailChange}
               style={inputStyle}
               disabled={isLoading}
               required
@@ -201,11 +220,12 @@ const CreateAccountForm = ({
           <div>
             <Label htmlFor="companyName" className="text-starlink-grey-light">Company Name (Optional)</Label>
             <input
+              key="company-input"
               id="companyName"
               type="text"
               placeholder="Enter your company name"
               value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              onChange={handleCompanyChange}
               style={inputStyle}
               disabled={isLoading}
             />
@@ -214,11 +234,12 @@ const CreateAccountForm = ({
           <div>
             <Label htmlFor="password" className="text-starlink-grey-light">Password *</Label>
             <input
+              key="password-input"
               id="password"
               type="password"
               placeholder="Enter a secure password (min 12 characters)"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               style={inputStyle}
               disabled={isLoading}
               required
@@ -229,11 +250,12 @@ const CreateAccountForm = ({
           <div>
             <Label htmlFor="confirmPassword" className="text-starlink-grey-light">Confirm Password *</Label>
             <input
+              key="confirm-password-input"
               id="confirmPassword"
               type="password"
               placeholder="Confirm your password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={handleConfirmPasswordChange}
               style={inputStyle}
               disabled={isLoading}
               required
