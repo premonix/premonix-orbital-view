@@ -162,12 +162,7 @@ const CreateAccountForm = ({
                 console.log('Name field changed:', e.target.value);
                 setName(e.target.value);
               }}
-              className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light focus:bg-starlink-slate-light focus:text-starlink-white"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                color: '#ffffff',
-                borderColor: 'rgba(100, 116, 139, 0.4)'
-              }}
+              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
               disabled={isLoading}
               required
             />
@@ -184,12 +179,7 @@ const CreateAccountForm = ({
                 console.log('Email field changed:', e.target.value);
                 setEmail(e.target.value);
               }}
-              className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light focus:bg-starlink-slate-light focus:text-starlink-white"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                color: '#ffffff',
-                borderColor: 'rgba(100, 116, 139, 0.4)'
-              }}
+              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
               disabled={isLoading}
               required
             />
@@ -203,12 +193,7 @@ const CreateAccountForm = ({
               placeholder="Enter your company name"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light focus:bg-starlink-slate-light focus:text-starlink-white"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                color: '#ffffff',
-                borderColor: 'rgba(100, 116, 139, 0.4)'
-              }}
+              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
               disabled={isLoading}
             />
           </div>
@@ -221,12 +206,7 @@ const CreateAccountForm = ({
               placeholder="Enter a secure password (min 12 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light focus:bg-starlink-slate-light focus:text-starlink-white"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                color: '#ffffff',
-                borderColor: 'rgba(100, 116, 139, 0.4)'
-              }}
+              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
               disabled={isLoading}
               required
               minLength={12}
@@ -241,12 +221,7 @@ const CreateAccountForm = ({
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light focus:bg-starlink-slate-light focus:text-starlink-white"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                color: '#ffffff',
-                borderColor: 'rgba(100, 116, 139, 0.4)'
-              }}
+              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
               disabled={isLoading}
               required
               minLength={12}
@@ -316,7 +291,7 @@ const CreateAccountForm = ({
               console.log('Inline form - Name changed:', e.target.value);
               setName(e.target.value);
             }}
-            className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
             disabled={isLoading}
             required
           />
@@ -328,7 +303,7 @@ const CreateAccountForm = ({
               console.log('Inline form - Email changed:', e.target.value);
               setEmail(e.target.value);
             }}
-            className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
             disabled={isLoading}
             required
           />
@@ -339,7 +314,7 @@ const CreateAccountForm = ({
             placeholder="Password (min 12 chars)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
             disabled={isLoading}
             required
             minLength={12}
@@ -349,7 +324,7 @@ const CreateAccountForm = ({
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
+            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
             disabled={isLoading}
             required
             minLength={12}
