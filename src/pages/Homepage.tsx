@@ -178,10 +178,6 @@ const Homepage = () => {
               </div>
             </div>
 
-            {/* Right side - Create Account Form */}
-            <div className="relative">
-              <CreateAccountForm />
-            </div>
           </div>
           
           {/* Stats */}
