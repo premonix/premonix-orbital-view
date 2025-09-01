@@ -158,7 +158,10 @@ const CreateAccountForm = ({
               type="text"
               placeholder="Enter your full name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                console.log('Name field changed:', e.target.value);
+                setName(e.target.value);
+              }}
               className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
               disabled={isLoading}
               required
@@ -172,7 +175,10 @@ const CreateAccountForm = ({
               type="email"
               placeholder="Enter your email address"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                console.log('Email field changed:', e.target.value);
+                setEmail(e.target.value);
+              }}
               className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
               disabled={isLoading}
               required
@@ -281,7 +287,10 @@ const CreateAccountForm = ({
             type="text"
             placeholder="Full name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              console.log('Inline form - Name changed:', e.target.value);
+              setName(e.target.value);
+            }}
             className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
             disabled={isLoading}
             required
@@ -290,7 +299,10 @@ const CreateAccountForm = ({
             type="email"
             placeholder="Email address"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              console.log('Inline form - Email changed:', e.target.value);
+              setEmail(e.target.value);
+            }}
             className="bg-starlink-slate-light border-starlink-grey/40 text-starlink-white placeholder:text-starlink-grey-light"
             disabled={isLoading}
             required
