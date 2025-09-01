@@ -133,6 +133,19 @@ const CreateAccountForm = ({
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    height: '40px',
+    padding: '8px 12px',
+    backgroundColor: '#2a2a2a',
+    color: '#ffffff',
+    border: '1px solid rgba(100, 116, 139, 0.4)',
+    borderRadius: '6px',
+    fontSize: '14px',
+    outline: 'none',
+    boxSizing: 'border-box' as const
+  };
+
   const FormContent = () => {
     if (isSubmitted) {
       return (
@@ -150,24 +163,6 @@ const CreateAccountForm = ({
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* DEBUG: Simple test input */}
-        <div style={{ padding: '20px', backgroundColor: 'red', color: 'white' }}>
-          <input 
-            type="text" 
-            value="TEST INPUT - Can you see this text?" 
-            style={{
-              width: '100%',
-              height: '50px',
-              backgroundColor: 'yellow',
-              color: 'black',
-              fontSize: '16px',
-              border: '3px solid red',
-              padding: '10px'
-            }}
-            readOnly
-          />
-        </div>
-        
         <div className="space-y-3">
           <div>
             <Label htmlFor="name" className="text-starlink-grey-light">Full Name *</Label>
@@ -180,17 +175,7 @@ const CreateAccountForm = ({
                 console.log('Name field changed:', e.target.value);
                 setName(e.target.value);
               }}
-              style={{
-                width: '100%',
-                height: '40px',
-                padding: '8px 12px',
-                backgroundColor: '#2a2a2a',
-                color: '#ffffff',
-                border: '1px solid rgba(100, 116, 139, 0.4)',
-                borderRadius: '6px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
+              style={inputStyle}
               disabled={isLoading}
               required
             />
@@ -207,17 +192,7 @@ const CreateAccountForm = ({
                 console.log('Email field changed:', e.target.value);
                 setEmail(e.target.value);
               }}
-              style={{
-                width: '100%',
-                height: '40px',
-                padding: '8px 12px',
-                backgroundColor: '#2a2a2a',
-                color: '#ffffff',
-                border: '1px solid rgba(100, 116, 139, 0.4)',
-                borderRadius: '6px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
+              style={inputStyle}
               disabled={isLoading}
               required
             />
@@ -231,30 +206,20 @@ const CreateAccountForm = ({
               placeholder="Enter your company name"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              style={{
-                width: '100%',
-                height: '40px',
-                padding: '8px 12px',
-                backgroundColor: '#2a2a2a',
-                color: '#ffffff',
-                border: '1px solid rgba(100, 116, 139, 0.4)',
-                borderRadius: '6px',
-                fontSize: '14px',
-                outline: 'none'
-              }}
+              style={inputStyle}
               disabled={isLoading}
             />
           </div>
 
           <div>
             <Label htmlFor="password" className="text-starlink-grey-light">Password *</Label>
-            <Input
+            <input
               id="password"
               type="password"
               placeholder="Enter a secure password (min 12 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+              style={inputStyle}
               disabled={isLoading}
               required
               minLength={12}
@@ -263,13 +228,13 @@ const CreateAccountForm = ({
 
           <div>
             <Label htmlFor="confirmPassword" className="text-starlink-grey-light">Confirm Password *</Label>
-            <Input
+            <input
               id="confirmPassword"
               type="password"
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+              style={inputStyle}
               disabled={isLoading}
               required
               minLength={12}
@@ -331,7 +296,7 @@ const CreateAccountForm = ({
     return (
       <form onSubmit={handleSubmit} className={`space-y-3 ${className}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Input
+          <input
             type="text"
             placeholder="Full name"
             value={name}
@@ -339,11 +304,11 @@ const CreateAccountForm = ({
               console.log('Inline form - Name changed:', e.target.value);
               setName(e.target.value);
             }}
-            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+            style={inputStyle}
             disabled={isLoading}
             required
           />
-          <Input
+          <input
             type="email"
             placeholder="Email address"
             value={email}
@@ -351,28 +316,28 @@ const CreateAccountForm = ({
               console.log('Inline form - Email changed:', e.target.value);
               setEmail(e.target.value);
             }}
-            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+            style={inputStyle}
             disabled={isLoading}
             required
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Input
+          <input
             type="password"
             placeholder="Password (min 12 chars)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+            style={inputStyle}
             disabled={isLoading}
             required
             minLength={12}
           />
-          <Input
+          <input
             type="password"
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="!bg-[#2a2a2a] !border-[rgba(100,116,139,0.4)] !text-white placeholder:!text-[#94a3b8] focus:!bg-[#2a2a2a] focus:!text-white focus:!border-[#00b4d8]"
+            style={inputStyle}
             disabled={isLoading}
             required
             minLength={12}
