@@ -26,27 +26,27 @@ export const SubscriptionPlans = () => {
   const plans: SubscriptionPlan[] = [
     {
       id: "individual",
-      name: "Individual",
-      price: "Free",
-      period: "always",
-      description: "Perfect for individuals seeking personal threat awareness",
+      name: "Personal",
+      price: "£24",
+      period: "per month",
+      description: "Perfect for individuals and families seeking personal preparedness",
       features: [
         "Global threat map access",
-        "Basic alert system",
-        "Limited resilience toolkit",
+        "Personal alert system",
+        "Basic resilience toolkit",
         "Mobile app access",
-        "Community support"
+        "Email support"
       ],
-      popular: true
+      popular: false
     },
     {
       id: "business-pro",
       name: "Business Pro",
-      price: "£2,995",
-      period: "per year",
+      price: "£249",
+      period: "per month",
       description: "Ideal for SMEs and growing businesses with up to 50 employees",
       features: [
-        "Everything in Individual",
+        "Everything in Personal",
         "Business continuity templates",
         "Team collaboration tools",
         "Sector-specific intelligence",
@@ -54,13 +54,13 @@ export const SubscriptionPlans = () => {
         "Custom alert filters",
         "Basic DisruptionOS features"
       ],
-      popular: false
+      popular: true
     },
     {
       id: "enterprise",
       name: "Enterprise",
-      price: "£9,750",
-      period: "per year",
+      price: "£812",
+      period: "per month",
       description: "Comprehensive solution for large organizations (£5M+ revenue)",
       features: [
         "Everything in Business Pro",
