@@ -74,8 +74,8 @@ const Homepage = () => {
   const pricingPlans = [
     {
       name: "Personal",
-      price: "£290",
-      period: "per year",
+      price: "£24",
+      period: "per month",
       description: "Perfect for individuals and families seeking personal preparedness",
       features: [
         "Global threat map access",
@@ -88,8 +88,8 @@ const Homepage = () => {
     },
     {
       name: "Business Pro",
-      price: "£2,995",
-      period: "per year",
+      price: "£249",
+      period: "per month",
       description: "Ideal for SMEs and growing businesses with up to 50 employees",
       features: [
         "Everything in Personal",
@@ -104,8 +104,8 @@ const Homepage = () => {
     },
     {
       name: "Enterprise",
-      price: "£9,750",
-      period: "per year",
+      price: "£812",
+      period: "per month",
       description: "Comprehensive solution for large organizations (£5M+ revenue)",
       features: [
         "Everything in Business Pro",
