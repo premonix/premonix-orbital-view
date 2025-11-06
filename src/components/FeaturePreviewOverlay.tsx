@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Lock, Zap, TrendingUp, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import CreateAccountForm from './CreateAccountForm';
 
 interface FeaturePreviewOverlayProps {
   featureName: string;
@@ -15,7 +16,7 @@ const FeaturePreviewOverlay = ({
   requiredRole = 'individual',
   className = ""
 }: FeaturePreviewOverlayProps) => {
-  const { upgradeRole } = useAuth();
+  const { upgradeRole, user } = useAuth();
 
   const handleUpgrade = () => {
     upgradeRole(requiredRole);
@@ -72,12 +73,22 @@ const FeaturePreviewOverlay = ({
           {description}
         </p>
         
-        <Button 
-          onClick={handleUpgrade}
-          className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
-        >
-          {getButtonText()}
-        </Button>
+        {!user && requiredRole === 'individual' ? (
+          <CreateAccountForm variant="modal">
+            <Button 
+              className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
+            >
+              {getButtonText()}
+            </Button>
+          </CreateAccountForm>
+        ) : (
+          <Button 
+            onClick={handleUpgrade}
+            className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
+          >
+            {getButtonText()}
+          </Button>
+        )}
       </div>
     </div>
   );
