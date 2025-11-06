@@ -189,7 +189,7 @@ const ResilienceToolkitPreview = () => {
                             Learn More - {tool.requiredRole} Plan
                           </Button>
                         ) : (
-                          <CreateAccountForm>
+                          <CreateAccountForm variant="modal">
                             <Button 
                               size="sm" 
                               className="w-full bg-starlink-blue/20 border border-starlink-blue/30 text-starlink-blue hover:bg-starlink-blue/30"
@@ -249,14 +249,14 @@ const ResilienceToolkitPreview = () => {
                   </>
                 ) : (
                   <>
-                    <CreateAccountForm>
+                    <CreateAccountForm variant="modal">
                       <Button 
                         className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8"
                       >
                         Sign Up Free - Access Dashboard
                       </Button>
                     </CreateAccountForm>
-                    <CreateAccountForm>
+                    <CreateAccountForm variant="modal">
                       <Button 
                         variant="outline"
                         className="border-starlink-blue/40 text-starlink-blue hover:bg-starlink-blue/10 px-8"
