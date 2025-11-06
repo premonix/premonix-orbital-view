@@ -73,12 +73,12 @@ const FeaturePreviewOverlay = ({
           {description}
         </p>
         
-        {!user && requiredRole === 'individual' ? (
+        {!user ? (
           <CreateAccountForm variant="modal">
             <Button 
               className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-medium"
             >
-              {getButtonText()}
+              Register Free
             </Button>
           </CreateAccountForm>
         ) : (
