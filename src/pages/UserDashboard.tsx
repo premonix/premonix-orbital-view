@@ -33,6 +33,7 @@ import { OpsLensWidget } from '@/components/dashboard/OpsLensWidget';
 import { SignalGraphWidget } from '@/components/dashboard/SignalGraphWidget';
 import { EnhancedBriefingWidget } from '@/components/dashboard/EnhancedBriefingWidget';
 import { DashboardSidebar } from '@/components/navigation/DashboardSidebar';
+import { AuthSection } from '@/components/navigation/AuthSection';
 import { useRealTime, RealTimeStatus } from '@/contexts/RealTimeContext';
 import SubscriptionPlans from '@/components/subscription/SubscriptionPlans';
 import { Settings, Bell } from 'lucide-react';
@@ -294,23 +295,31 @@ const UserDashboard = () => {
               </div>
               
               <div className="flex items-center space-x-4">
+                {unreadAlerts > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="relative"
+                    onClick={() => setActiveTab('alerts')}
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Alerts</span>
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs">
+                      {unreadAlerts}
+                    </Badge>
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => setActiveTab('settings')}
                 >
                   <Settings className="w-4 h-4 mr-2" />
-                  Settings
+                  <span className="hidden sm:inline">Settings</span>
                 </Button>
-                {unreadAlerts > 0 && (
-                  <Button variant="outline" size="sm" className="relative">
-                    <Bell className="w-4 h-4 mr-2" />
-                    Alerts
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs">
-                      {unreadAlerts}
-                    </Badge>
-                  </Button>
-                )}
+                
+                {/* User Menu with Logout */}
+                <AuthSection />
               </div>
             </header>
             
