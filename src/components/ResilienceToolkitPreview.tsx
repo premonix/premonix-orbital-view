@@ -14,10 +14,11 @@ import {
   CheckCircle
 } from 'lucide-react';
 import FeaturePreviewOverlay from './FeaturePreviewOverlay';
+import CreateAccountForm from './CreateAccountForm';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ResilienceToolkitPreview = () => {
-  const { upgradeRole } = useAuth();
+  const { upgradeRole, user } = useAuth();
 
   const toolkitSections = [
     {
@@ -178,14 +179,26 @@ const ResilienceToolkitPreview = () => {
                       </div>
                       
                       <div className="pt-4 border-t border-starlink-grey/20">
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-starlink-blue/20 border border-starlink-blue/30 text-starlink-blue hover:bg-starlink-blue/30"
-                          onClick={() => upgradeRole(tool.requiredRole)}
-                        >
-                          <Lock className="w-4 h-4 mr-2" />
-                          Learn More - {tool.requiredRole} Plan
-                        </Button>
+                        {user ? (
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-starlink-blue/20 border border-starlink-blue/30 text-starlink-blue hover:bg-starlink-blue/30"
+                            onClick={() => upgradeRole(tool.requiredRole)}
+                          >
+                            <Lock className="w-4 h-4 mr-2" />
+                            Learn More - {tool.requiredRole} Plan
+                          </Button>
+                        ) : (
+                          <CreateAccountForm>
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-starlink-blue/20 border border-starlink-blue/30 text-starlink-blue hover:bg-starlink-blue/30"
+                            >
+                              <Lock className="w-4 h-4 mr-2" />
+                              Sign Up to Access - {tool.requiredRole} Plan
+                            </Button>
+                          </CreateAccountForm>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -218,19 +231,41 @@ const ResilienceToolkitPreview = () => {
                 Access personalized tools, training, and resources in your dashboard.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={() => upgradeRole('individual')}
-                  className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8"
-                >
-                  Start Free - Access Dashboard
-                </Button>
-                <Button 
-                  onClick={() => upgradeRole('team_admin')}
-                  variant="outline"
-                  className="border-starlink-blue/40 text-starlink-blue hover:bg-starlink-blue/10 px-8"
-                >
-                  Upgrade to Business
-                </Button>
+                {user ? (
+                  <>
+                    <Button 
+                      onClick={() => upgradeRole('individual')}
+                      className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8"
+                    >
+                      Access Dashboard
+                    </Button>
+                    <Button 
+                      onClick={() => upgradeRole('team_admin')}
+                      variant="outline"
+                      className="border-starlink-blue/40 text-starlink-blue hover:bg-starlink-blue/10 px-8"
+                    >
+                      Upgrade to Business
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <CreateAccountForm>
+                      <Button 
+                        className="bg-starlink-blue hover:bg-starlink-blue-bright text-starlink-dark font-semibold px-8"
+                      >
+                        Sign Up Free - Access Dashboard
+                      </Button>
+                    </CreateAccountForm>
+                    <CreateAccountForm>
+                      <Button 
+                        variant="outline"
+                        className="border-starlink-blue/40 text-starlink-blue hover:bg-starlink-blue/10 px-8"
+                      >
+                        Sign Up - Business Plan
+                      </Button>
+                    </CreateAccountForm>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
