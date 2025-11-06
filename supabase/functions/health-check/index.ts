@@ -110,6 +110,105 @@ serve(async (req) => {
       await logHealthCheck(supabaseClient, 'signal_ingestion', 'error', functionResponseTime, error.message)
     }
 
+    // Check Map Tiles Accessibility
+    const mapTilesStartTime = Date.now()
+    try {
+      let cartoStatus = 'healthy'
+      let cartoError = null
+      
+      try {
+        // Test Carto dark matter style.json
+        const styleUrl = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+        const response = await fetch(styleUrl, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(5000)
+        })
+        
+        if (!response.ok) {
+          cartoStatus = 'error'
+          cartoError = `HTTP ${response.status}`
+        }
+      } catch (error) {
+        cartoStatus = 'error'
+        cartoError = error.message
+      }
+
+      const mapTilesResponseTime = Date.now() - mapTilesStartTime
+      
+      healthStatus.services.map_tiles = {
+        status: cartoStatus,
+        response_time_ms: mapTilesResponseTime,
+        carto_basemap: { status: cartoStatus, error: cartoError },
+        last_check: new Date().toISOString()
+      }
+
+      if (cartoStatus === 'error' && healthStatus.overall_status === 'healthy') {
+        healthStatus.overall_status = 'warning'
+      }
+
+      await logHealthCheck(supabaseClient, 'map_tiles', cartoStatus, mapTilesResponseTime, cartoError)
+    } catch (error) {
+      const mapTilesResponseTime = Date.now() - mapTilesStartTime
+      healthStatus.services.map_tiles = {
+        status: 'error',
+        response_time_ms: mapTilesResponseTime,
+        error: error.message,
+        last_check: new Date().toISOString()
+      }
+      
+      await logHealthCheck(supabaseClient, 'map_tiles', 'error', mapTilesResponseTime, error.message)
+    }
+
+    // Check Supabase Realtime WebSocket
+    const realtimeStartTime = Date.now()
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+      let realtimeStatus = 'healthy'
+      let realtimeError = null
+      
+      try {
+        // Check if the Supabase REST endpoint is accessible (proxy for realtime service)
+        const response = await fetch(supabaseUrl + '/rest/v1/', {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(3000)
+        })
+        
+        if (!response.ok) {
+          realtimeStatus = 'warning'
+          realtimeError = `REST endpoint returned ${response.status}`
+        }
+      } catch (error) {
+        realtimeStatus = 'error'
+        realtimeError = error.message
+      }
+
+      const realtimeResponseTime = Date.now() - realtimeStartTime
+      
+      healthStatus.services.realtime = {
+        status: realtimeStatus,
+        response_time_ms: realtimeResponseTime,
+        websocket_endpoint: supabaseUrl.replace('https://', 'wss://') + '/realtime/v1/websocket',
+        error: realtimeError,
+        last_check: new Date().toISOString()
+      }
+
+      if (realtimeStatus === 'error' && healthStatus.overall_status === 'healthy') {
+        healthStatus.overall_status = 'warning'
+      }
+
+      await logHealthCheck(supabaseClient, 'realtime', realtimeStatus, realtimeResponseTime, realtimeError)
+    } catch (error) {
+      const realtimeResponseTime = Date.now() - realtimeStartTime
+      healthStatus.services.realtime = {
+        status: 'error',
+        response_time_ms: realtimeResponseTime,
+        error: error.message,
+        last_check: new Date().toISOString()
+      }
+      
+      await logHealthCheck(supabaseClient, 'realtime', 'error', realtimeResponseTime, error.message)
+    }
+
     // Check external APIs availability
     const apiStartTime = Date.now()
     try {
